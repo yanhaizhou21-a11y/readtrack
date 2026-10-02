@@ -7,7 +7,7 @@ edition = "2021"
 
 [lib]
 name = "readtrack_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
+crate-type = ["rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
@@ -29,3 +29,13 @@ chrono = { version = "0.4", features = ["serde"] }
 
 [dev-dependencies]
 tokio = { version = "1.38", features = ["full", "test-util"] }
+
+[profile.dev]
+debug = 1
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
+
