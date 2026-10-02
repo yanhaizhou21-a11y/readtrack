@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#2B5F55"/>
+  <!-- Book spine & pages -->
+  <path d="M128 140 C192 120 240 135 256 160 C272 135 320 120 384 140 L384 340 C320 320 272 335 256 360 C240 335 192 320 128 340 Z" fill="#FAF8F4" stroke="#FAF8F4" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Center spine divider -->
+  <line x1="256" y1="160" x2="256" y2="360" stroke="#2B5F55" stroke-width="8" stroke-linecap="round"/>
+  <!-- Reading progress indicator stripes on right page -->
+  <line x1="280" y1="200" x2="350" y2="185" stroke="#7FB5A6" stroke-width="12" stroke-linecap="round"/>
+  <line x1="280" y1="240" x2="350" y2="225" stroke="#7FB5A6" stroke-width="12" stroke-linecap="round"/>
+  <line x1="280" y1="280" x2="330" y2="265" stroke="#7FB5A6" stroke-width="12" stroke-linecap="round"/>
+  <!-- Text lines on left page -->
+  <line x1="162" y1="185" x2="232" y2="200" stroke="#9A958B" stroke-width="10" stroke-linecap="round"/>
+  <line x1="162" y1="225" x2="232" y2="240" stroke="#9A958B" stroke-width="10" stroke-linecap="round"/>
+  <line x1="162" y1="265" x2="232" y2="280" stroke="#9A958B" stroke-width="10" stroke-linecap="round"/>
+</svg>
