@@ -7,7 +7,7 @@ edition = "2021"
 
 [lib]
 name = "readtrack_lib"
-crate-type = ["rlib"]
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
@@ -37,5 +37,6 @@ debug = 1
 opt-level = "z"
 lto = true
 codegen-units = 1
+panic = "abort"
 strip = true
 
