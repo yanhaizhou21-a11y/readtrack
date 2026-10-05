@@ -1,6 +1,6 @@
-use sqlx::{Row, SqliteConnection, SqlitePool};
 use crate::errors::AppError;
 use crate::models::{Highlight, LogicalPosition};
+use sqlx::{Row, SqliteConnection, SqlitePool};
 
 pub struct HighlightRepo;
 
@@ -15,11 +15,10 @@ impl HighlightRepo {
             }
         })?;
 
-        let pos_end_json = serde_json::to_string(&highlight.position_end).map_err(|_| {
-            AppError::InvalidInput {
+        let pos_end_json =
+            serde_json::to_string(&highlight.position_end).map_err(|_| AppError::InvalidInput {
                 field: "position_end".to_string(),
-            }
-        })?;
+            })?;
 
         sqlx::query(
             r#"
@@ -48,10 +47,7 @@ impl HighlightRepo {
         Ok(())
     }
 
-    pub async fn get_by_id(
-        pool: &SqlitePool,
-        id: &str,
-    ) -> Result<Option<Highlight>, AppError> {
+    pub async fn get_by_id(pool: &SqlitePool, id: &str) -> Result<Option<Highlight>, AppError> {
         let row = sqlx::query(
             r#"
             SELECT id, document_id, position_start, position_end, start_pos, end_pos,
@@ -98,10 +94,7 @@ impl HighlightRepo {
         Self::get_by_id(pool, id).await
     }
 
-    pub async fn delete(
-        conn: &mut SqliteConnection,
-        id: &str,
-    ) -> Result<bool, AppError> {
+    pub async fn delete(conn: &mut SqliteConnection, id: &str) -> Result<bool, AppError> {
         let result = sqlx::query("DELETE FROM highlights WHERE id = ?")
             .bind(id)
             .execute(&mut *conn)
@@ -116,34 +109,30 @@ impl HighlightRepo {
         document_id: Option<&str>,
     ) -> Result<Vec<Highlight>, AppError> {
         let rows = match document_id {
-            Some(doc_id) => {
-                sqlx::query(
-                    r#"
+            Some(doc_id) => sqlx::query(
+                r#"
                     SELECT id, document_id, position_start, position_end, start_pos, end_pos,
                            page, selected_text, color, note, created_at, updated_at
                     FROM highlights
                     WHERE document_id = ?
                     ORDER BY start_pos ASC, created_at DESC
                     "#,
-                )
-                .bind(doc_id)
-                .fetch_all(pool)
-                .await
-                .map_err(AppError::from)?
-            }
-            None => {
-                sqlx::query(
-                    r#"
+            )
+            .bind(doc_id)
+            .fetch_all(pool)
+            .await
+            .map_err(AppError::from)?,
+            None => sqlx::query(
+                r#"
                     SELECT id, document_id, position_start, position_end, start_pos, end_pos,
                            page, selected_text, color, note, created_at, updated_at
                     FROM highlights
                     ORDER BY created_at DESC
                     "#,
-                )
-                .fetch_all(pool)
-                .await
-                .map_err(AppError::from)?
-            }
+            )
+            .fetch_all(pool)
+            .await
+            .map_err(AppError::from)?,
         };
 
         let mut highlights = Vec::with_capacity(rows.len());

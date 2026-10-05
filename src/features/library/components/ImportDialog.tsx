@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { X, Upload, Loader2, AlertCircle, FileText, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
-import { importDocument, importDocumentBytes } from "@/features/library/api/documents";
+import { importDocumentBytes } from "@/features/library/api/documents";
 
 export interface ImportDialogProps {
   isOpen: boolean;

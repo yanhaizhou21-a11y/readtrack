@@ -4,8 +4,7 @@ use crate::errors::IpcError;
 use crate::models::{
     DocumentArchiveInput, DocumentDeleteInput, DocumentDetail, DocumentGetInput,
     DocumentGetSectionsInput, DocumentImportBytesInput, DocumentImportInput, DocumentListInput,
-    DocumentListResponse, DocumentRenameInput, DocumentSummary, DocumentTouchInput,
-    SectionPayload,
+    DocumentListResponse, DocumentRenameInput, DocumentSummary, DocumentTouchInput, SectionPayload,
 };
 use crate::AppState;
 

@@ -21,7 +21,8 @@ async fn setup_test_db() -> (sqlx::SqlitePool, String) {
         file_type: "txt".to_string(),
         mime_type: "text/plain".to_string(),
         file_size: 2048,
-        content_hash: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef".to_string(),
+        content_hash: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+            .to_string(),
         page_count: None,
         word_count: Some(500),
         thumbnail_path: None,
@@ -209,7 +210,10 @@ async fn test_note_lifecycle() {
         .unwrap();
 
     assert_eq!(note.pos, 200);
-    assert_eq!(note.content, "Remember to check Big-O complexity for QuickSort");
+    assert_eq!(
+        note.content,
+        "Remember to check Big-O complexity for QuickSort"
+    );
 
     // 2. Update note
     let updated = service
@@ -250,7 +254,8 @@ async fn test_global_fts5_search() {
                 percentage: 0.3,
                 parser_version: 1,
             },
-            content: "Dijkstra shortest path algorithm requires non-negative edge weights".to_string(),
+            content: "Dijkstra shortest path algorithm requires non-negative edge weights"
+                .to_string(),
             highlight_id: None,
         })
         .await
@@ -275,6 +280,9 @@ async fn test_global_fts5_search() {
     assert_eq!(hit.document_title, "The Art of Computer Systems");
 
     // Verify snippet match
-    let has_match = hit.snippet.iter().any(|part| part.is_match && part.text.contains("Dijkstra"));
+    let has_match = hit
+        .snippet
+        .iter()
+        .any(|part| part.is_match && part.text.contains("Dijkstra"));
     assert!(has_match);
 }

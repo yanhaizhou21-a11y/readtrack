@@ -24,9 +24,20 @@ impl AnnotationService {
         let id = Uuid::new_v4().to_string();
 
         let pos = input.position.offset.unwrap_or(0);
-        let page = input.position.page.map(|p| p as i64);
+        let page = input.position.page;
 
-        let section_id = input.position.section_id.map(|s| s.to_string());
+        let section_id = if let Some(sec_idx) = input.position.section_id {
+            sqlx::query_scalar::<_, String>(
+                "SELECT id FROM document_sections WHERE document_id = ? AND section_index = ? LIMIT 1",
+            )
+            .bind(&input.document_id)
+            .bind(sec_idx)
+            .fetch_optional(&self.db)
+            .await
+            .unwrap_or(None)
+        } else {
+            None
+        };
 
         let excerpt = input.title.clone().unwrap_or_else(|| {
             if let Some(pg) = page {
@@ -161,7 +172,7 @@ impl AnnotationService {
             .unwrap_or(start_pos + trimmed_text.len() as i64)
             .max(start_pos);
 
-        let page = input.start.page.map(|p| p as i64);
+        let page = input.start.page;
 
         let highlight = Highlight {
             id: id.clone(),
@@ -278,7 +289,7 @@ impl AnnotationService {
         let id = Uuid::new_v4().to_string();
 
         let pos = input.position.offset.unwrap_or(0);
-        let page = input.position.page.map(|p| p as i64);
+        let page = input.position.page;
 
         let note = Note {
             id: id.clone(),

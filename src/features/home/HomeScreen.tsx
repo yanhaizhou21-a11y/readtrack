@@ -16,6 +16,7 @@ import {
   Play,
   Map,
   Plus,
+  Bookmark,
 } from "lucide-react";
 
 export const HomeScreen: React.FC = () => {
@@ -42,15 +43,27 @@ export const HomeScreen: React.FC = () => {
     loadDashboard();
   }, [loadDashboard]);
 
-  const searchAction = (
-    <button
-      type="button"
-      onClick={() => navigate("/search")}
-      aria-label="Search documents"
-      className="w-10 h-10 rounded-control flex items-center justify-center text-foreground hover:bg-surface-2 transition-colors"
-    >
-      <Search className="w-5 h-5 text-muted" />
-    </button>
+  const headerActions = (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => navigate("/annotations")}
+        aria-label="Clippings & Annotations"
+        title="Clippings & Annotations"
+        className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+      >
+        <Bookmark className="w-4 h-4 text-muted" />
+      </button>
+      <button
+        type="button"
+        onClick={() => navigate("/search")}
+        aria-label="Search documents"
+        title="Search"
+        className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+      >
+        <Search className="w-4 h-4 text-muted" />
+      </button>
+    </div>
   );
 
   if (loading) {
@@ -59,7 +72,7 @@ export const HomeScreen: React.FC = () => {
         <Header
           title="ReadTrack"
           subtitle="Local-first reading tracker"
-          actions={searchAction}
+          actions={headerActions}
         />
         <div className="p-4 space-y-4 max-w-lg mx-auto w-full">
           <LoadingSkeleton className="h-44 w-full rounded-card" />
@@ -76,7 +89,7 @@ export const HomeScreen: React.FC = () => {
         <Header
           title="ReadTrack"
           subtitle="Local-first reading tracker"
-          actions={searchAction}
+          actions={headerActions}
         />
         <div className="flex-1 flex items-center justify-center p-4">
           <ErrorState
@@ -101,7 +114,7 @@ export const HomeScreen: React.FC = () => {
         <Header
           title="ReadTrack"
           subtitle="Local-first reading tracker"
-          actions={searchAction}
+          actions={headerActions}
         />
         <div className="flex-1 flex flex-col items-center justify-center p-4">
           <EmptyState
@@ -148,7 +161,7 @@ export const HomeScreen: React.FC = () => {
       <Header
         title="ReadTrack"
         subtitle="Local-first reading tracker"
-        actions={searchAction}
+        actions={headerActions}
       />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6 max-w-lg mx-auto w-full">

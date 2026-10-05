@@ -8,6 +8,7 @@ import {
   List as ListIcon,
   ArrowUpDown,
   X,
+  Bookmark,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -157,24 +158,35 @@ export const LibraryScreen: React.FC = () => {
     }
   };
 
-  const importAction = (
-    <button
-      type="button"
-      onClick={() => {
-        setImportError(null);
-        setIsImportOpen(true);
-      }}
-      aria-label="Import document"
-      className="flex items-center gap-1.5 h-9 px-3 rounded-control bg-accent text-accent-foreground text-sm font-medium hover:opacity-95 transition-opacity"
-    >
-      <Plus className="w-4 h-4" />
-      <span>Import</span>
-    </button>
+  const headerActions = (
+    <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        onClick={() => navigate("/annotations")}
+        aria-label="Clippings & Annotations"
+        title="Clippings & Annotations"
+        className="w-9 h-9 border border-border flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+      >
+        <Bookmark className="w-4 h-4 text-muted hover:text-foreground" />
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setImportError(null);
+          setIsImportOpen(true);
+        }}
+        aria-label="Import document"
+        className="flex items-center gap-1.5 h-9 px-3 border border-border bg-foreground text-background text-xs font-mono font-bold uppercase hover:bg-accent hover:text-white transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+        <span>Import</span>
+      </button>
+    </div>
   );
 
   return (
     <div className="flex-1 flex flex-col relative pb-20">
-      <Header title="Library" actions={importAction} />
+      <Header title="Library" actions={headerActions} />
 
       {/* Search and Filter Section */}
       <div className="p-4 border-b border-border space-y-3 bg-surface">

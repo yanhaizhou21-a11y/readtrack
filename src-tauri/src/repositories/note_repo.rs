@@ -1,17 +1,15 @@
-use sqlx::{Row, SqliteConnection, SqlitePool};
 use crate::errors::AppError;
 use crate::models::{LogicalPosition, Note};
+use sqlx::{Row, SqliteConnection, SqlitePool};
 
 pub struct NoteRepo;
 
 impl NoteRepo {
-    pub async fn create(
-        conn: &mut SqliteConnection,
-        note: &Note,
-    ) -> Result<(), AppError> {
-        let pos_json = serde_json::to_string(&note.position).map_err(|_| AppError::InvalidInput {
-            field: "position".to_string(),
-        })?;
+    pub async fn create(conn: &mut SqliteConnection, note: &Note) -> Result<(), AppError> {
+        let pos_json =
+            serde_json::to_string(&note.position).map_err(|_| AppError::InvalidInput {
+                field: "position".to_string(),
+            })?;
 
         sqlx::query(
             r#"
@@ -37,10 +35,7 @@ impl NoteRepo {
         Ok(())
     }
 
-    pub async fn get_by_id(
-        pool: &SqlitePool,
-        id: &str,
-    ) -> Result<Option<Note>, AppError> {
+    pub async fn get_by_id(pool: &SqlitePool, id: &str) -> Result<Option<Note>, AppError> {
         let row = sqlx::query(
             r#"
             SELECT id, document_id, highlight_id, position, pos, page,
@@ -84,10 +79,7 @@ impl NoteRepo {
         Self::get_by_id(pool, id).await
     }
 
-    pub async fn delete(
-        conn: &mut SqliteConnection,
-        id: &str,
-    ) -> Result<bool, AppError> {
+    pub async fn delete(conn: &mut SqliteConnection, id: &str) -> Result<bool, AppError> {
         let result = sqlx::query("DELETE FROM notes WHERE id = ?")
             .bind(id)
             .execute(&mut *conn)
@@ -97,39 +89,32 @@ impl NoteRepo {
         Ok(result.rows_affected() > 0)
     }
 
-    pub async fn list(
-        pool: &SqlitePool,
-        document_id: Option<&str>,
-    ) -> Result<Vec<Note>, AppError> {
+    pub async fn list(pool: &SqlitePool, document_id: Option<&str>) -> Result<Vec<Note>, AppError> {
         let rows = match document_id {
-            Some(doc_id) => {
-                sqlx::query(
-                    r#"
+            Some(doc_id) => sqlx::query(
+                r#"
                     SELECT id, document_id, highlight_id, position, pos, page,
                            content, created_at, updated_at
                     FROM notes
                     WHERE document_id = ?
                     ORDER BY pos ASC, created_at DESC
                     "#,
-                )
-                .bind(doc_id)
-                .fetch_all(pool)
-                .await
-                .map_err(AppError::from)?
-            }
-            None => {
-                sqlx::query(
-                    r#"
+            )
+            .bind(doc_id)
+            .fetch_all(pool)
+            .await
+            .map_err(AppError::from)?,
+            None => sqlx::query(
+                r#"
                     SELECT id, document_id, highlight_id, position, pos, page,
                            content, created_at, updated_at
                     FROM notes
                     ORDER BY created_at DESC
                     "#,
-                )
-                .fetch_all(pool)
-                .await
-                .map_err(AppError::from)?
-            }
+            )
+            .fetch_all(pool)
+            .await
+            .map_err(AppError::from)?,
         };
 
         let mut notes = Vec::with_capacity(rows.len());
