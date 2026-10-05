@@ -201,10 +201,8 @@ impl MarkdownAstBuilder {
                     Tag::Emphasis => self.current_marks.push(Mark::Italic),
                     Tag::Strong => self.current_marks.push(Mark::Bold),
                     Tag::Strikethrough => self.current_marks.push(Mark::Strikethrough),
-                    Tag::Link { dest_url, .. } => {
-                        if is_safe_link_url(&dest_url) {
-                            self.current_marks.push(Mark::Link { href: dest_url.to_string() });
-                        }
+                    Tag::Link { dest_url, .. } if is_safe_link_url(&dest_url) => {
+                        self.current_marks.push(Mark::Link { href: dest_url.to_string() });
                     }
                     _ => {}
                 },

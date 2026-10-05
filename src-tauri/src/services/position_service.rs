@@ -3,6 +3,12 @@ use crate::errors::AppError;
 
 pub struct PositionService;
 
+impl Default for PositionService {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PositionService {
     pub fn new() -> Self {
         Self
@@ -12,13 +18,8 @@ impl PositionService {
         // Tier 5: PDF
         if position.page.is_some() || doc.metadata.page_count.is_some() {
             let page_count = doc.metadata.page_count.unwrap_or(1) as i64;
-            let mut page = position.page.unwrap_or(1);
-            if page < 1 { page = 1; }
-            if page > page_count { page = page_count; }
-            
-            let mut page_offset = position.page_offset.unwrap_or(0.0);
-            if page_offset < 0.0 { page_offset = 0.0; }
-            if page_offset > 1.0 { page_offset = 1.0; }
+            let page = position.page.unwrap_or(1).clamp(1, page_count);
+            let page_offset = position.page_offset.unwrap_or(0.0).clamp(0.0, 1.0);
             
             let linear_pos = (page - 1) * 1_000_000 + (page_offset * 999_999.0).round() as i64;
             

@@ -46,9 +46,9 @@ pub fn run() {
                                 if let Ok(file_path) = file_store.get_document_path(&doc.id, &doc.file_type) {
                                     if let Ok(file_bytes) = std::fs::read(&file_path) {
                                         if let Some(range) = range_header {
-                                            if range.starts_with("bytes=") {
-                                                let parts: Vec<&str> = range["bytes=".len()..].split('-').collect();
-                                                let start: usize = parts.get(0).and_then(|s| s.parse().ok()).unwrap_or(0);
+                                            if let Some(stripped) = range.strip_prefix("bytes=") {
+                                                let parts: Vec<&str> = stripped.split('-').collect();
+                                                let start: usize = parts.first().and_then(|s| s.parse().ok()).unwrap_or(0);
                                                 let end: usize = parts.get(1).and_then(|s| if s.is_empty() { None } else { s.parse().ok() }).unwrap_or(file_bytes.len() - 1);
                                                 
                                                 let end = end.min(file_bytes.len() - 1);
