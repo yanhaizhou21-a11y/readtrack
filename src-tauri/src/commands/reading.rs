@@ -39,25 +39,22 @@ pub async fn document_resolve_position(
 ) -> Result<ResolvedPosition, IpcError> {
     let doc_id = &input.position.document_id;
     let doc = DocumentRepo::get_by_id(&state.db, doc_id)
-        .await
-        .map_err(AppError::from)?
+        .await?
         .ok_or(AppError::DocumentNotFound)?;
 
     let file_store = crate::storage::file_store::FileStore::new(state.storage.clone());
     let path = file_store
-        .get_document_path(&doc.id, &doc.file_type)
-        .map_err(AppError::from)?;
+        .get_document_path(&doc.id, &doc.file_type)?;
 
     let registry = ParserRegistry::new();
     let parser = registry
         .get(&crate::models::FileType::from_ext(&doc.file_type).unwrap_or(crate::models::FileType::Txt))
         .ok_or_else(|| AppError::UnsupportedFormat { ext: doc.file_type.to_string() })?;
 
-    let normalized = parser.parse(&path).map_err(AppError::from)?;
+    let normalized = parser.parse(&path)?;
     let position_service = PositionService::new();
     let resolved = position_service
-        .resolve(input.position, &normalized)
-        .map_err(AppError::from)?;
+        .resolve(input.position, &normalized)?;
 
     Ok(resolved)
 }
@@ -68,8 +65,7 @@ pub async fn reading_get_progress(
     input: ReadingProgressInput,
 ) -> Result<ReadingProgress, IpcError> {
     let progress = ProgressRepo::get_by_document_id(&state.db, &input.document_id)
-        .await
-        .map_err(AppError::from)?;
+        .await?;
 
     if let Some(p) = progress {
         Ok(p)
@@ -106,14 +102,12 @@ pub async fn reading_update_progress(
     input: UpdateProgressInput,
 ) -> Result<(), IpcError> {
     let _doc = DocumentRepo::get_by_id(&state.db, &input.document_id)
-        .await
-        .map_err(AppError::from)?
+        .await?
         .ok_or(AppError::DocumentNotFound)?;
 
     let now = chrono::Utc::now().timestamp_millis();
     let existing = ProgressRepo::get_by_document_id(&state.db, &input.document_id)
-        .await
-        .map_err(AppError::from)?;
+        .await?;
 
     let mut new_progress = if let Some(mut e) = existing {
         e.current_position = input.position.clone();
@@ -144,9 +138,9 @@ pub async fn reading_update_progress(
         new_progress.completed_at = Some(now);
     }
 
-    let mut tx = state.db.begin().await.map_err(AppError::from)?;
-    ProgressRepo::upsert(&mut tx, &new_progress).await.map_err(AppError::from)?;
-    tx.commit().await.map_err(AppError::from)?;
+    let mut tx = state.db.begin().await?;
+    ProgressRepo::upsert(&mut tx, &new_progress).await?;
+    tx.commit().await?;
 
     Ok(())
 }
