@@ -52,13 +52,13 @@ Kerjakan urut. Centang `[x]` saat selesai **dan** lolos Definition of Done (`AGE
 **Exit:** scroll cepat ≠ read; ch1=100% / ch2=63% / ch3=0% tampil nyata di dashboard; sesi tercatat.
 
 ## Phase 5 — Annotations
-- [ ] Repo + service + command bookmark/highlight/note (CRUD penuh) + excerpt generator
-- [ ] Rich: seleksi teks → `SelectionToolbar` (Highlight, Add Note, Copy), render highlight overlay dari posisi
-- [ ] PDF: seleksi dari text layer → posisi (page + offset teks) → highlight overlay
-- [ ] Bookmark UI (tombol toolbar, daftar, edit, swipe delete+undo)
-- [ ] Search global lengkap (FTS5: dokumen, konten, notes, highlights, bookmarks), UI hasil + lompat + sorot
-- [ ] Empty states anotasi & search
-- [ ] Test CRUD, FTS update saat anotasi berubah, lompat posisi
+- [x] Repo + service + command bookmark/highlight/note (CRUD penuh) + excerpt generator
+- [x] Rich: seleksi teks → `SelectionToolbar` (Highlight, Add Note, Copy), render highlight overlay dari posisi
+- [x] PDF: seleksi dari text layer → posisi (page + offset teks) → highlight overlay
+- [x] Bookmark UI (tombol toolbar, daftar, edit, swipe delete+undo)
+- [x] Search global lengkap (FTS5: dokumen, konten, notes, highlights, bookmarks), UI hasil + lompat + sorot
+- [x] Empty states anotasi & search
+- [x] Test CRUD, FTS update saat anotasi berubah, lompat posisi
 **Exit:** anotasi persisten setelah restart; search klik → posisi tepat + sorot.
 
 ## Phase 6 — Export
