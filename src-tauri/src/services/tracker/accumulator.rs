@@ -96,7 +96,7 @@ impl SessionAccumulator {
 
         self.last_report_ts = Some(report.ts);
         self.last_heartbeat_at = report.ts;
-        self.duration_seconds = ((report.ts - self.started_at).max(0) / 1000) as i64;
+        self.duration_seconds = (report.ts - self.started_at).max(0) / 1000;
         self.end_position = Some(report.position.clone());
 
         let visible_in_zone: Vec<i64> = report
