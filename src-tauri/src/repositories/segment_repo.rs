@@ -63,7 +63,7 @@ impl SegmentRepo {
         .await
         .map_err(AppError::from)?;
 
-        let mut segments = Vec::new();
+        let mut segments = Vec::with_capacity(rows.len());
         for r in rows {
             segments.push(ReadingSegment {
                 id: r.get("id"),
@@ -84,5 +84,82 @@ impl SegmentRepo {
             });
         }
         Ok(segments)
+    }
+
+    pub async fn update_batch_state(
+        conn: &mut SqliteConnection,
+        segments: &[ReadingSegment],
+    ) -> Result<(), AppError> {
+        for seg in segments {
+            sqlx::query(
+                r#"
+                UPDATE reading_segments
+                SET status = ?,
+                    dwell_ms = ?,
+                    first_read_at = ?,
+                    last_read_at = ?,
+                    read_count = ?
+                WHERE id = ?
+                "#,
+            )
+            .bind(&seg.status)
+            .bind(seg.dwell_ms)
+            .bind(seg.first_read_at)
+            .bind(seg.last_read_at)
+            .bind(seg.read_count)
+            .bind(&seg.id)
+            .execute(&mut *conn)
+            .await
+            .map_err(AppError::from)?;
+        }
+        Ok(())
+    }
+
+    pub async fn mark_all_as_read(
+        conn: &mut SqliteConnection,
+        document_id: &str,
+        now: i64,
+    ) -> Result<(), AppError> {
+        sqlx::query(
+            r#"
+            UPDATE reading_segments
+            SET status = 'read',
+                last_read_at = ?,
+                first_read_at = COALESCE(first_read_at, ?),
+                read_count = CASE WHEN read_count = 0 THEN 1 ELSE read_count END
+            WHERE document_id = ?
+            "#,
+        )
+        .bind(now)
+        .bind(now)
+        .bind(document_id)
+        .execute(&mut *conn)
+        .await
+        .map_err(AppError::from)?;
+
+        Ok(())
+    }
+
+    pub async fn reset_all_for_doc(
+        conn: &mut SqliteConnection,
+        document_id: &str,
+    ) -> Result<(), AppError> {
+        sqlx::query(
+            r#"
+            UPDATE reading_segments
+            SET status = 'unread',
+                dwell_ms = 0,
+                first_read_at = NULL,
+                last_read_at = NULL,
+                read_count = 0
+            WHERE document_id = ?
+            "#,
+        )
+        .bind(document_id)
+        .execute(&mut *conn)
+        .await
+        .map_err(AppError::from)?;
+
+        Ok(())
     }
 }
