@@ -1,7 +1,7 @@
-use std::path::Path;
 use crate::errors::AppError;
 use crate::models::document_model::{DocMetadata, FileType, NormalizedDocument};
 use crate::parsers::traits::DocumentParser;
+use std::path::Path;
 
 pub struct PdfParser;
 

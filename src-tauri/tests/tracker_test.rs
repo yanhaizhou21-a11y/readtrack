@@ -1,15 +1,21 @@
 use readtrack_lib::db::{create_in_memory_pool, run_migrations};
 use readtrack_lib::models::{
-    Document, LogicalPosition, ReadingProgress, ReadingSegment,
-    ViewportReport, VisibleSegmentRatio,
+    Document, LogicalPosition, ReadingProgress, ReadingSegment, ViewportReport, VisibleSegmentRatio,
 };
-use readtrack_lib::repositories::{DocumentRepo, ProgressRepo, SectionRepo, SegmentRepo, SessionRepo};
+use readtrack_lib::repositories::{
+    DocumentRepo, ProgressRepo, SectionRepo, SegmentRepo, SessionRepo,
+};
 use readtrack_lib::services::tracker::engine::{
     calculate_dwell_delta_ms, calculate_progress, calculate_required_dwell_ms,
 };
 use readtrack_lib::services::TrackerService;
 
-async fn setup_test_doc(pool: &sqlx::SqlitePool, doc_id: &str, segments_count: usize, words_per_segment: i64) {
+async fn setup_test_doc(
+    pool: &sqlx::SqlitePool,
+    doc_id: &str,
+    segments_count: usize,
+    words_per_segment: i64,
+) {
     let now = chrono::Utc::now().timestamp_millis();
     let doc = Document {
         id: doc_id.to_string(),
@@ -124,7 +130,10 @@ async fn test_fast_scroll_past_10_segments_does_not_mark_read() {
         parser_version: 1,
     };
 
-    let session_id = tracker.start_session(doc_id.to_string(), pos.clone()).await.unwrap();
+    let session_id = tracker
+        .start_session(doc_id.to_string(), pos.clone())
+        .await
+        .unwrap();
 
     let start_ts = chrono::Utc::now().timestamp_millis();
     // Rapidly scroll through 10 segments (50ms per segment)
@@ -153,7 +162,10 @@ async fn test_fast_scroll_past_10_segments_does_not_mark_read() {
         .filter(|s| s.status == "read")
         .count();
 
-    assert_eq!(read_count, 0, "Fast scrolling past 10 segments must not mark any segment as read");
+    assert_eq!(
+        read_count, 0,
+        "Fast scrolling past 10 segments must not mark any segment as read"
+    );
 }
 
 #[tokio::test]
@@ -180,68 +192,107 @@ async fn test_100_words_dwell_thresholds() {
         parser_version: 1,
     };
 
-    let session_id = tracker.start_session(doc_id.to_string(), pos.clone()).await.unwrap();
+    let session_id = tracker
+        .start_session(doc_id.to_string(), pos.clone())
+        .await
+        .unwrap();
     let start_ts = 1_000_000i64;
 
     // Report at 0ms
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: start_ts,
-        visible: vec![VisibleSegmentRatio { segment_index: 0, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: start_ts,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 0,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     // Report after 1500ms
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: start_ts + 1500,
-        visible: vec![VisibleSegmentRatio { segment_index: 0, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: start_ts + 1500,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 0,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     // Report after 3000ms total dwell
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: start_ts + 3000,
-        visible: vec![VisibleSegmentRatio { segment_index: 0, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: start_ts + 3000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 0,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     let map = tracker.get_reading_map(doc_id).await.unwrap();
-    assert_eq!(map.sections[0].segments[0].status, "reading", "At 3s dwell (under 4.286s required), status must be 'reading'");
+    assert_eq!(
+        map.sections[0].segments[0].status, "reading",
+        "At 3s dwell (under 4.286s required), status must be 'reading'"
+    );
 
     // Report after 5000ms total dwell (two 1000ms reports)
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: start_ts + 4000,
-        visible: vec![VisibleSegmentRatio { segment_index: 0, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: start_ts + 4000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 0,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: start_ts + 5000,
-        visible: vec![VisibleSegmentRatio { segment_index: 0, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: start_ts + 5000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 0,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     let map2 = tracker.get_reading_map(doc_id).await.unwrap();
-    assert_eq!(map2.sections[0].segments[0].status, "read", "At 5s dwell (exceeds 4.286s required), status must transition to 'read'");
+    assert_eq!(
+        map2.sections[0].segments[0].status, "read",
+        "At 5s dwell (exceeds 4.286s required), status must transition to 'read'"
+    );
 }
 
 #[test]
@@ -285,33 +336,51 @@ async fn test_jump_toc_does_not_mark_skipped() {
         parser_version: 1,
     };
 
-    let session_id = tracker.start_session(doc_id.to_string(), pos.clone()).await.unwrap();
+    let session_id = tracker
+        .start_session(doc_id.to_string(), pos.clone())
+        .await
+        .unwrap();
 
     // Report segment 0
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: 1000,
-        visible: vec![VisibleSegmentRatio { segment_index: 0, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: 1000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 0,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     // Jump to segment 5 via TOC
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: 2000,
-        visible: vec![VisibleSegmentRatio { segment_index: 5, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "toc".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: 2000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 5,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "toc".to_string(),
+        })
+        .await
+        .unwrap();
 
     let map = tracker.get_reading_map(doc_id).await.unwrap();
     for seg in &map.sections[0].segments[1..5] {
-        assert_eq!(seg.status, "unread", "Jump via TOC must NOT mark skipped segments");
+        assert_eq!(
+            seg.status, "unread",
+            "Jump via TOC must NOT mark skipped segments"
+        );
     }
 }
 
@@ -335,57 +404,93 @@ async fn test_continuous_scroll_marks_skipped_and_rereading_marks_read() {
         parser_version: 1,
     };
 
-    let session_id = tracker.start_session(doc_id.to_string(), pos.clone()).await.unwrap();
+    let session_id = tracker
+        .start_session(doc_id.to_string(), pos.clone())
+        .await
+        .unwrap();
 
     // View segment 0
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: 1000,
-        visible: vec![VisibleSegmentRatio { segment_index: 0, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: 1000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 0,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     // Scroll forward continuously (jump="none") straight to segment 3 (skipping 1 and 2)
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: 2000,
-        visible: vec![VisibleSegmentRatio { segment_index: 3, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: 2000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 3,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     let map = tracker.get_reading_map(doc_id).await.unwrap();
-    assert_eq!(map.sections[0].segments[1].status, "skipped", "Passed segment 1 must be skipped");
-    assert_eq!(map.sections[0].segments[2].status, "skipped", "Passed segment 2 must be skipped");
+    assert_eq!(
+        map.sections[0].segments[1].status, "skipped",
+        "Passed segment 1 must be skipped"
+    );
+    assert_eq!(
+        map.sections[0].segments[2].status, "skipped",
+        "Passed segment 2 must be skipped"
+    );
 
     // Later, user reads segment 1 with sufficient dwell (1500ms > 1200ms)
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: 3000,
-        visible: vec![VisibleSegmentRatio { segment_index: 1, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: 3000,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 1,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
-    tracker.report_viewport(ViewportReport {
-        session_id: session_id.clone(),
-        ts: 4500,
-        visible: vec![VisibleSegmentRatio { segment_index: 1, ratio: 1.0 }],
-        position: pos.clone(),
-        interacting: true,
-        foreground: true,
-        jump: "none".to_string(),
-    }).await.unwrap();
+    tracker
+        .report_viewport(ViewportReport {
+            session_id: session_id.clone(),
+            ts: 4500,
+            visible: vec![VisibleSegmentRatio {
+                segment_index: 1,
+                ratio: 1.0,
+            }],
+            position: pos.clone(),
+            interacting: true,
+            foreground: true,
+            jump: "none".to_string(),
+        })
+        .await
+        .unwrap();
 
     let map2 = tracker.get_reading_map(doc_id).await.unwrap();
-    assert_eq!(map2.sections[0].segments[1].status, "read", "Skipped segment read with sufficient dwell must become 'read'");
+    assert_eq!(
+        map2.sections[0].segments[1].status, "read",
+        "Skipped segment read with sufficient dwell must become 'read'"
+    );
 }
 
 #[test]
@@ -505,9 +610,15 @@ async fn test_session_lifecycle_and_noise_cleanup() {
     };
 
     // Start session and end immediately without reading (active < 5s)
-    let session_id = tracker.start_session(doc_id.to_string(), pos.clone()).await.unwrap();
+    let session_id = tracker
+        .start_session(doc_id.to_string(), pos.clone())
+        .await
+        .unwrap();
     let res = tracker.end_session(&session_id, pos.clone()).await.unwrap();
-    assert!(res.is_none(), "Session under 5s active with no read segments must be deleted as noise");
+    assert!(
+        res.is_none(),
+        "Session under 5s active with no read segments must be deleted as noise"
+    );
 
     let count = SessionRepo::count_for_doc(&pool, doc_id).await.unwrap();
     assert_eq!(count, 0, "Noise session must not exist in database");
@@ -547,8 +658,15 @@ async fn test_crash_recovery_for_orphaned_sessions() {
     let recovered = tracker.crash_recovery().await.unwrap();
     assert_eq!(recovered, 1, "Should recover 1 orphaned session");
 
-    let recovered_session = SessionRepo::get_by_id(&pool, "orphaned-session-1").await.unwrap().unwrap();
-    assert_eq!(recovered_session.ended_at, Some(now - 30_000), "Ended at should be set to last_heartbeat_at");
+    let recovered_session = SessionRepo::get_by_id(&pool, "orphaned-session-1")
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        recovered_session.ended_at,
+        Some(now - 30_000),
+        "Ended at should be set to last_heartbeat_at"
+    );
 }
 
 #[tokio::test]

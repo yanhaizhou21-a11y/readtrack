@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::errors::AppError;
 use crate::models::document_model::FileType;
 use crate::parsers::docx::DocxParser;
@@ -7,6 +6,7 @@ use crate::parsers::markdown::MarkdownParser;
 use crate::parsers::pdf::PdfParser;
 use crate::parsers::traits::DocumentParser;
 use crate::parsers::txt::TxtParser;
+use std::collections::HashMap;
 
 pub struct ParserRegistry {
     parsers: HashMap<FileType, Box<dyn DocumentParser>>,
@@ -44,9 +44,11 @@ impl ParserRegistry {
             ext: ext.to_string(),
         })?;
 
-        let parser = self.get(&file_type).ok_or_else(|| AppError::UnsupportedFormat {
-            ext: ext.to_string(),
-        })?;
+        let parser = self
+            .get(&file_type)
+            .ok_or_else(|| AppError::UnsupportedFormat {
+                ext: ext.to_string(),
+            })?;
 
         if !head.is_empty() && !parser.sniff(head) {
             tracing::warn!(

@@ -398,14 +398,10 @@ async fn test_document_repositories_and_lifecycle() {
     assert_eq!(renamed.unwrap().title, "Advanced Async Rust");
 
     // Verify archive
-    let archived = readtrack_lib::repositories::DocumentRepo::archive(
-        &pool,
-        &doc_id,
-        true,
-        now + 2000,
-    )
-    .await
-    .unwrap();
+    let archived =
+        readtrack_lib::repositories::DocumentRepo::archive(&pool, &doc_id, true, now + 2000)
+            .await
+            .unwrap();
     assert!(archived.unwrap().is_archived);
 
     // Verify touch
@@ -442,7 +438,8 @@ async fn test_document_import_service_duplicate_rejection_and_deletion() {
     storage.init_dirs().unwrap();
 
     let import_service = readtrack_lib::services::ImportService::new(pool.clone(), storage.clone());
-    let library_service = readtrack_lib::services::LibraryService::new(pool.clone(), storage.clone());
+    let library_service =
+        readtrack_lib::services::LibraryService::new(pool.clone(), storage.clone());
 
     // 1. Create a valid test markdown file
     let source_file = temp_dir.join("sample_doc.md");
@@ -468,15 +465,24 @@ async fn test_document_import_service_duplicate_rejection_and_deletion() {
 
     // Verify physical file was committed to library/documents/<doc_id>.md
     let committed_file = storage.documents_dir().join(format!("{}.md", doc_id));
-    assert!(committed_file.exists(), "Committed physical file must exist on disk");
+    assert!(
+        committed_file.exists(),
+        "Committed physical file must exist on disk"
+    );
 
     // Verify detail retrieval through LibraryService
-    let detail = library_service.get(&doc_id).await.expect("LibraryService::get must find doc");
+    let detail = library_service
+        .get(&doc_id)
+        .await
+        .expect("LibraryService::get must find doc");
     assert_eq!(detail.summary.id, doc_id);
     assert!(detail.position.is_some(), "Initial position must be set");
 
     // Verify sections slice through LibraryService
-    let sections = library_service.get_sections(&doc_id, Some(0), Some(10)).await.unwrap();
+    let sections = library_service
+        .get_sections(&doc_id, Some(0), Some(10))
+        .await
+        .unwrap();
     assert!(!sections.is_empty(), "Must return parsed sections");
 
     // 3. Attempt duplicate import with default / "ask" -> must be rejected
@@ -502,7 +508,10 @@ async fn test_document_import_service_duplicate_rejection_and_deletion() {
         .filter_map(|e| e.ok())
         .filter(|e| e.file_name().to_string_lossy().starts_with("tmp-"))
         .count();
-    assert_eq!(tmp_count, 0, "No orphaned tmp files after duplicate rejection");
+    assert_eq!(
+        tmp_count, 0,
+        "No orphaned tmp files after duplicate rejection"
+    );
 
     // 4. Duplicate import with "open_existing" -> must return existing summary
     let dup_input_open = readtrack_lib::models::DocumentImportInput {
@@ -528,7 +537,10 @@ async fn test_document_import_service_duplicate_rejection_and_deletion() {
     assert_ne!(new_doc_id, doc_id, "Replaced document must have new ID");
 
     // Old physical file must be purged, new physical file must exist
-    assert!(!committed_file.exists(), "Old physical file must be removed");
+    assert!(
+        !committed_file.exists(),
+        "Old physical file must be removed"
+    );
     let new_committed_file = storage.documents_dir().join(format!("{}.md", new_doc_id));
     assert!(new_committed_file.exists(), "New physical file must exist");
 
@@ -538,10 +550,15 @@ async fn test_document_import_service_duplicate_rejection_and_deletion() {
         .await
         .expect("LibraryService::delete must succeed");
 
-    assert!(!new_committed_file.exists(), "Physical file must be deleted on LibraryService::delete");
+    assert!(
+        !new_committed_file.exists(),
+        "Physical file must be deleted on LibraryService::delete"
+    );
     let get_after_del = library_service.get(&new_doc_id).await;
-    assert!(matches!(get_after_del, Err(readtrack_lib::errors::AppError::DocumentNotFound)));
+    assert!(matches!(
+        get_after_del,
+        Err(readtrack_lib::errors::AppError::DocumentNotFound)
+    ));
 
     let _ = std::fs::remove_dir_all(&temp_dir);
 }
-

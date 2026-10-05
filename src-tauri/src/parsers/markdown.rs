@@ -72,8 +72,14 @@ struct MarkdownAstBuilder {
 }
 
 enum ContainerState {
-    Quote { blocks: Vec<Block> },
-    List { ordered: bool, items: Vec<Vec<Block>>, current_item: Vec<Block> },
+    Quote {
+        blocks: Vec<Block>,
+    },
+    List {
+        ordered: bool,
+        items: Vec<Vec<Block>>,
+        current_item: Vec<Block>,
+    },
 }
 
 struct TableState {
@@ -157,7 +163,8 @@ impl MarkdownAstBuilder {
                         self.current_inlines.clear();
                     }
                     Tag::BlockQuote(_) => {
-                        self.container_stack.push(ContainerState::Quote { blocks: Vec::new() });
+                        self.container_stack
+                            .push(ContainerState::Quote { blocks: Vec::new() });
                     }
                     Tag::CodeBlock(kind) => {
                         in_code_block = true;
@@ -165,7 +172,11 @@ impl MarkdownAstBuilder {
                         active_code_lang = match kind {
                             CodeBlockKind::Fenced(lang) => {
                                 let l = lang.trim();
-                                if l.is_empty() { None } else { Some(l.to_string()) }
+                                if l.is_empty() {
+                                    None
+                                } else {
+                                    Some(l.to_string())
+                                }
                             }
                             CodeBlockKind::Indented => None,
                         };
@@ -202,7 +213,9 @@ impl MarkdownAstBuilder {
                     Tag::Strong => self.current_marks.push(Mark::Bold),
                     Tag::Strikethrough => self.current_marks.push(Mark::Strikethrough),
                     Tag::Link { dest_url, .. } if is_safe_link_url(&dest_url) => {
-                        self.current_marks.push(Mark::Link { href: dest_url.to_string() });
+                        self.current_marks.push(Mark::Link {
+                            href: dest_url.to_string(),
+                        });
                     }
                     _ => {}
                 },
@@ -211,21 +224,30 @@ impl MarkdownAstBuilder {
                         let inlines = self.flush_inlines();
                         if !inlines.is_empty() {
                             let block_id = self.active_section.next_block_id();
-                            self.push_block(Block::Paragraph { id: block_id, inlines });
+                            self.push_block(Block::Paragraph {
+                                id: block_id,
+                                inlines,
+                            });
                         }
                     }
                     TagEnd::Heading(_) => {
                         let level = active_heading_level.take().unwrap_or(HeadingLevel::H1);
                         let inlines = self.flush_inlines();
-                        let heading_text: String = inlines.iter().map(|i| i.text.as_str()).collect();
+                        let heading_text: String =
+                            inlines.iter().map(|i| i.text.as_str()).collect();
                         let level_u8 = heading_level_to_u8(level);
 
-                        if self.doc_title.is_none() || (level_u8 == 1 && self.doc_title.as_ref() == Some(&self.fallback_title)) {
+                        if self.doc_title.is_none()
+                            || (level_u8 == 1
+                                && self.doc_title.as_ref() == Some(&self.fallback_title))
+                        {
                             self.doc_title = Some(heading_text.clone());
                         }
 
                         if level_u8 <= 2 {
-                            let new_sec_index = if self.active_section.blocks.is_empty() && self.sections.is_empty() {
+                            let new_sec_index = if self.active_section.blocks.is_empty()
+                                && self.sections.is_empty()
+                            {
                                 0
                             } else {
                                 self.sections.len() as u32 + 1
@@ -236,14 +258,22 @@ impl MarkdownAstBuilder {
                                     &mut self.active_section,
                                     SectionBuilder::new(
                                         new_sec_index,
-                                        if level_u8 == 1 { SectionKind::Chapter } else { SectionKind::Heading },
+                                        if level_u8 == 1 {
+                                            SectionKind::Chapter
+                                        } else {
+                                            SectionKind::Heading
+                                        },
                                         Some(heading_text.clone()),
                                         level_u8,
                                     ),
                                 );
                                 self.sections.push(old_sec);
                             } else {
-                                self.active_section.kind = if level_u8 == 1 { SectionKind::Chapter } else { SectionKind::Heading };
+                                self.active_section.kind = if level_u8 == 1 {
+                                    SectionKind::Chapter
+                                } else {
+                                    SectionKind::Heading
+                                };
                                 self.active_section.title = Some(heading_text.clone());
                                 self.active_section.level = level_u8;
                             }
@@ -257,7 +287,11 @@ impl MarkdownAstBuilder {
                                 level: level_u8,
                                 children: Vec::new(),
                             });
-                            self.push_block(Block::Heading { id: block_id, level: level_u8, inlines });
+                            self.push_block(Block::Heading {
+                                id: block_id,
+                                level: level_u8,
+                                inlines,
+                            });
                         } else {
                             let block_id = self.active_section.next_block_id();
                             self.toc.push(TocEntry {
@@ -268,13 +302,20 @@ impl MarkdownAstBuilder {
                                 level: level_u8,
                                 children: Vec::new(),
                             });
-                            self.push_block(Block::Heading { id: block_id, level: level_u8, inlines });
+                            self.push_block(Block::Heading {
+                                id: block_id,
+                                level: level_u8,
+                                inlines,
+                            });
                         }
                     }
                     TagEnd::BlockQuote(_) => {
                         if let Some(ContainerState::Quote { blocks }) = self.container_stack.pop() {
                             let block_id = self.active_section.next_block_id();
-                            self.push_block(Block::Quote { id: block_id, blocks });
+                            self.push_block(Block::Quote {
+                                id: block_id,
+                                blocks,
+                            });
                         }
                     }
                     TagEnd::CodeBlock => {
@@ -287,14 +328,25 @@ impl MarkdownAstBuilder {
                         });
                     }
                     TagEnd::Item => {
-                        if let Some(ContainerState::List { items, current_item, .. }) = self.container_stack.last_mut() {
+                        if let Some(ContainerState::List {
+                            items,
+                            current_item,
+                            ..
+                        }) = self.container_stack.last_mut()
+                        {
                             items.push(std::mem::take(current_item));
                         }
                     }
                     TagEnd::List(_) => {
-                        if let Some(ContainerState::List { ordered, items, .. }) = self.container_stack.pop() {
+                        if let Some(ContainerState::List { ordered, items, .. }) =
+                            self.container_stack.pop()
+                        {
                             let block_id = self.active_section.next_block_id();
-                            self.push_block(Block::List { id: block_id, ordered, items });
+                            self.push_block(Block::List {
+                                id: block_id,
+                                ordered,
+                                items,
+                            });
                         }
                     }
                     TagEnd::TableCell => {
@@ -450,7 +502,6 @@ impl MarkdownAstBuilder {
         }
     }
 }
-
 
 fn heading_level_to_u8(level: HeadingLevel) -> u8 {
     match level {

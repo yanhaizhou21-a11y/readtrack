@@ -1,11 +1,9 @@
-use std::path::PathBuf;
 use readtrack_lib::errors::AppError;
 use readtrack_lib::models::{
     Block, DocMetadata, FileType, Inline, Mark, NormalizedDocument, Section, SectionKind,
 };
-use readtrack_lib::parsers::{
-    DocumentParser, MarkdownParser, ParserRegistry, TxtParser,
-};
+use readtrack_lib::parsers::{DocumentParser, MarkdownParser, ParserRegistry, TxtParser};
+use std::path::PathBuf;
 
 fn temp_file(name: &str, content: &[u8]) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("readtrack_p_test_{}", uuid::Uuid::new_v4()));
@@ -17,7 +15,8 @@ fn temp_file(name: &str, content: &[u8]) -> PathBuf {
 
 #[test]
 fn test_txt_parser_simple() {
-    let content = "My Book Title\n\nFirst paragraph content here.\n\nSecond paragraph content here.";
+    let content =
+        "My Book Title\n\nFirst paragraph content here.\n\nSecond paragraph content here.";
     let path = temp_file("simple.txt", content.as_bytes());
 
     let parser = TxtParser;
@@ -51,9 +50,7 @@ fn test_txt_parser_utf8_bom() {
 #[test]
 fn test_txt_parser_utf16le_bom() {
     let mut data = vec![0xFF, 0xFE];
-    let utf16_chars: Vec<u16> = "UTF-16 Title\n\nBody text"
-        .encode_utf16()
-        .collect();
+    let utf16_chars: Vec<u16> = "UTF-16 Title\n\nBody text".encode_utf16().collect();
     for u in utf16_chars {
         data.extend_from_slice(&u.to_le_bytes());
     }
@@ -87,7 +84,11 @@ fn test_txt_parser_synthetic_sections() {
     // Generate text with > 3000 words across multiple paragraphs
     let mut paras = Vec::new();
     for i in 0..45 {
-        paras.push(format!("Paragraph {} {}", i, vec!["lorem ipsum dolor sit amet"; 15].join(" ")));
+        paras.push(format!(
+            "Paragraph {} {}",
+            i,
+            vec!["lorem ipsum dolor sit amet"; 15].join(" ")
+        ));
     }
     let full_text = format!("Synthetic Book\n\n{}", paras.join("\n\n"));
     let path = temp_file("large.txt", full_text.as_bytes());
@@ -95,7 +96,10 @@ fn test_txt_parser_synthetic_sections() {
     let parser = TxtParser;
     let doc = parser.parse(&path).unwrap();
 
-    assert!(doc.sections.len() > 1, "Should generate synthetic sections for > 3000 words");
+    assert!(
+        doc.sections.len() > 1,
+        "Should generate synthetic sections for > 3000 words"
+    );
     assert_eq!(doc.sections[0].kind, SectionKind::Chapter);
     assert_eq!(doc.sections[0].title, Some("Part 1".to_string()));
     assert!(!doc.toc.is_empty());
@@ -133,7 +137,8 @@ fn test_markdown_parser_headings_sections() {
 
 #[test]
 fn test_markdown_parser_subheadings() {
-    let content = "## Chapter One\n\n### Subheading A\n\nContent A.\n\n#### Deep Heading\n\nDeep content.";
+    let content =
+        "## Chapter One\n\n### Subheading A\n\nContent A.\n\n#### Deep Heading\n\nDeep content.";
     let path = temp_file("subheadings.md", content.as_bytes());
 
     let parser = MarkdownParser;
@@ -162,7 +167,9 @@ fn test_markdown_parser_inline_formatting() {
     if let Block::Paragraph { inlines, .. } = block {
         let has_bold = inlines.iter().any(|i| i.marks.contains(&Mark::Bold));
         let has_italic = inlines.iter().any(|i| i.marks.contains(&Mark::Italic));
-        let has_strike = inlines.iter().any(|i| i.marks.contains(&Mark::Strikethrough));
+        let has_strike = inlines
+            .iter()
+            .any(|i| i.marks.contains(&Mark::Strikethrough));
         let has_code = inlines.iter().any(|i| i.marks.contains(&Mark::Code));
 
         assert!(has_bold, "Must contain bold mark");
@@ -185,21 +192,36 @@ fn test_markdown_parser_safe_and_unsafe_links() {
     let doc = parser.parse(&path).unwrap();
 
     if let Block::Paragraph { inlines, .. } = &doc.sections[0].blocks[0] {
-        let safe_link = inlines.iter().find(|i| i.text.contains("Safe Link")).unwrap();
+        let safe_link = inlines
+            .iter()
+            .find(|i| i.text.contains("Safe Link"))
+            .unwrap();
         assert!(
-            safe_link.marks.iter().any(|m| matches!(m, Mark::Link { href } if href == "https://readtrack.app")),
+            safe_link
+                .marks
+                .iter()
+                .any(|m| matches!(m, Mark::Link { href } if href == "https://readtrack.app")),
             "Safe link must retain Mark::Link"
         );
 
-        let unsafe_link = inlines.iter().find(|i| i.text.contains("Unsafe Link")).unwrap();
+        let unsafe_link = inlines
+            .iter()
+            .find(|i| i.text.contains("Unsafe Link"))
+            .unwrap();
         assert!(
-            !unsafe_link.marks.iter().any(|m| matches!(m, Mark::Link { .. })),
+            !unsafe_link
+                .marks
+                .iter()
+                .any(|m| matches!(m, Mark::Link { .. })),
             "Unsafe javascript: link must have Mark::Link stripped"
         );
 
         let mail_link = inlines.iter().find(|i| i.text.contains("Mail")).unwrap();
         assert!(
-            mail_link.marks.iter().any(|m| matches!(m, Mark::Link { href } if href == "mailto:info@readtrack.app")),
+            mail_link
+                .marks
+                .iter()
+                .any(|m| matches!(m, Mark::Link { href } if href == "mailto:info@readtrack.app")),
             "Mailto link must retain Mark::Link"
         );
     } else {
@@ -219,8 +241,14 @@ fn test_markdown_parser_html_stripping() {
 
     if let Block::Paragraph { inlines, .. } = &doc.sections[0].blocks[0] {
         let full_text: String = inlines.iter().map(|i| i.text.as_str()).collect();
-        assert!(!full_text.contains("<script>"), "Raw HTML <script> must be stripped");
-        assert!(!full_text.contains("<div"), "Raw HTML <div> must be stripped");
+        assert!(
+            !full_text.contains("<script>"),
+            "Raw HTML <script> must be stripped"
+        );
+        assert!(
+            !full_text.contains("<div"),
+            "Raw HTML <div> must be stripped"
+        );
         assert!(full_text.contains("Text with"));
     } else {
         panic!("Expected paragraph");
@@ -286,7 +314,9 @@ fn test_markdown_parser_tables() {
 
     assert_eq!(doc.sections[0].blocks.len(), 1);
     match &doc.sections[0].blocks[0] {
-        Block::Table { rows, header_rows, .. } => {
+        Block::Table {
+            rows, header_rows, ..
+        } => {
             assert_eq!(*header_rows, 1);
             assert_eq!(rows.len(), 3); // Header + 2 data rows
             assert_eq!(rows[0].len(), 2);
@@ -368,6 +398,7 @@ fn test_normalized_document_serde_roundtrip() {
     assert!(json.contains("\"wordCount\":42"));
     assert!(json.contains("\"type\":\"paragraph\""));
 
-    let deserialized: NormalizedDocument = serde_json::from_str(&json).expect("Deserialization failed");
+    let deserialized: NormalizedDocument =
+        serde_json::from_str(&json).expect("Deserialization failed");
     assert_eq!(doc, deserialized);
 }

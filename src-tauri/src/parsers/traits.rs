@@ -1,6 +1,6 @@
-use std::path::Path;
 use crate::errors::AppError;
 use crate::models::document_model::{DocMetadata, FileType, NormalizedDocument};
+use std::path::Path;
 
 pub trait DocumentParser: Send + Sync {
     /// Return the canonical file type handled by this parser

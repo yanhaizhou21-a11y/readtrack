@@ -1,4 +1,6 @@
-use readtrack_lib::models::{Block, DocMetadata, Inline, LogicalPosition, NormalizedDocument, Section, SectionKind};
+use readtrack_lib::models::{
+    Block, DocMetadata, Inline, LogicalPosition, NormalizedDocument, Section, SectionKind,
+};
 use readtrack_lib::services::position_service::PositionService;
 
 #[test]

@@ -56,10 +56,22 @@ fn test_blake3_hash_determinism_identical_content() {
     // Reference BLAKE3 hash computed directly via blake3 crate
     let reference_hash = blake3::hash(payload.as_bytes()).to_hex().to_string();
 
-    assert_eq!(staged_a.hash, reference_hash, "staged_a hash mismatch with reference");
-    assert_eq!(staged_b.hash, reference_hash, "staged_b hash mismatch with reference");
-    assert_eq!(staged_c.hash, reference_hash, "staged_c hash mismatch with reference");
-    assert_eq!(staged_a.hash, staged_b.hash, "hashes between staged_a and staged_b must match");
+    assert_eq!(
+        staged_a.hash, reference_hash,
+        "staged_a hash mismatch with reference"
+    );
+    assert_eq!(
+        staged_b.hash, reference_hash,
+        "staged_b hash mismatch with reference"
+    );
+    assert_eq!(
+        staged_c.hash, reference_hash,
+        "staged_c hash mismatch with reference"
+    );
+    assert_eq!(
+        staged_a.hash, staged_b.hash,
+        "hashes between staged_a and staged_b must match"
+    );
 
     cleanup_test_env(&temp_dir);
 }
@@ -79,8 +91,12 @@ fn test_blake3_hash_distinguishes_single_byte_mutation() {
     fs::write(&file1, &payload1).unwrap();
     fs::write(&file2, &payload2).unwrap();
 
-    let staged1 = file_store.stage_file(&file1, DEFAULT_MAX_IMPORT_BYTES).unwrap();
-    let staged2 = file_store.stage_file(&file2, DEFAULT_MAX_IMPORT_BYTES).unwrap();
+    let staged1 = file_store
+        .stage_file(&file1, DEFAULT_MAX_IMPORT_BYTES)
+        .unwrap();
+    let staged2 = file_store
+        .stage_file(&file2, DEFAULT_MAX_IMPORT_BYTES)
+        .unwrap();
 
     assert_ne!(
         staged1.hash, staged2.hash,
@@ -124,7 +140,11 @@ fn test_boundary_limit_exact_and_oversized() {
     );
 
     match staged_over.err().unwrap() {
-        AppError::FileTooLarge { max_bytes, actual_bytes, .. } => {
+        AppError::FileTooLarge {
+            max_bytes,
+            actual_bytes,
+            ..
+        } => {
             assert_eq!(max_bytes, limit_bytes);
             assert_eq!(actual_bytes, limit_bytes + 1);
         }
@@ -137,7 +157,10 @@ fn test_boundary_limit_exact_and_oversized() {
         .filter_map(|e| e.ok())
         .filter(|e| e.file_name().to_string_lossy().starts_with("tmp-"))
         .count();
-    assert_eq!(count, 0, "No orphaned tmp files should exist after boundary rejection");
+    assert_eq!(
+        count, 0,
+        "No orphaned tmp files should exist after boundary rejection"
+    );
 
     cleanup_test_env(&temp_dir);
 }
@@ -163,7 +186,10 @@ fn test_raii_rollback_on_magic_bytes_failure() {
         .filter_map(|e| e.ok())
         .filter(|e| e.file_name().to_string_lossy().starts_with("tmp-"))
         .count();
-    assert_eq!(count, 0, "Temp file must be purged after magic byte validation error");
+    assert_eq!(
+        count, 0,
+        "Temp file must be purged after magic byte validation error"
+    );
 
     cleanup_test_env(&temp_dir);
 }
@@ -180,14 +206,20 @@ fn test_raii_rollback_on_null_byte_in_txt() {
     fs::write(&null_txt, &null_data).unwrap();
 
     let result = file_store.stage_file(&null_txt, DEFAULT_MAX_IMPORT_BYTES);
-    assert!(result.is_err(), "Text file with null bytes must be rejected");
+    assert!(
+        result.is_err(),
+        "Text file with null bytes must be rejected"
+    );
 
     let count = fs::read_dir(storage.documents_dir())
         .unwrap()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_name().to_string_lossy().starts_with("tmp-"))
         .count();
-    assert_eq!(count, 0, "Temp file must be purged after null byte rejection");
+    assert_eq!(
+        count, 0,
+        "Temp file must be purged after null byte rejection"
+    );
 
     cleanup_test_env(&temp_dir);
 }
@@ -257,7 +289,10 @@ fn test_path_traversal_variations_rejected() {
         );
         match res.err().unwrap() {
             AppError::PermissionDenied => {}
-            other => panic!("Expected PermissionDenied for '{}', got: {:?}", malicious, other),
+            other => panic!(
+                "Expected PermissionDenied for '{}', got: {:?}",
+                malicious, other
+            ),
         }
     }
 
@@ -277,13 +312,21 @@ fn test_path_traversal_variations_rejected() {
             .unwrap();
 
         let commit_res = file_store.commit_file(staged.guard, bad_id, "txt");
-        assert!(commit_res.is_err(), "Traversal in document_id must fail: {}", bad_id);
+        assert!(
+            commit_res.is_err(),
+            "Traversal in document_id must fail: {}",
+            bad_id
+        );
     }
 
     // 4c. Traversal in FileStore::delete_file
     for bad_id in traversal_ids {
         let delete_res = file_store.delete_file(bad_id, "txt");
-        assert!(delete_res.is_err(), "Traversal in delete_file must fail: {}", bad_id);
+        assert!(
+            delete_res.is_err(),
+            "Traversal in delete_file must fail: {}",
+            bad_id
+        );
     }
 
     cleanup_test_env(&temp_dir);

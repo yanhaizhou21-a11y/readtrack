@@ -10,10 +10,11 @@ impl ProgressRepo {
         conn: &mut SqliteConnection,
         progress: &ReadingProgress,
     ) -> Result<(), AppError> {
-        let position_json = serde_json::to_string(&progress.current_position)
-            .map_err(|_| AppError::InvalidDocument {
+        let position_json = serde_json::to_string(&progress.current_position).map_err(|_| {
+            AppError::InvalidDocument {
                 reason: "Failed to serialize current position".into(),
-            })?;
+            }
+        })?;
 
         sqlx::query(
             r#"
@@ -47,10 +48,11 @@ impl ProgressRepo {
         conn: &mut SqliteConnection,
         progress: &ReadingProgress,
     ) -> Result<(), AppError> {
-        let position_json = serde_json::to_string(&progress.current_position)
-            .map_err(|_| AppError::InvalidDocument {
+        let position_json = serde_json::to_string(&progress.current_position).map_err(|_| {
+            AppError::InvalidDocument {
                 reason: "Failed to serialize current position".into(),
-            })?;
+            }
+        })?;
 
         sqlx::query(
             r#"

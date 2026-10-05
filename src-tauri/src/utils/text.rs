@@ -43,7 +43,9 @@ mod tests {
 
         // Dangerous schemes must be rejected
         assert!(!is_safe_link_url("javascript:alert(1)"));
-        assert!(!is_safe_link_url("data:text/html,<script>alert(1)</script>"));
+        assert!(!is_safe_link_url(
+            "data:text/html,<script>alert(1)</script>"
+        ));
         assert!(!is_safe_link_url("file:///etc/passwd"));
         assert!(!is_safe_link_url("intent://scan"));
         assert!(!is_safe_link_url("vbscript:msgbox"));

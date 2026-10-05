@@ -32,7 +32,11 @@ fn test_sample_txt_content_and_metrics() {
         .map(|p| p.trim())
         .filter(|p| !p.is_empty())
         .collect();
-    assert_eq!(paragraphs.len(), 4, "sample.txt must have exactly 4 paragraphs");
+    assert_eq!(
+        paragraphs.len(),
+        4,
+        "sample.txt must have exactly 4 paragraphs"
+    );
 
     let word_count = content.split_whitespace().count();
     assert_eq!(word_count, 300, "sample.txt must have exactly 300 words");

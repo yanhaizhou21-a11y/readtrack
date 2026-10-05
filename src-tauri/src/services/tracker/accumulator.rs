@@ -1,8 +1,8 @@
-use std::collections::{HashMap, HashSet};
-use crate::models::{LogicalPosition, ReadingSegment, ViewportReport};
 use super::engine::{
     calculate_dwell_delta_ms, calculate_required_dwell_ms, DEFAULT_IDLE_TIMEOUT_MS,
 };
+use crate::models::{LogicalPosition, ReadingSegment, ViewportReport};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone)]
 pub struct SessionAccumulator {
@@ -107,7 +107,10 @@ impl SessionAccumulator {
             .collect();
 
         // Detect skipped segments if continuously moving forward without jump
-        if report.jump == "none" && !self.last_visible_indices.is_empty() && !visible_in_zone.is_empty() {
+        if report.jump == "none"
+            && !self.last_visible_indices.is_empty()
+            && !visible_in_zone.is_empty()
+        {
             let max_prev = *self.last_visible_indices.iter().max().unwrap_or(&0);
             let min_curr = *visible_in_zone.iter().min().unwrap_or(&0);
 

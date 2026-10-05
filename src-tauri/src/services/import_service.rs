@@ -43,10 +43,7 @@ impl ImportService {
         }
 
         // Path traversal and safety checks (SECURITY.md)
-        if source_str.contains("../")
-            || source_str.contains("..\\")
-            || source_str.contains('\0')
-        {
+        if source_str.contains("../") || source_str.contains("..\\") || source_str.contains('\0') {
             return Err(AppError::PermissionDenied);
         }
 
@@ -144,16 +141,16 @@ impl ImportService {
         }
 
         // 3. Parse document AST via ParserRegistry
-        let file_type = FileType::from_ext(file_ext).ok_or_else(|| {
-            AppError::UnsupportedFormat {
+        let file_type =
+            FileType::from_ext(file_ext).ok_or_else(|| AppError::UnsupportedFormat {
                 ext: file_ext.to_string(),
-            }
-        })?;
-        let parser = self.parser_registry.get(&file_type).ok_or_else(|| {
-            AppError::UnsupportedFormat {
-                ext: file_ext.to_string(),
-            }
-        })?;
+            })?;
+        let parser =
+            self.parser_registry
+                .get(&file_type)
+                .ok_or_else(|| AppError::UnsupportedFormat {
+                    ext: file_ext.to_string(),
+                })?;
 
         let ast = parser.parse(staged.guard.path())?;
 
@@ -351,7 +348,11 @@ impl ImportService {
             .ok_or(AppError::Internal)
     }
 
-    async fn delete_existing_document(&self, doc_id: &str, file_type: &str) -> Result<(), AppError> {
+    async fn delete_existing_document(
+        &self,
+        doc_id: &str,
+        file_type: &str,
+    ) -> Result<(), AppError> {
         let mut tx = self.db.begin().await.map_err(AppError::from)?;
         DocumentRepo::delete(&mut tx, doc_id).await?;
         SearchRepo::delete_document(&mut tx, doc_id).await?;

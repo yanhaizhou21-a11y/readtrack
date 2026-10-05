@@ -1,7 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
-use serde::{Deserialize, Serialize};
 
 use crate::errors::AppError;
 use crate::storage::paths::StoragePaths;
@@ -102,7 +102,10 @@ impl Drop for TempFileGuard {
                     err
                 );
             } else {
-                tracing::debug!("Successfully unlinked uncommitted temp file {:?}", self.path);
+                tracing::debug!(
+                    "Successfully unlinked uncommitted temp file {:?}",
+                    self.path
+                );
             }
         }
     }
@@ -166,8 +169,10 @@ impl FileStore {
             .extension()
             .and_then(|e| e.to_str())
             .unwrap_or_default();
-        let candidate_format = DetectedFormat::from_extension(ext)
-            .ok_or_else(|| AppError::UnsupportedFormat { ext: ext.to_string() })?;
+        let candidate_format =
+            DetectedFormat::from_extension(ext).ok_or_else(|| AppError::UnsupportedFormat {
+                ext: ext.to_string(),
+            })?;
 
         // 4. Ensure destination directory exists
         let docs_dir = self.paths.documents_dir();
@@ -215,7 +220,9 @@ impl FileStore {
             }
 
             hasher.update(&buffer[..bytes_read]);
-            writer.write_all(&buffer[..bytes_read]).map_err(AppError::from)?;
+            writer
+                .write_all(&buffer[..bytes_read])
+                .map_err(AppError::from)?;
 
             // Accumulate first 4KB for magic bytes signature verification
             if sniff_buffer.len() < SNIFF_BUFFER_SIZE {
@@ -253,21 +260,24 @@ impl FileStore {
             DetectedFormat::Pdf => {
                 if !bytes.starts_with(b"%PDF-") {
                     return Err(AppError::InvalidDocument {
-                        reason: "File has .pdf extension but lacks %PDF- magic signature".to_string(),
+                        reason: "File has .pdf extension but lacks %PDF- magic signature"
+                            .to_string(),
                     });
                 }
             }
             DetectedFormat::Epub => {
                 if !bytes.starts_with(b"PK\x03\x04") {
                     return Err(AppError::InvalidDocument {
-                        reason: "File has .epub extension but lacks PK\\x03\\x04 ZIP header".to_string(),
+                        reason: "File has .epub extension but lacks PK\\x03\\x04 ZIP header"
+                            .to_string(),
                     });
                 }
             }
             DetectedFormat::Docx => {
                 if !bytes.starts_with(b"PK\x03\x04") {
                     return Err(AppError::InvalidDocument {
-                        reason: "File has .docx extension but lacks PK\\x03\\x04 ZIP header".to_string(),
+                        reason: "File has .docx extension but lacks PK\\x03\\x04 ZIP header"
+                            .to_string(),
                     });
                 }
             }

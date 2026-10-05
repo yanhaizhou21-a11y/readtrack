@@ -241,14 +241,15 @@ impl DocumentRepo {
         title: &str,
         updated_at: i64,
     ) -> Result<Option<DocumentSummary>, AppError> {
-        let rows_affected = sqlx::query("UPDATE documents SET title = ?, updated_at = ? WHERE id = ?")
-            .bind(title)
-            .bind(updated_at)
-            .bind(id)
-            .execute(pool)
-            .await
-            .map_err(AppError::from)?
-            .rows_affected();
+        let rows_affected =
+            sqlx::query("UPDATE documents SET title = ?, updated_at = ? WHERE id = ?")
+                .bind(title)
+                .bind(updated_at)
+                .bind(id)
+                .execute(pool)
+                .await
+                .map_err(AppError::from)?
+                .rows_affected();
 
         if rows_affected == 0 {
             return Ok(None);
@@ -263,14 +264,15 @@ impl DocumentRepo {
         is_archived: bool,
         updated_at: i64,
     ) -> Result<Option<DocumentSummary>, AppError> {
-        let rows_affected = sqlx::query("UPDATE documents SET is_archived = ?, updated_at = ? WHERE id = ?")
-            .bind(if is_archived { 1 } else { 0 })
-            .bind(updated_at)
-            .bind(id)
-            .execute(pool)
-            .await
-            .map_err(AppError::from)?
-            .rows_affected();
+        let rows_affected =
+            sqlx::query("UPDATE documents SET is_archived = ?, updated_at = ? WHERE id = ?")
+                .bind(if is_archived { 1 } else { 0 })
+                .bind(updated_at)
+                .bind(id)
+                .execute(pool)
+                .await
+                .map_err(AppError::from)?
+                .rows_affected();
 
         if rows_affected == 0 {
             return Ok(None);
@@ -293,7 +295,10 @@ impl DocumentRepo {
         Ok(rows_affected > 0)
     }
 
-    pub async fn delete(conn: &mut SqliteConnection, id: &str) -> Result<Option<Document>, AppError> {
+    pub async fn delete(
+        conn: &mut SqliteConnection,
+        id: &str,
+    ) -> Result<Option<Document>, AppError> {
         let doc = sqlx::query(
             r#"
             SELECT id, title, author, original_filename, file_path, file_type,

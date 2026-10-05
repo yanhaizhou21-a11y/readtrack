@@ -1,4 +1,3 @@
-use std::path::{Path, PathBuf};
 use readtrack_lib::models::document_model::*;
 use readtrack_lib::parsers::markdown::MarkdownParser;
 use readtrack_lib::parsers::registry::ParserRegistry;
@@ -6,6 +5,7 @@ use readtrack_lib::parsers::segment_generator::SegmentGenerator;
 use readtrack_lib::parsers::traits::DocumentParser;
 use readtrack_lib::parsers::txt::TxtParser;
 use readtrack_lib::storage::{DetectedFormat, FileStore};
+use std::path::{Path, PathBuf};
 
 fn temp_file(name: &str, data: &[u8]) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("readtrack_adv_{}", uuid::Uuid::new_v4()));
@@ -60,7 +60,10 @@ fn test_challenge_txt_utf16le_sniff_and_registry_rejection_bug() {
 
     // TxtParser::parse works on its own:
     let doc_res = parser.parse(&path);
-    assert!(doc_res.is_ok(), "TxtParser::parse handles UTF-16LE internally");
+    assert!(
+        doc_res.is_ok(),
+        "TxtParser::parse handles UTF-16LE internally"
+    );
 
     // BUT EMPIRICAL BUG 1: TxtParser::sniff rejects UTF-16LE because it checks for NUL bytes!
     let sniff_result = parser.sniff(&data);
@@ -69,11 +72,17 @@ fn test_challenge_txt_utf16le_sniff_and_registry_rejection_bug() {
     // EMPIRICAL BUG 2: ParserRegistry::for_file rejects UTF-16LE!
     let registry = ParserRegistry::new();
     let reg_result = registry.for_file(&data, "txt");
-    eprintln!("ParserRegistry::for_file on UTF-16LE returned: {:?}", reg_result.is_ok());
+    eprintln!(
+        "ParserRegistry::for_file on UTF-16LE returned: {:?}",
+        reg_result.is_ok()
+    );
 
     // EMPIRICAL BUG 3: FileStore::validate_magic_bytes rejects UTF-16LE!
     let fs_result = FileStore::validate_magic_bytes(DetectedFormat::Txt, &data);
-    eprintln!("FileStore::validate_magic_bytes on UTF-16LE returned: {:?}", fs_result);
+    eprintln!(
+        "FileStore::validate_magic_bytes on UTF-16LE returned: {:?}",
+        fs_result
+    );
 
     cleanup(&path);
 }
@@ -91,7 +100,10 @@ fn test_challenge_txt_utf16be_sniff_and_registry_rejection_bug() {
 
     // TxtParser::parse works on its own:
     let doc_res = parser.parse(&path);
-    assert!(doc_res.is_ok(), "TxtParser::parse handles UTF-16BE internally");
+    assert!(
+        doc_res.is_ok(),
+        "TxtParser::parse handles UTF-16BE internally"
+    );
 
     // EMPIRICAL BUG: Sniffing and FileStore reject UTF-16BE
     let sniff_result = parser.sniff(&data);
@@ -99,10 +111,16 @@ fn test_challenge_txt_utf16be_sniff_and_registry_rejection_bug() {
 
     let registry = ParserRegistry::new();
     let reg_result = registry.for_file(&data, "txt");
-    eprintln!("ParserRegistry::for_file on UTF-16BE returned: {:?}", reg_result.is_ok());
+    eprintln!(
+        "ParserRegistry::for_file on UTF-16BE returned: {:?}",
+        reg_result.is_ok()
+    );
 
     let fs_result = FileStore::validate_magic_bytes(DetectedFormat::Txt, &data);
-    eprintln!("FileStore::validate_magic_bytes on UTF-16BE returned: {:?}", fs_result);
+    eprintln!(
+        "FileStore::validate_magic_bytes on UTF-16BE returned: {:?}",
+        fs_result
+    );
 
     cleanup(&path);
 }
@@ -121,11 +139,19 @@ fn test_challenge_txt_synthetic_section_breaks_over_3000_words() {
 
     assert_eq!(doc.metadata.title, "Document Title");
     assert!(doc.metadata.word_count >= 3500);
-    assert_eq!(doc.sections.len(), 2, "Must partition into 2 sections at >3000 words");
+    assert_eq!(
+        doc.sections.len(),
+        2,
+        "Must partition into 2 sections at >3000 words"
+    );
     assert_eq!(doc.sections[0].kind, SectionKind::Chapter);
     assert_eq!(doc.sections[0].title.as_deref(), Some("Part 1"));
     assert_eq!(doc.sections[1].title.as_deref(), Some("Part 2"));
-    assert_eq!(doc.toc.len(), 2, "TOC must contain entries for Part 1 and Part 2");
+    assert_eq!(
+        doc.toc.len(),
+        2,
+        "TOC must contain entries for Part 1 and Part 2"
+    );
 
     cleanup(&path);
 }
@@ -144,7 +170,10 @@ fn test_challenge_txt_zero_length_document() {
 
     // Segments for empty doc
     let segments = SegmentGenerator::generate_segments(&doc);
-    assert!(segments.is_empty(), "Zero-length document must produce 0 segments");
+    assert!(
+        segments.is_empty(),
+        "Zero-length document must produce 0 segments"
+    );
 
     cleanup(&path);
 }
@@ -212,7 +241,10 @@ fn test_challenge_markdown_unclosed_code_fence() {
 
     let sec = &doc.sections[0];
     let code_block = sec.blocks.iter().find(|b| matches!(b, Block::Code { .. }));
-    assert!(code_block.is_some(), "Unclosed code fence must be closed at EOF");
+    assert!(
+        code_block.is_some(),
+        "Unclosed code fence must be closed at EOF"
+    );
     if let Some(Block::Code { text, .. }) = code_block {
         assert!(text.contains("fn unclosed()"));
     }
@@ -352,7 +384,11 @@ fn test_challenge_segment_word_accumulation_and_thresholds() {
     };
 
     let segments = SegmentGenerator::generate_segments(&doc);
-    assert_eq!(segments.len(), 1, "39 words + 1 word = 40 words, must flush into exactly 1 segment");
+    assert_eq!(
+        segments.len(),
+        1,
+        "39 words + 1 word = 40 words, must flush into exactly 1 segment"
+    );
     assert_eq!(segments[0].word_count, 40);
     assert_eq!(segments[0].first_block_id.as_deref(), Some("s0-b0"));
     assert_eq!(segments[0].last_block_id.as_deref(), Some("s0-b1"));
@@ -393,7 +429,11 @@ fn test_challenge_segment_flush_before_exceeding_220_words() {
     };
 
     let segments = SegmentGenerator::generate_segments(&doc);
-    assert_eq!(segments.len(), 2, "Must split into 2 segments before exceeding 220 words");
+    assert_eq!(
+        segments.len(),
+        2,
+        "Must split into 2 segments before exceeding 220 words"
+    );
     assert_eq!(segments[0].word_count, 30);
     assert_eq!(segments[0].first_block_id.as_deref(), Some("s0-b0"));
     assert_eq!(segments[1].word_count, 200);
@@ -417,26 +457,46 @@ fn test_challenge_segment_media_weight_formulas() {
         language: None,
         text: "".into(),
     };
-    assert_eq!(SegmentGenerator::calculate_block_metrics(&code_0).words, 1, "0 chars code must weigh at least 1");
+    assert_eq!(
+        SegmentGenerator::calculate_block_metrics(&code_0).words,
+        1,
+        "0 chars code must weigh at least 1"
+    );
 
     let code_60 = Block::Code {
         id: "s0-b2".into(),
         language: Some("rust".into()),
         text: vec!["a"; 60].join(""),
     };
-    assert_eq!(SegmentGenerator::calculate_block_metrics(&code_60).words, 10, "60 chars / 6 = 10 words");
+    assert_eq!(
+        SegmentGenerator::calculate_block_metrics(&code_60).words,
+        10,
+        "60 chars / 6 = 10 words"
+    );
 
     // 3. Table = cells * 1.0
     let table = Block::Table {
         id: "s0-b3".into(),
         rows: vec![
             vec![
-                vec![Inline { text: "".into(), marks: Vec::new() }],
-                vec![Inline { text: "".into(), marks: Vec::new() }],
+                vec![Inline {
+                    text: "".into(),
+                    marks: Vec::new(),
+                }],
+                vec![Inline {
+                    text: "".into(),
+                    marks: Vec::new(),
+                }],
             ],
             vec![
-                vec![Inline { text: "".into(), marks: Vec::new() }],
-                vec![Inline { text: "".into(), marks: Vec::new() }],
+                vec![Inline {
+                    text: "".into(),
+                    marks: Vec::new(),
+                }],
+                vec![Inline {
+                    text: "".into(),
+                    marks: Vec::new(),
+                }],
             ],
         ],
         header_rows: 1,
@@ -457,7 +517,10 @@ fn test_challenge_segment_section_isolation_never_merges() {
                 level: 1,
                 blocks: vec![Block::Paragraph {
                     id: "s0-b0".into(),
-                    inlines: vec![Inline { text: "short section 0".into(), marks: Vec::new() }],
+                    inlines: vec![Inline {
+                        text: "short section 0".into(),
+                        marks: Vec::new(),
+                    }],
                 }],
                 word_count: 3,
                 character_count: 15,
@@ -469,7 +532,10 @@ fn test_challenge_segment_section_isolation_never_merges() {
                 level: 1,
                 blocks: vec![Block::Paragraph {
                     id: "s1-b0".into(),
-                    inlines: vec![Inline { text: "short section 1".into(), marks: Vec::new() }],
+                    inlines: vec![Inline {
+                        text: "short section 1".into(),
+                        marks: Vec::new(),
+                    }],
                 }],
                 word_count: 3,
                 character_count: 15,
@@ -479,7 +545,11 @@ fn test_challenge_segment_section_isolation_never_merges() {
     };
 
     let segments = SegmentGenerator::generate_segments(&doc);
-    assert_eq!(segments.len(), 2, "Must have exactly 2 segments, never merged across sections");
+    assert_eq!(
+        segments.len(),
+        2,
+        "Must have exactly 2 segments, never merged across sections"
+    );
     assert_eq!(segments[0].section_index, 0);
     assert_eq!(segments[1].section_index, 1);
 }

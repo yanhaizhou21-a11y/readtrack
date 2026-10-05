@@ -257,7 +257,9 @@ fn test_delete_file_and_cleanup() {
         .unwrap();
 
     let doc_id = uuid::Uuid::new_v4().to_string();
-    let committed_path = file_store.commit_file(staged.guard, &doc_id, "txt").unwrap();
+    let committed_path = file_store
+        .commit_file(staged.guard, &doc_id, "txt")
+        .unwrap();
     assert!(committed_path.exists());
 
     file_store.delete_file(&doc_id, "txt").unwrap();

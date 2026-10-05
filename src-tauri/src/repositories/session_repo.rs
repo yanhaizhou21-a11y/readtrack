@@ -1,6 +1,6 @@
-use sqlx::{Row, SqliteConnection, SqlitePool};
 use crate::errors::AppError;
 use crate::models::{DayActivity, LogicalPosition, ReadingSession};
+use sqlx::{Row, SqliteConnection, SqlitePool};
 
 pub struct SessionRepo;
 
@@ -10,16 +10,20 @@ impl SessionRepo {
         session: &ReadingSession,
     ) -> Result<(), AppError> {
         let start_pos_json = match &session.start_position {
-            Some(pos) => Some(serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
-                field: "start_position".to_string(),
-            })?),
+            Some(pos) => Some(
+                serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
+                    field: "start_position".to_string(),
+                })?,
+            ),
             None => None,
         };
 
         let end_pos_json = match &session.end_position {
-            Some(pos) => Some(serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
-                field: "end_position".to_string(),
-            })?),
+            Some(pos) => Some(
+                serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
+                    field: "end_position".to_string(),
+                })?,
+            ),
             None => None,
         };
 
@@ -65,9 +69,11 @@ impl SessionRepo {
         segments_read: i64,
     ) -> Result<(), AppError> {
         let end_pos_json = match end_position {
-            Some(pos) => Some(serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
-                field: "end_position".to_string(),
-            })?),
+            Some(pos) => Some(
+                serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
+                    field: "end_position".to_string(),
+                })?,
+            ),
             None => None,
         };
 
@@ -112,9 +118,11 @@ impl SessionRepo {
         segments_read: i64,
     ) -> Result<(), AppError> {
         let end_pos_json = match end_position {
-            Some(pos) => Some(serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
-                field: "end_position".to_string(),
-            })?),
+            Some(pos) => Some(
+                serde_json::to_string(pos).map_err(|_| AppError::InvalidInput {
+                    field: "end_position".to_string(),
+                })?,
+            ),
             None => None,
         };
 
@@ -148,10 +156,7 @@ impl SessionRepo {
         Ok(())
     }
 
-    pub async fn delete(
-        conn: &mut SqliteConnection,
-        session_id: &str,
-    ) -> Result<(), AppError> {
+    pub async fn delete(conn: &mut SqliteConnection, session_id: &str) -> Result<(), AppError> {
         sqlx::query("DELETE FROM reading_sessions WHERE id = ?")
             .bind(session_id)
             .execute(&mut *conn)

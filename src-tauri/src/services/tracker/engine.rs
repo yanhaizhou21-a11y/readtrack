@@ -72,7 +72,9 @@ pub fn calculate_progress(
         .all(|s| s.status == "read");
 
     let last_seg_index = segments.iter().map(|s| s.segment_index).max().unwrap_or(0);
-    let reached_end = current_segment_index.map(|idx| idx >= last_seg_index).unwrap_or(false);
+    let reached_end = current_segment_index
+        .map(|idx| idx >= last_seg_index)
+        .unwrap_or(false);
 
     let completed = percent >= 0.98 || (all_non_skipped_read && reached_end);
 
@@ -90,7 +92,10 @@ pub fn build_map_sections(
     // Group segments by section_id
     let mut grouped = BTreeMap::<String, Vec<ReadingSegment>>::new();
     for seg in segments {
-        grouped.entry(seg.section_id.clone()).or_default().push(seg.clone());
+        grouped
+            .entry(seg.section_id.clone())
+            .or_default()
+            .push(seg.clone());
     }
 
     let mut map_sections = Vec::new();
@@ -114,7 +119,9 @@ pub fn build_map_sections(
             0.0
         };
 
-        let is_current = current_section_id.map(|cid| cid == section_id).unwrap_or(false);
+        let is_current = current_section_id
+            .map(|cid| cid == section_id)
+            .unwrap_or(false);
         let status = if progress >= 0.98 {
             "read"
         } else if progress > 0.0 || is_current {

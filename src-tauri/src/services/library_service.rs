@@ -122,11 +122,7 @@ impl LibraryService {
         Ok(())
     }
 
-    pub async fn delete(
-        &self,
-        app_handle: Option<&AppHandle>,
-        id: &str,
-    ) -> Result<(), AppError> {
+    pub async fn delete(&self, app_handle: Option<&AppHandle>, id: &str) -> Result<(), AppError> {
         self.validate_uuid(id)?;
 
         let mut tx = self.db.begin().await.map_err(AppError::from)?;

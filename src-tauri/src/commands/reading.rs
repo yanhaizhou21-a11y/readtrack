@@ -1,17 +1,16 @@
-use tauri::State;
 use serde::Deserialize;
+use tauri::State;
 
-use crate::AppState;
 use crate::errors::{AppError, IpcError};
 use crate::models::{
     EndSessionInput, GetSessionsInput, HomeDashboard, HomeDashboardInput, LogicalPosition,
     ReadingMap, ReadingProgress, ReadingSession, ResolvedPosition, SessionSummary,
-    StartSessionInput, StartSessionResponse, TrackerOverview, TrackerOverviewInput,
-    ViewportReport,
+    StartSessionInput, StartSessionResponse, TrackerOverview, TrackerOverviewInput, ViewportReport,
 };
 use crate::parsers::registry::ParserRegistry;
 use crate::repositories::{DocumentRepo, ProgressRepo, SessionRepo};
 use crate::services::position_service::PositionService;
+use crate::AppState;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -43,18 +42,21 @@ pub async fn document_resolve_position(
         .ok_or(AppError::DocumentNotFound)?;
 
     let file_store = crate::storage::file_store::FileStore::new(state.storage.clone());
-    let path = file_store
-        .get_document_path(&doc.id, &doc.file_type)?;
+    let path = file_store.get_document_path(&doc.id, &doc.file_type)?;
 
     let registry = ParserRegistry::new();
     let parser = registry
-        .get(&crate::models::FileType::from_ext(&doc.file_type).unwrap_or(crate::models::FileType::Txt))
-        .ok_or_else(|| AppError::UnsupportedFormat { ext: doc.file_type.to_string() })?;
+        .get(
+            &crate::models::FileType::from_ext(&doc.file_type)
+                .unwrap_or(crate::models::FileType::Txt),
+        )
+        .ok_or_else(|| AppError::UnsupportedFormat {
+            ext: doc.file_type.to_string(),
+        })?;
 
     let normalized = parser.parse(&path)?;
     let position_service = PositionService::new();
-    let resolved = position_service
-        .resolve(input.position, &normalized)?;
+    let resolved = position_service.resolve(input.position, &normalized)?;
 
     Ok(resolved)
 }
@@ -64,8 +66,7 @@ pub async fn reading_get_progress(
     state: State<'_, AppState>,
     input: ReadingProgressInput,
 ) -> Result<ReadingProgress, IpcError> {
-    let progress = ProgressRepo::get_by_document_id(&state.db, &input.document_id)
-        .await?;
+    let progress = ProgressRepo::get_by_document_id(&state.db, &input.document_id).await?;
 
     if let Some(p) = progress {
         Ok(p)
@@ -106,8 +107,7 @@ pub async fn reading_update_progress(
         .ok_or(AppError::DocumentNotFound)?;
 
     let now = chrono::Utc::now().timestamp_millis();
-    let existing = ProgressRepo::get_by_document_id(&state.db, &input.document_id)
-        .await?;
+    let existing = ProgressRepo::get_by_document_id(&state.db, &input.document_id).await?;
 
     let mut new_progress = if let Some(mut e) = existing {
         e.current_position = input.position.clone();
@@ -138,9 +138,9 @@ pub async fn reading_update_progress(
         new_progress.completed_at = Some(now);
     }
 
-    let mut tx = state.db.begin().await?;
+    let mut tx = state.db.begin().await.map_err(AppError::from)?;
     ProgressRepo::upsert(&mut tx, &new_progress).await?;
-    tx.commit().await?;
+    tx.commit().await.map_err(AppError::from)?;
 
     Ok(())
 }
@@ -163,10 +163,7 @@ pub async fn reading_report_viewport(
     state: State<'_, AppState>,
     input: ViewportReport,
 ) -> Result<(), IpcError> {
-    state
-        .tracker_service
-        .report_viewport(input)
-        .await?;
+    state.tracker_service.report_viewport(input).await?;
 
     Ok(())
 }

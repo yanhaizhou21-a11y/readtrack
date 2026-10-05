@@ -1,7 +1,7 @@
 pub mod documents;
-pub mod settings;
 pub mod reading;
+pub mod settings;
 
 pub use documents::*;
-pub use settings::*;
 pub use reading::*;
+pub use settings::*;

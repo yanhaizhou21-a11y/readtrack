@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
-use super::position::LogicalPosition;
 use super::document::DocumentSummary;
+use super::position::LogicalPosition;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -1,20 +1,17 @@
+use sqlx::SqlitePool;
 use std::collections::HashMap;
 use std::sync::Arc;
-use sqlx::SqlitePool;
 use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
 
-use crate::errors::AppError;
-use crate::models::{
-    ContinueCard, DocumentSummary, HomeDashboard, LogicalPosition,
-    ReadingMap, ReadingProgress, ReadingProgressUpdatedPayload, SessionSummary, TrackerOverview,
-    ViewportReport,
-};
-use crate::repositories::{
-    DocumentRepo, ProgressRepo, SectionRepo, SegmentRepo, SessionRepo,
-};
 use super::accumulator::SessionAccumulator;
 use super::engine::{build_map_sections, calculate_progress};
+use crate::errors::AppError;
+use crate::models::{
+    ContinueCard, DocumentSummary, HomeDashboard, LogicalPosition, ReadingMap, ReadingProgress,
+    ReadingProgressUpdatedPayload, SessionSummary, TrackerOverview, ViewportReport,
+};
+use crate::repositories::{DocumentRepo, ProgressRepo, SectionRepo, SegmentRepo, SessionRepo};
 
 pub struct TrackerService {
     pool: SqlitePool,
@@ -70,13 +67,8 @@ impl TrackerService {
         SessionRepo::create(&mut tx, &session_record).await?;
         tx.commit().await?;
 
-        let accumulator = SessionAccumulator::new(
-            session_id.clone(),
-            doc.id,
-            now,
-            position,
-            segments,
-        );
+        let accumulator =
+            SessionAccumulator::new(session_id.clone(), doc.id, now, position, segments);
 
         let mut sessions = self.active_sessions.lock().await;
         sessions.insert(session_id.clone(), accumulator);
@@ -210,16 +202,25 @@ impl TrackerService {
         for s in &sections {
             section_map.insert(
                 s.id.clone(),
-                (s.section_index, s.title.clone().unwrap_or_else(|| format!("Section {}", s.section_index))),
+                (
+                    s.section_index,
+                    s.title
+                        .clone()
+                        .unwrap_or_else(|| format!("Section {}", s.section_index)),
+                ),
             );
         }
 
-        let current_section_id = progress.as_ref().and_then(|p| p.current_section_id.as_deref());
+        let current_section_id = progress
+            .as_ref()
+            .and_then(|p| p.current_section_id.as_deref());
         let map_sections = build_map_sections(&segments, &section_map, current_section_id);
 
         let (calc_progress, calc_completed) = calculate_progress(
             &segments,
-            progress.as_ref().and_then(|p| p.current_position.section_id),
+            progress
+                .as_ref()
+                .and_then(|p| p.current_position.section_id),
         );
 
         let default_pos = LogicalPosition {
@@ -243,8 +244,14 @@ impl TrackerService {
 
         Ok(ReadingMap {
             document_id: document_id.to_string(),
-            progress: progress.as_ref().map(|p| p.progress_percent).unwrap_or(calc_progress),
-            completed: progress.as_ref().map(|p| p.completed).unwrap_or(calc_completed),
+            progress: progress
+                .as_ref()
+                .map(|p| p.progress_percent)
+                .unwrap_or(calc_progress),
+            completed: progress
+                .as_ref()
+                .map(|p| p.completed)
+                .unwrap_or(calc_completed),
             total_read_ms,
             sessions: session_count,
             last_read_at,
@@ -261,15 +268,9 @@ impl TrackerService {
         let (today_ms, week_ms, activity_by_day) =
             SessionRepo::get_time_stats(&self.pool, now, tz_offset_min).await?;
 
-        let (all_docs, _total) = DocumentRepo::list(
-            &self.pool,
-            Some("all"),
-            Some("recent_opened"),
-            None,
-            100,
-            0,
-        )
-        .await?;
+        let (all_docs, _total) =
+            DocumentRepo::list(&self.pool, Some("all"), Some("recent_opened"), None, 100, 0)
+                .await?;
 
         let total_documents = all_docs.len() as i64;
         let completed_count = all_docs.iter().filter(|d| d.completed).count() as i64;
@@ -297,35 +298,14 @@ impl TrackerService {
         let (_today_ms, _week_ms, activity) =
             SessionRepo::get_time_stats(&self.pool, now, tz_offset_min).await?;
 
-        let (recent_docs, _total) = DocumentRepo::list(
-            &self.pool,
-            Some("all"),
-            Some("recent_opened"),
-            None,
-            5,
-            0,
-        )
-        .await?;
+        let (recent_docs, _total) =
+            DocumentRepo::list(&self.pool, Some("all"), Some("recent_opened"), None, 5, 0).await?;
 
-        let (_in_prog, currently_reading_count) = DocumentRepo::list(
-            &self.pool,
-            Some("in_progress"),
-            None,
-            None,
-            100,
-            0,
-        )
-        .await?;
+        let (_in_prog, currently_reading_count) =
+            DocumentRepo::list(&self.pool, Some("in_progress"), None, None, 100, 0).await?;
 
-        let (_comp, completed_count) = DocumentRepo::list(
-            &self.pool,
-            Some("completed"),
-            None,
-            None,
-            100,
-            0,
-        )
-        .await?;
+        let (_comp, completed_count) =
+            DocumentRepo::list(&self.pool, Some("completed"), None, None, 100, 0).await?;
 
         let continue_reading = if let Some(first) = recent_docs.first() {
             let prog = ProgressRepo::get_by_document_id(&self.pool, &first.id).await?;
@@ -483,19 +463,20 @@ impl TrackerService {
 
         let total_read_ms: i64 = seg_list.iter().map(|s| s.dwell_ms).sum();
 
-        let real_section_id = if let Some(sec_idx) = acc.end_position.as_ref().and_then(|p| p.section_id) {
-            sqlx::query_scalar::<_, String>(
-                "SELECT id FROM document_sections WHERE document_id = ? AND section_index = ?"
-            )
-            .bind(&acc.document_id)
-            .bind(sec_idx)
-            .fetch_optional(&mut *tx)
-            .await
-            .ok()
-            .flatten()
-        } else {
-            None
-        };
+        let real_section_id =
+            if let Some(sec_idx) = acc.end_position.as_ref().and_then(|p| p.section_id) {
+                sqlx::query_scalar::<_, String>(
+                    "SELECT id FROM document_sections WHERE document_id = ? AND section_index = ?",
+                )
+                .bind(&acc.document_id)
+                .bind(sec_idx)
+                .fetch_optional(&mut *tx)
+                .await
+                .ok()
+                .flatten()
+            } else {
+                None
+            };
 
         let progress = ReadingProgress {
             id: uuid::Uuid::new_v4().to_string(),
