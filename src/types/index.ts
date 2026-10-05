@@ -64,3 +64,4 @@ export interface DocumentDetail extends DocumentSummary {
 
 export * from "./document";
 export * from "./settings";
+export * from "./tracker";
