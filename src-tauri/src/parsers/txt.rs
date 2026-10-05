@@ -92,8 +92,10 @@ fn decode_text(bytes: &[u8]) -> String {
     }
     if bytes.len() >= 2 && bytes[0..2] == [0xFF, 0xFE] {
         let u16s: Vec<u16> = bytes[2..]
-            .chunks_exact(2)
-            .map(|c| u16::from_le_bytes([c[0], c[1]]))
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .map(|&c| u16::from_le_bytes(c))
             .collect();
         return char::decode_utf16(u16s)
             .map(|r| r.unwrap_or('\u{FFFD}'))
@@ -101,8 +103,10 @@ fn decode_text(bytes: &[u8]) -> String {
     }
     if bytes.len() >= 2 && bytes[0..2] == [0xFE, 0xFF] {
         let u16s: Vec<u16> = bytes[2..]
-            .chunks_exact(2)
-            .map(|c| u16::from_be_bytes([c[0], c[1]]))
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .map(|&c| u16::from_be_bytes(c))
             .collect();
         return char::decode_utf16(u16s)
             .map(|r| r.unwrap_or('\u{FFFD}'))
