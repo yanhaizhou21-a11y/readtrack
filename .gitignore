@@ -47,3 +47,4 @@ coverage/
 # Temporary cache
 .cache/
 .turbo/
+.agents/

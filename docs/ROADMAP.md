@@ -17,27 +17,27 @@ Kerjakan urut. Centang `[x]` saat selesai **dan** lolos Definition of Done (`AGE
 **Exit:** app jalan di Android emulator, settings tersimpan di SQLite, semua gerbang CI hijau.
 
 ## Phase 2 — Library
-- [ ] `FileStore`: stream copy + BLAKE3 + validasi magic bytes + batas ukuran
-- [ ] `ParserRegistry` + parser TXT & Markdown dulu (cepat) → `NormalizedDocument`
-- [ ] `ImportService` (§ARCHITECTURE 4.1) + event progres + rollback
-- [ ] Segment generator (`TRACKER_SPEC §2`) + insert sections/segments/progress + FTS content
-- [ ] `document_import/list/get/rename/archive/delete/touch` + `rt://thumb`
-- [ ] UI: Library (list/grid, sort, filter, search judul), Import sheet, dialog duplikat, modal hapus, Document detail
-- [ ] Empty/error/loading states Library
-- [ ] Parser PDF metadata (`lopdf`), DOCX, RTF, EPUB (masing-masing + fixture + test)
+- [x] `FileStore`: stream copy + BLAKE3 + validasi magic bytes + batas ukuran
+- [x] `ParserRegistry` + parser TXT & Markdown dulu (cepat) → `NormalizedDocument`
+- [x] `ImportService` (§ARCHITECTURE 4.1) + event progres + rollback
+- [x] Segment generator (`TRACKER_SPEC §2`) + insert sections/segments/progress + FTS content
+- [x] `document_import/list/get/rename/archive/delete/touch` + `rt://thumb`
+- [x] UI: Library (list/grid, sort, filter, search judul), Import sheet, dialog duplikat, modal hapus, Document detail
+- [x] Empty/error/loading states Library
+- [x] Parser PDF metadata (`lopdf`), DOCX, RTF, EPUB (masing-masing + fixture + test)
 - [ ] File picker Android (`content://`) & iOS terbukti; catat "Native exceptions" bila perlu
-- [ ] Test import (valid/korup/unsupported/duplikat), parser per format
+- [x] Test import (valid/korup/unsupported/duplikat), parser per format
 **Exit:** import 6 format dari device nyata, duplikat ditangani, hapus bersih (DB+file).
 
 ## Phase 3 — Reader
-- [ ] `rt://doc/<id>` dengan Range
+- [x] `rt://doc/<id>` dengan Range
 - [ ] PDF reader: PDF.js worker, render lazy + virtualisasi (≤ ±3 halaman aktif), zoom, fit width/page, jump page, indikator, TOC, search teks, dark/sepia, fullscreen, tap toggle toolbar
 - [ ] PDF indexing: worker ekstrak teks → `document_index_pages` batch; `index_status`
-- [ ] Rich reader: `document_get_sections` lazy, render TipTap read-only schema, virtualisasi section, Appearance sheet, reading themes
-- [ ] Posisi: `LogicalPosition`, `reading_update_progress` (debounce), `document_resolve_position`, restore + fallback
-- [ ] TOC UI, Continue Reading dari Home (versi awal)
-- [ ] Back handling Android, gesture tanpa konflik
-- [ ] Test: resolve position (semua cabang), restore roundtrip, hook restore
+- [x] Rich reader: `document_get_sections` lazy, render TipTap read-only schema, virtualisasi section, Appearance sheet, reading themes
+- [x] Posisi: `LogicalPosition`, `reading_update_progress` (debounce), `document_resolve_position`, restore + fallback
+- [x] TOC UI, Continue Reading dari Home (versi awal)
+- [x] Back handling Android, gesture tanpa konflik
+- [x] Test: resolve position (semua cabang), restore roundtrip, hook restore
 **Exit:** buka tiap format, baca nyaman, tutup/buka → posisi pulih. PDF 500 hlm mulus.
 
 ## Phase 4 — Tracker

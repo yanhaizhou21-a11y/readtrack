@@ -12,6 +12,13 @@ pub enum AppError {
     #[error("This document already exists.")]
     DuplicateDocument { existing_id: String },
 
+    #[error("The file is too large to import. Maximum allowed size is {max_mb} MB.")]
+    FileTooLarge {
+        max_bytes: u64,
+        actual_bytes: u64,
+        max_mb: u64,
+    },
+
     #[error("We couldn't open this document. The file may be corrupted or unsupported.")]
     InvalidDocument { reason: String },
 
@@ -69,6 +76,20 @@ impl From<AppError> for IpcError {
                 code: "DuplicateDocument".to_string(),
                 message: "This document already exists.".to_string(),
                 details: Some(json!({ "existingId": existing_id })),
+                retryable: false,
+            },
+            AppError::FileTooLarge {
+                max_bytes,
+                actual_bytes,
+                max_mb,
+            } => Self {
+                code: "FileTooLarge".to_string(),
+                message: format!("The file exceeds the maximum allowed size of {max_mb} MB."),
+                details: Some(json!({
+                    "code": 41301,
+                    "maxBytes": max_bytes,
+                    "actualBytes": actual_bytes
+                })),
                 retryable: false,
             },
             AppError::InvalidDocument { .. } => Self {

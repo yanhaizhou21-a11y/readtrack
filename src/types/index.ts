@@ -62,4 +62,5 @@ export interface DocumentDetail extends DocumentSummary {
   position?: LogicalPosition;
 }
 
+export * from "./document";
 export * from "./settings";
