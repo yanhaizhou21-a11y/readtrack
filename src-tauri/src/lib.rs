@@ -17,6 +17,7 @@ pub struct AppState {
     pub settings_service: services::SettingsService,
     pub import_service: services::ImportService,
     pub library_service: services::LibraryService,
+    pub tracker_service: std::sync::Arc<services::TrackerService>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -140,6 +141,15 @@ pub fn run() {
                     services::ImportService::new(pool.clone(), storage.clone());
                 let library_service =
                     services::LibraryService::new(pool.clone(), storage.clone());
+                let tracker_service =
+                    std::sync::Arc::new(services::TrackerService::new(pool.clone()));
+
+                // Run crash recovery for orphaned sessions on startup
+                if let Err(e) = tracker_service.crash_recovery().await {
+                    eprintln!("Failed to run session crash recovery: {}", e);
+                }
+
+                tracker_service.set_app_handle(app_handle.clone()).await;
 
                 app_handle.manage(AppState {
                     db: pool,
@@ -147,6 +157,7 @@ pub fn run() {
                     settings_service,
                     import_service,
                     library_service,
+                    tracker_service,
                 });
             });
 
@@ -165,7 +176,16 @@ pub fn run() {
             commands::document_get_sections,
             commands::document_resolve_position,
             commands::reading_get_progress,
-            commands::reading_update_progress
+            commands::reading_update_progress,
+            commands::reading_start_session,
+            commands::reading_report_viewport,
+            commands::reading_end_session,
+            commands::reading_get_sessions,
+            commands::tracker_get_map,
+            commands::tracker_get_overview,
+            commands::home_get_dashboard,
+            commands::reading_mark_completed,
+            commands::reading_mark_unread
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

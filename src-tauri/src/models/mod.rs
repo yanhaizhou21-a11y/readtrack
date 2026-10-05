@@ -2,6 +2,7 @@ pub mod document;
 pub mod document_model;
 pub mod position;
 pub mod settings;
+pub mod tracker;
 
 pub use document::{
     BlockPayload, Document, DocumentArchiveInput, DocumentDeleteInput, DocumentDetail,
@@ -16,3 +17,4 @@ pub use document_model::{
 };
 pub use position::{LogicalPosition, ResolvedPosition};
 pub use settings::{default_settings, SettingRecord};
+pub use tracker::*;
