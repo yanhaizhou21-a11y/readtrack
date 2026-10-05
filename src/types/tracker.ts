@@ -1,8 +1,9 @@
-import { z } from "zod";
-import { LogicalPositionSchema, DocumentSummarySchema } from "./document";
-
-export const SegmentStatusSchema = z.enum(["unread", "reading", "read", "skipped"]);
-export type SegmentStatus = z.infer<typeof SegmentStatusSchema>;
+import {
+  LogicalPositionSchema,
+  DocumentSummarySchema,
+  SegmentStatusSchema,
+  SegmentStatus,
+} from "./document";
 
 export const VisibleSegmentRatioSchema = z.object({
   segmentIndex: z.number().int().nonnegative(),
