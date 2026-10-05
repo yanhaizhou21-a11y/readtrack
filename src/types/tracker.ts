@@ -1,8 +1,8 @@
+import { z } from "zod";
 import {
   LogicalPositionSchema,
   DocumentSummarySchema,
   SegmentStatusSchema,
-  SegmentStatus,
 } from "./document";
 
 export const VisibleSegmentRatioSchema = z.object({

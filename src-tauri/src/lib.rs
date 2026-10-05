@@ -18,6 +18,8 @@ pub struct AppState {
     pub import_service: services::ImportService,
     pub library_service: services::LibraryService,
     pub tracker_service: std::sync::Arc<services::TrackerService>,
+    pub annotation_service: services::AnnotationService,
+    pub search_service: services::SearchService,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -194,6 +196,8 @@ pub fn run() {
                 let library_service = services::LibraryService::new(pool.clone(), storage.clone());
                 let tracker_service =
                     std::sync::Arc::new(services::TrackerService::new(pool.clone()));
+                let annotation_service = services::AnnotationService::new(pool.clone());
+                let search_service = services::SearchService::new(pool.clone());
 
                 // Run crash recovery for orphaned sessions on startup
                 if let Err(e) = tracker_service.crash_recovery().await {
@@ -209,6 +213,8 @@ pub fn run() {
                     import_service,
                     library_service,
                     tracker_service,
+                    annotation_service,
+                    search_service,
                 });
             });
 
@@ -218,6 +224,7 @@ pub fn run() {
             commands::settings_get_all,
             commands::settings_set,
             commands::document_import,
+            commands::document_import_bytes,
             commands::document_list,
             commands::document_get,
             commands::document_rename,
@@ -236,7 +243,20 @@ pub fn run() {
             commands::tracker_get_overview,
             commands::home_get_dashboard,
             commands::reading_mark_completed,
-            commands::reading_mark_unread
+            commands::reading_mark_unread,
+            commands::bookmark_create,
+            commands::bookmark_update,
+            commands::bookmark_delete,
+            commands::bookmark_list,
+            commands::highlight_create,
+            commands::highlight_update,
+            commands::highlight_delete,
+            commands::highlight_list,
+            commands::note_create,
+            commands::note_update,
+            commands::note_delete,
+            commands::note_list,
+            commands::document_search
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -82,7 +82,7 @@ export const HomeScreen: React.FC = () => {
           <ErrorState
             title="Failed to Load Dashboard"
             message={error || "Could not retrieve reading dashboard."}
-            onRetry={loadDashboard}
+            actions={[{ label: "Try Again", onClick: loadDashboard }]}
           />
         </div>
       </div>

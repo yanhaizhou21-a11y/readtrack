@@ -4,7 +4,7 @@ import { SectionPayload, ReadingMap, Block } from "@/types";
 export interface RichReaderProps {
   sections: SectionPayload[];
   readingMap: ReadingMap | null;
-  containerRef?: React.RefObject<HTMLDivElement | null>;
+  containerRef?: React.Ref<HTMLDivElement>;
 }
 
 export const RichReader: React.FC<RichReaderProps> = ({

@@ -361,4 +361,31 @@ impl ImportService {
         let _ = self.file_store.delete_file(doc_id, file_type);
         Ok(())
     }
+
+    pub async fn import_document_bytes(
+        &self,
+        app_handle: Option<&AppHandle>,
+        file_name: String,
+        data: Vec<u8>,
+        on_duplicate: Option<String>,
+    ) -> Result<DocumentSummary, AppError> {
+        let clean_name = Path::new(&file_name)
+            .file_name()
+            .and_then(|s| s.to_str())
+            .unwrap_or("document.txt");
+        let temp_filename = format!("staging_{}_{}", uuid::Uuid::new_v4(), clean_name);
+        let temp_path = self.file_store.paths().cache_dir().join(&temp_filename);
+        std::fs::write(&temp_path, &data).map_err(AppError::from)?;
+        let result = self
+            .import_document(
+                app_handle,
+                DocumentImportInput {
+                    source: temp_path.to_string_lossy().to_string(),
+                    on_duplicate,
+                },
+            )
+            .await;
+        let _ = std::fs::remove_file(&temp_path);
+        result
+    }
 }

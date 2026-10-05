@@ -150,7 +150,7 @@ export const ReaderScreen: React.FC = () => {
         <ErrorState
           title="Could Not Open Document"
           message={error || "Document could not be found."}
-          onRetry={loadDocumentData}
+          actions={[{ label: "Try Again", onClick: loadDocumentData }]}
         />
         <button
           type="button"

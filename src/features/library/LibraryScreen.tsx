@@ -362,6 +362,7 @@ export const LibraryScreen: React.FC = () => {
         error={importError}
         onClose={() => setIsImportOpen(false)}
         onImport={(src) => handleImport(src)}
+        onSuccess={() => fetchDocuments()}
       />
 
       <DuplicateDialog

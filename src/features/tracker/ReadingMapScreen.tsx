@@ -47,7 +47,7 @@ export const ReadingMapScreen: React.FC = () => {
       ]);
       setMap(mapData);
       setDoc(docData);
-      if (mapData.sections.length > 0) {
+      if (mapData.sections.length > 0 && mapData.sections[0]) {
         setSelectedSection(mapData.sections[0]);
       }
     } catch (err: unknown) {
@@ -118,7 +118,7 @@ export const ReadingMapScreen: React.FC = () => {
           <ErrorState
             title="Failed to Load Reading Map"
             message={error || "Could not retrieve reading tracking data."}
-            onRetry={loadData}
+            actions={[{ label: "Try Again", onClick: loadData }]}
           />
         </div>
       </div>

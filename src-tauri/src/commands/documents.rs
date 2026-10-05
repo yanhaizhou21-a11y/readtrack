@@ -3,8 +3,9 @@ use tauri::{AppHandle, State};
 use crate::errors::IpcError;
 use crate::models::{
     DocumentArchiveInput, DocumentDeleteInput, DocumentDetail, DocumentGetInput,
-    DocumentGetSectionsInput, DocumentImportInput, DocumentListInput, DocumentListResponse,
-    DocumentRenameInput, DocumentSummary, DocumentTouchInput, SectionPayload,
+    DocumentGetSectionsInput, DocumentImportBytesInput, DocumentImportInput, DocumentListInput,
+    DocumentListResponse, DocumentRenameInput, DocumentSummary, DocumentTouchInput,
+    SectionPayload,
 };
 use crate::AppState;
 
@@ -17,6 +18,19 @@ pub async fn document_import(
     state
         .import_service
         .import_document(Some(&app), input)
+        .await
+        .map_err(IpcError::from)
+}
+
+#[tauri::command]
+pub async fn document_import_bytes(
+    state: State<'_, AppState>,
+    app: AppHandle,
+    input: DocumentImportBytesInput,
+) -> Result<DocumentSummary, IpcError> {
+    state
+        .import_service
+        .import_document_bytes(Some(&app), input.file_name, input.data, input.on_duplicate)
         .await
         .map_err(IpcError::from)
 }

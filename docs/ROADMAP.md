@@ -41,14 +41,14 @@ Kerjakan urut. Centang `[x]` saat selesai **dan** lolos Definition of Done (`AGE
 **Exit:** buka tiap format, baca nyaman, tutup/buka → posisi pulih. PDF 500 hlm mulus.
 
 ## Phase 4 — Tracker
-- [ ] `TrackerService` murni + state machine + akumulator (`TRACKER_SPEC §4–9`)
-- [ ] `reading_start_session/report_viewport/end_session`, flush throttled, crash recovery
-- [ ] Hook `useViewportReporter` (reading zone, IntersectionObserver / PDF page visibility), idle & foreground detection
-- [ ] `tracker_get_map`, `tracker_get_overview`, `home_get_dashboard`, event `reading_progress_updated`
-- [ ] UI: Home dashboard, Tracker tab, Reading map (spine, ChapterBar, ring), kartu info segmen, Continue Reading dari map, Sessions & Activity
-- [ ] `reading_mark_completed/unread`
-- [ ] Empty states Tracker/Home
-- [ ] Test semua butir `TRACKER_SPEC §11`
+- [x] `TrackerService` murni + state machine + akumulator (`TRACKER_SPEC §4–9`)
+- [x] `reading_start_session/report_viewport/end_session`, flush throttled, crash recovery
+- [x] Hook `useViewportReporter` (reading zone, IntersectionObserver / PDF page visibility), idle & foreground detection
+- [x] `tracker_get_map`, `tracker_get_overview`, `home_get_dashboard`, event `reading_progress_updated`
+- [x] UI: Home dashboard, Tracker tab, Reading map (spine, ChapterBar, ring), kartu info segmen, Continue Reading dari map, Sessions & Activity
+- [x] `reading_mark_completed/unread`
+- [x] Empty states Tracker/Home
+- [x] Test semua butir `TRACKER_SPEC §11`
 **Exit:** scroll cepat ≠ read; ch1=100% / ch2=63% / ch3=0% tampil nyata di dashboard; sesi tercatat.
 
 ## Phase 5 — Annotations

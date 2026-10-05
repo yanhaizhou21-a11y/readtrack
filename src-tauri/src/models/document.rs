@@ -147,6 +147,14 @@ pub struct DocumentImportInput {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DocumentImportBytesInput {
+    pub file_name: String,
+    pub data: Vec<u8>,
+    pub on_duplicate: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DocumentListInput {
     pub filter: Option<String>,
     pub sort: Option<String>,

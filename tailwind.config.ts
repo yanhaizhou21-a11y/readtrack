@@ -18,8 +18,13 @@ const config: Config = {
         surface: {
           DEFAULT: "var(--surface)",
           2: "var(--surface-2)",
+          3: "var(--surface-3)",
         },
-        border: "var(--border)",
+        border: {
+          DEFAULT: "var(--border)",
+          muted: "var(--border-muted)",
+        },
+        divider: "var(--divider)",
         accent: {
           DEFAULT: "var(--accent)",
           foreground: "var(--accent-foreground)",
@@ -33,42 +38,62 @@ const config: Config = {
         danger: {
           DEFAULT: "var(--danger)",
         },
+        neutral: {
+          100: "#F5F5F5",
+          200: "#E5E5E5",
+          400: "#A3A3A3",
+          500: "#737373",
+          600: "#525252",
+          700: "#404040",
+        },
         // Reading theme tokens
         reading: {
           paper: {
-            bg: "#FBF9F4",
-            text: "#26231F",
-            link: "#2B5F55",
+            bg: "#F9F9F7",
+            text: "#111111",
+            link: "#CC0000",
           },
           sepia: {
             bg: "#F2E8D5",
             text: "#3B3024",
-            link: "#7A4B1E",
+            link: "#8B2500",
           },
           dark: {
-            bg: "#1A1917",
-            text: "#CFC9BE",
-            link: "#7FB5A6",
+            bg: "#111111",
+            text: "#F9F9F7",
+            link: "#E53935",
           },
         },
-        // Highlight tokens
+        // Editorial highlight tokens
         highlight: {
-          yellow: "#F6D860",
-          green: "#A9D8A0",
-          blue: "#A5C8E8",
-          pink: "#F0B0C8",
-          orange: "#F4BE8A",
+          yellow: "#FFE066",
+          green: "#B2E2B8",
+          blue: "#A7D2FA",
+          pink: "#FFB3C6",
+          orange: "#FFCCA8",
         },
       },
       fontFamily: {
-        serif: ["Newsreader", "Source Serif 4", "Georgia", "serif"],
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
-        mono: ["JetBrains Mono", "Menlo", "monospace"],
+        serif: ["'Playfair Display'", "'Times New Roman'", "Georgia", "serif"],
+        body: ["'Lora'", "Georgia", "serif"],
+        sans: ["'Inter'", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        mono: ["'JetBrains Mono'", "'Courier New'", "monospace"],
       },
       borderRadius: {
-        control: "8px",
-        card: "12px",
-        full: "9999px",
+        none: "0px",
+        control: "0px",
+        card: "0px",
+        container: "0px",
+        sm: "0px",
+        md: "0px",
+        lg: "0px",
+        xl: "0px",
+        "2xl": "0px",
+        full: "0px",
+      },
+      boxShadow: {
+        hard: "4px 4px 0px 0px var(--border)",
+        "hard-sm": "2px 2px 0px 0px var(--border)",
       },
       spacing: {
         18: "4.5rem",

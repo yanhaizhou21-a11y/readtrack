@@ -1,6 +1,6 @@
 import React from "react";
 import { MapSegment } from "@/types";
-import { X, Play, Clock, FileText, CheckCircle2 } from "lucide-react";
+import { X, Play, Clock, FileText } from "lucide-react";
 
 interface SegmentModalProps {
   segment: MapSegment | null;

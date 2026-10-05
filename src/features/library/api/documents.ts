@@ -21,6 +21,20 @@ export async function importDocument(input: ImportDocumentInput): Promise<Docume
   );
 }
 
+export interface ImportDocumentBytesInput {
+  fileName: string;
+  data: number[];
+  onDuplicate?: "ask" | "open_existing" | "replace";
+}
+
+export async function importDocumentBytes(input: ImportDocumentBytesInput): Promise<DocumentSummary> {
+  return ipc(
+    "document_import_bytes",
+    { input: { fileName: input.fileName, data: input.data, onDuplicate: input.onDuplicate } },
+    DocumentSummarySchema
+  );
+}
+
 export async function listDocuments(input: ListDocumentsInput = {}): Promise<DocumentListResponse> {
   return ipc(
     "document_list",

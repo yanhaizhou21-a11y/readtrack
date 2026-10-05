@@ -1,4 +1,7 @@
+pub mod bookmark_repo;
 pub mod document_repo;
+pub mod highlight_repo;
+pub mod note_repo;
 pub mod progress_repo;
 pub mod search_repo;
 pub mod section_repo;
@@ -6,7 +9,10 @@ pub mod segment_repo;
 pub mod session_repo;
 pub mod settings_repo;
 
+pub use bookmark_repo::BookmarkRepo;
 pub use document_repo::DocumentRepo;
+pub use highlight_repo::HighlightRepo;
+pub use note_repo::NoteRepo;
 pub use progress_repo::ProgressRepo;
 pub use search_repo::SearchRepo;
 pub use section_repo::SectionRepo;

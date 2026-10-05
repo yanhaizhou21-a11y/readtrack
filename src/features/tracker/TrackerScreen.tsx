@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   TrendingUp,
   Map,
-  ChevronRight,
   Flame,
 } from "lucide-react";
 
@@ -69,7 +68,7 @@ export const TrackerScreen: React.FC = () => {
           <ErrorState
             title="Failed to Load Tracker"
             message={error || "Could not retrieve reading tracker data."}
-            onRetry={loadData}
+            actions={[{ label: "Try Again", onClick: loadData }]}
           />
         </div>
       </div>
