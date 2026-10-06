@@ -22,6 +22,19 @@ export default defineConfig({
       ignored: ["**/src-tauri/**"],
     },
   },
+  build: {
+    target: ["es2021", "chrome100", "safari13"],
+    minify: "esbuild",
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "lucide-icons": ["lucide-react"],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: "jsdom",
