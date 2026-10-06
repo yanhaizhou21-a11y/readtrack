@@ -64,11 +64,12 @@ async fn setup_test_context() -> TestContext {
 
     // Populate reading session
     sqlx::query(
-        "INSERT INTO reading_sessions (id, document_id, start_time, end_time, active_duration_ms, total_duration_ms, pages_read, segments_read, was_clean_exit)
-         VALUES ('sess-1', ?, ?, ?, 120000, 150000, 5, 12, 1)"
+        "INSERT INTO reading_sessions (id, document_id, started_at, ended_at, last_heartbeat_at, duration_seconds, active_seconds, pages_read, segments_read)
+         VALUES ('sess-1', ?, ?, ?, ?, 150, 120, 5, 12)"
     )
     .bind(&doc_id)
     .bind(now - 150000)
+    .bind(now)
     .bind(now)
     .execute(&pool)
     .await
@@ -76,8 +77,28 @@ async fn setup_test_context() -> TestContext {
 
     // Populate reading progress
     sqlx::query(
-        "INSERT INTO reading_progress (document_id, total_units, read_units, progress, completed, last_read_at)
-         VALUES (?, 100, 45, 0.45, 0, ?)"
+        "INSERT INTO reading_progress (id, document_id, progress_percent, completed, updated_at)
+         VALUES ('prog-1', ?, 0.45, 0, ?)"
+    )
+    .bind(&doc_id)
+    .bind(now)
+    .execute(&pool)
+    .await
+    .unwrap();
+
+    // Populate document section & segment
+    sqlx::query(
+        "INSERT INTO document_sections (id, document_id, section_index, title, start_pos, end_pos)
+         VALUES ('sec-1', ?, 0, 'Chapter 1: The Principle', 0, 1000)"
+    )
+    .bind(&doc_id)
+    .execute(&pool)
+    .await
+    .unwrap();
+
+    sqlx::query(
+        "INSERT INTO reading_segments (id, document_id, section_id, segment_index, status, dwell_ms, last_read_at)
+         VALUES ('seg-1', ?, 'sec-1', 0, 'read', 60000, ?)"
     )
     .bind(&doc_id)
     .bind(now)
