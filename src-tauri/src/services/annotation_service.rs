@@ -17,8 +17,6 @@ impl AnnotationService {
         Self { db }
     }
 
-    // ---------------- BOOKMARKS ----------------
-
     pub async fn create_bookmark(&self, input: BookmarkCreateInput) -> Result<Bookmark, AppError> {
         let now = chrono::Utc::now().timestamp_millis();
         let id = Uuid::new_v4().to_string();
@@ -136,8 +134,6 @@ impl AnnotationService {
     ) -> Result<Vec<Bookmark>, AppError> {
         BookmarkRepo::list(&self.db, document_id).await
     }
-
-    // ---------------- HIGHLIGHTS ----------------
 
     pub async fn create_highlight(
         &self,
@@ -274,8 +270,6 @@ impl AnnotationService {
     ) -> Result<Vec<Highlight>, AppError> {
         HighlightRepo::list(&self.db, document_id).await
     }
-
-    // ---------------- NOTES ----------------
 
     pub async fn create_note(&self, input: NoteCreateInput) -> Result<Note, AppError> {
         let clean_content = input.content.trim();

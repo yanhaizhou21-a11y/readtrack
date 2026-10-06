@@ -141,7 +141,6 @@ impl FileStore {
     /// Stages a file into `library/documents/tmp-<uuid>` with constant memory streaming,
     /// simultaneous BLAKE3 hashing, mid-stream 200MB limit guard, and magic byte validation.
     pub fn stage_file(&self, source: &Path, max_bytes: u64) -> Result<StagedFile, AppError> {
-        // 1. Validate source existence & file type
         if !source.exists() {
             return Err(AppError::NotFound {
                 entity: format!("Source file: {}", source.display()),
@@ -153,7 +152,6 @@ impl FileStore {
             });
         }
 
-        // 2. Pre-check file size if metadata is available
         if let Ok(meta) = source.metadata() {
             if meta.len() > max_bytes {
                 return Err(AppError::FileTooLarge {
@@ -164,7 +162,6 @@ impl FileStore {
             }
         }
 
-        // 3. Candidate format from extension
         let ext = source
             .extension()
             .and_then(|e| e.to_str())
@@ -174,13 +171,11 @@ impl FileStore {
                 ext: ext.to_string(),
             })?;
 
-        // 4. Ensure destination directory exists
         let docs_dir = self.paths.documents_dir();
         if !docs_dir.exists() {
             std::fs::create_dir_all(&docs_dir).map_err(AppError::from)?;
         }
 
-        // 5. Create temporary file directly in `library/documents/`
         let temp_filename = format!("tmp-{}", uuid::Uuid::new_v4());
         let temp_path = docs_dir.join(&temp_filename);
         let temp_file = OpenOptions::new()
@@ -192,7 +187,6 @@ impl FileStore {
         // Wrap immediately in RAII guard: any subsequent error drops guard -> unlinks temp_path!
         let guard = TempFileGuard::new(temp_path);
 
-        // 6. Open source and prepare streaming buffers
         let source_file = File::open(source).map_err(AppError::from)?;
         let mut reader = BufReader::with_capacity(STREAM_BUFFER_SIZE, source_file);
         let mut writer = BufWriter::with_capacity(STREAM_BUFFER_SIZE, temp_file);
@@ -202,7 +196,6 @@ impl FileStore {
         let mut buffer = [0u8; STREAM_BUFFER_SIZE];
         let mut total_bytes: u64 = 0;
 
-        // 7. Streaming loop: constant memory, mid-stream guard, hash update
         loop {
             let bytes_read = reader.read(&mut buffer).map_err(AppError::from)?;
             if bytes_read == 0 {
@@ -235,7 +228,6 @@ impl FileStore {
         writer.flush().map_err(AppError::from)?;
         drop(writer); // Close write handle before any inspection/rename
 
-        // 8. Sniff magic bytes & validate against candidate format
         Self::validate_magic_bytes(candidate_format, &sniff_buffer)?;
 
         let hash = hasher.finalize().to_hex().to_string();

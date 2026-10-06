@@ -84,7 +84,6 @@ impl ImportService {
             );
         }
 
-        // 1. Stage file streaming with BLAKE3 hashing & magic byte validation
         let staged = self
             .file_store
             .stage_file(source_path, DEFAULT_MAX_IMPORT_BYTES)?;
@@ -106,7 +105,6 @@ impl ImportService {
         let detected_format = staged.format;
         let file_ext = detected_format.as_str();
 
-        // 2. Check for duplicate content hash
         let existing = DocumentRepo::get_by_content_hash(&self.db, &content_hash).await?;
         if let Some(existing_doc) = existing {
             match input.on_duplicate.as_deref().unwrap_or("ask") {
@@ -140,7 +138,6 @@ impl ImportService {
             );
         }
 
-        // 3. Parse document AST via ParserRegistry
         let file_type =
             FileType::from_ext(file_ext).ok_or_else(|| AppError::UnsupportedFormat {
                 ext: file_ext.to_string(),
@@ -154,10 +151,8 @@ impl ImportService {
 
         let ast = parser.parse(staged.guard.path())?;
 
-        // 4. Generate segments
         let generated_segments = SegmentGenerator::generate_segments(&ast);
 
-        // 5. Atomic SQLite transaction
         let doc_id = uuid::Uuid::new_v4().to_string();
         let now = chrono::Utc::now().timestamp_millis();
 
@@ -317,13 +312,11 @@ impl ImportService {
 
         tx.commit().await.map_err(AppError::from)?;
 
-        // 6. Commit staged file on disk to library/documents/<doc_id>.<ext>
         if let Err(err) = self.file_store.commit_file(staged.guard, &doc_id, file_ext) {
             let _ = self.delete_existing_document(&doc_id, file_ext).await;
             return Err(err);
         }
 
-        // 7. Emit done progress and library_changed event
         if let Some(app) = app_handle {
             let _ = app.emit(
                 "document_import_progress",
@@ -342,7 +335,6 @@ impl ImportService {
             );
         }
 
-        // 8. Return summary
         DocumentRepo::get_summary(&self.db, &doc_id)
             .await?
             .ok_or(AppError::Internal)

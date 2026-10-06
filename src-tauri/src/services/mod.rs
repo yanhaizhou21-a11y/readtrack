@@ -1,4 +1,5 @@
 pub mod annotation_service;
+pub mod export_service;
 pub mod import_service;
 pub mod library_service;
 pub mod position_service;
@@ -7,6 +8,7 @@ pub mod settings_service;
 pub mod tracker;
 
 pub use annotation_service::AnnotationService;
+pub use export_service::ExportService;
 pub use import_service::ImportService;
 pub use library_service::LibraryService;
 pub use position_service::PositionService;
