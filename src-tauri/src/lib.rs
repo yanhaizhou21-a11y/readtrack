@@ -20,6 +20,7 @@ pub struct AppState {
     pub tracker_service: std::sync::Arc<services::TrackerService>,
     pub annotation_service: services::AnnotationService,
     pub search_service: services::SearchService,
+    pub export_service: services::ExportService,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -37,8 +38,8 @@ pub fn run() {
 
             tauri::async_runtime::spawn(async move {
                 let state = app_handle.state::<AppState>();
-                let parsed = url::Url::parse(&uri)
-                    .unwrap_or_else(|_| url::Url::parse("rt://error").unwrap());
+                let parsed = tauri::Url::parse(&uri)
+                    .unwrap_or_else(|_| tauri::Url::parse("rt://error").unwrap());
 
                 let mut path_segments = parsed.path_segments().into_iter().flatten();
                 let category = parsed.host_str().unwrap_or("");
@@ -198,6 +199,7 @@ pub fn run() {
                     std::sync::Arc::new(services::TrackerService::new(pool.clone()));
                 let annotation_service = services::AnnotationService::new(pool.clone());
                 let search_service = services::SearchService::new(pool.clone());
+                let export_service = services::ExportService::new(pool.clone(), storage.clone());
 
                 // Run crash recovery for orphaned sessions on startup
                 if let Err(e) = tracker_service.crash_recovery().await {
@@ -215,6 +217,7 @@ pub fn run() {
                     tracker_service,
                     annotation_service,
                     search_service,
+                    export_service,
                 });
             });
 
@@ -256,7 +259,10 @@ pub fn run() {
             commands::note_update,
             commands::note_delete,
             commands::note_list,
-            commands::document_search
+            commands::document_search,
+            commands::export_xlsx,
+            commands::export_pdf,
+            commands::export_share
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

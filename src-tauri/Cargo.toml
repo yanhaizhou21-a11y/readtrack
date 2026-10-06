@@ -27,10 +27,13 @@ uuid = { version = "1.9", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 blake3 = "1.5"
 pulldown-cmark = { version = "0.12", default-features = false, features = ["html"] }
-url = "2.5.8"
+rust_xlsxwriter = { version = "0.80", features = ["chrono"] }
+printpdf = "0.7"
+open = "5.3"
 
 [dev-dependencies]
 tokio = { version = "1.38", features = ["macros", "rt-multi-thread"] }
+calamine = "0.26"
 
 [profile.dev]
 debug = 0

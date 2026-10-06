@@ -1,12 +1,14 @@
 pub mod annotations;
 pub mod document;
 pub mod document_model;
+pub mod export;
 pub mod position;
 pub mod search;
 pub mod settings;
 pub mod tracker;
 
 pub use annotations::*;
+pub use export::*;
 pub use document::{
     BlockPayload, Document, DocumentArchiveInput, DocumentDeleteInput, DocumentDetail,
     DocumentGetInput, DocumentGetSectionsInput, DocumentImportBytesInput, DocumentImportInput,
