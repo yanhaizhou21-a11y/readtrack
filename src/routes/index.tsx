@@ -9,6 +9,7 @@ import { ReadingMapScreen } from "@/features/tracker/ReadingMapScreen";
 import { SearchScreen } from "@/features/search/SearchScreen";
 import { AnnotationsScreen } from "@/features/annotations/AnnotationsScreen";
 import { SettingsScreen } from "@/features/settings/SettingsScreen";
+import { ExportScreen } from "@/features/export/ExportScreen";
 
 export const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
       { path: "tracker/:id", element: <ReadingMapScreen /> },
       { path: "search", element: <SearchScreen /> },
       { path: "annotations", element: <AnnotationsScreen /> },
+      { path: "export", element: <ExportScreen /> },
       { path: "settings", element: <SettingsScreen /> },
     ],
   },

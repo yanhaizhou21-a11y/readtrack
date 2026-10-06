@@ -88,17 +88,18 @@ async fn setup_test_context() -> TestContext {
 
     // Populate document section & segment
     sqlx::query(
-        "INSERT INTO document_sections (id, document_id, section_index, title, start_pos, end_pos)
-         VALUES ('sec-1', ?, 0, 'Chapter 1: The Principle', 0, 1000)"
+        "INSERT INTO document_sections (id, document_id, section_index, section_type, title, start_position, end_position, created_at)
+         VALUES ('sec-1', ?, 0, 'chapter', 'Chapter 1: The Principle', 0, 1000, ?)"
     )
     .bind(&doc_id)
+    .bind(now)
     .execute(&pool)
     .await
     .unwrap();
 
     sqlx::query(
-        "INSERT INTO reading_segments (id, document_id, section_id, segment_index, status, dwell_ms, last_read_at)
-         VALUES ('seg-1', ?, 'sec-1', 0, 'read', 60000, ?)"
+        "INSERT INTO reading_segments (id, document_id, section_id, segment_type, segment_index, start_position, end_position, status, dwell_ms, last_read_at)
+         VALUES ('seg-1', ?, 'sec-1', 'block_group', 0, 0, 500, 'read', 60000, ?)"
     )
     .bind(&doc_id)
     .bind(now)
