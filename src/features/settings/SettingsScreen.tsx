@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { settingsGetAll, settingsSet } from "./api";
 import { useUiStore, type AppTheme } from "@/stores/ui.store";
@@ -23,6 +24,7 @@ function applyThemeClass(newTheme: AppTheme) {
 }
 
 export const SettingsScreen: React.FC = () => {
+  const navigate = useNavigate();
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,6 +164,28 @@ export const SettingsScreen: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </section>
+
+            {/* Export & Dossiers Section */}
+            <section className="bg-surface rounded-card p-4 border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-semibold uppercase text-muted tracking-wider">
+                    Data & Export
+                  </h2>
+                  <p className="font-serif text-xs text-foreground mt-0.5">
+                    Generate offline Excel ledgers or print PDF reports.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/export")}
+                className="w-full py-2.5 px-3 border border-border bg-surface-2 text-foreground font-mono text-xs font-bold uppercase tracking-wide hover:bg-surface-3 transition-colors flex items-center justify-between"
+              >
+                <span>Export Reading Dossier (.xlsx / .pdf)</span>
+                <span className="text-accent text-[11px] font-sans">Open &rarr;</span>
+              </button>
             </section>
 
             {/* Storage & Privacy Section */}
