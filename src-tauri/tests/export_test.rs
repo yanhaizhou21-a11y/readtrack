@@ -28,9 +28,12 @@ async fn setup_test_context() -> TestContext {
     let pool = create_in_memory_pool().await.unwrap();
     run_migrations(&pool).await.unwrap();
 
-    let temp_dir = std::env::temp_dir().join(format!("readtrack_export_test_{}", uuid::Uuid::new_v4()));
+    let temp_dir =
+        std::env::temp_dir().join(format!("readtrack_export_test_{}", uuid::Uuid::new_v4()));
     let storage = StoragePaths::new(temp_dir.clone());
-    storage.init_dirs().expect("Failed to init test storage dirs");
+    storage
+        .init_dirs()
+        .expect("Failed to init test storage dirs");
 
     let doc_id = "doc-export-test-1".to_string();
     let now = chrono::Utc::now().timestamp_millis();
@@ -43,7 +46,8 @@ async fn setup_test_context() -> TestContext {
         file_type: "txt".to_string(),
         mime_type: "text/plain".to_string(),
         file_size: 4096,
-        content_hash: "1122334455667788112233445566778811223344556677881122334455667788".to_string(),
+        content_hash: "1122334455667788112233445566778811223344556677881122334455667788"
+            .to_string(),
         page_count: None,
         word_count: Some(1200),
         thumbnail_path: None,
@@ -78,7 +82,7 @@ async fn setup_test_context() -> TestContext {
     // Populate reading progress
     sqlx::query(
         "INSERT INTO reading_progress (id, document_id, progress_percent, completed, updated_at)
-         VALUES ('prog-1', ?, 0.45, 0, ?)"
+         VALUES ('prog-1', ?, 0.45, 0, ?)",
     )
     .bind(&doc_id)
     .bind(now)
@@ -261,8 +265,15 @@ async fn test_export_pdf_header_and_structure() {
     assert!(path.exists(), "Generated PDF file must exist on disk");
 
     let bytes = fs::read(&path).expect("Must read PDF bytes");
-    assert!(bytes.len() > 500, "PDF should have substantial byte content");
-    assert_eq!(&bytes[..5], b"%PDF-", "PDF file must start with '%PDF-' magic bytes");
+    assert!(
+        bytes.len() > 500,
+        "PDF should have substantial byte content"
+    );
+    assert_eq!(
+        &bytes[..5],
+        b"%PDF-",
+        "PDF file must start with '%PDF-' magic bytes"
+    );
 }
 
 #[tokio::test]
@@ -272,7 +283,9 @@ async fn test_export_share_security_validation() {
 
     // 1. Missing file returns NotFound
     let missing_path = ctx.storage.exports_dir().join("missing.xlsx");
-    let err = export_service.export_share(&missing_path.to_string_lossy()).unwrap_err();
+    let err = export_service
+        .export_share(&missing_path.to_string_lossy())
+        .unwrap_err();
     match err {
         AppError::NotFound { .. } => {}
         other => panic!("Expected NotFound, got {:?}", other),
@@ -282,7 +295,9 @@ async fn test_export_share_security_validation() {
     let outside_file = ctx.temp_dir.join("outside.txt");
     fs::write(&outside_file, "secret").unwrap();
 
-    let err2 = export_service.export_share(&outside_file.to_string_lossy()).unwrap_err();
+    let err2 = export_service
+        .export_share(&outside_file.to_string_lossy())
+        .unwrap_err();
     match err2 {
         AppError::PermissionDenied => {}
         other => panic!("Expected PermissionDenied, got {:?}", other),

@@ -14,7 +14,6 @@ import {
   ReadingMapSchema,
   BookmarkSchema,
 } from "./harness/contracts";
-import { TrackerOracle } from "./harness/tracker_oracle";
 
 describe("Tier 1: Feature Coverage (Baseline Happy Paths)", () => {
   let driver: OpaqueBoxDriver;

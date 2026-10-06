@@ -16,11 +16,11 @@ impl PdfExporter {
         let (doc, page1, layer1) =
             PdfDocument::new("ReadTrack Reading Report", page_w, page_h, "Main");
 
-        let font = doc
-            .add_builtin_font(BuiltinFont::Helvetica)
-            .map_err(|e| AppError::ExportFailed {
-                reason: e.to_string(),
-            })?;
+        let font =
+            doc.add_builtin_font(BuiltinFont::Helvetica)
+                .map_err(|e| AppError::ExportFailed {
+                    reason: e.to_string(),
+                })?;
         let font_bold = doc
             .add_builtin_font(BuiltinFont::HelveticaBold)
             .map_err(|e| AppError::ExportFailed {
@@ -58,16 +58,19 @@ impl PdfExporter {
 
         // Helper for page break
         let check_page_break = |needed: f32,
-                                    doc_ref: &PdfDocumentReference,
-                                    y_ref: &mut f32,
-                                    page_ref: &mut PdfPageIndex,
-                                    layer_idx_ref: &mut PdfLayerIndex,
-                                    layer_ref: &mut PdfLayerReference,
-                                    p_num: &mut usize| {
+                                doc_ref: &PdfDocumentReference,
+                                y_ref: &mut f32,
+                                page_ref: &mut PdfPageIndex,
+                                layer_idx_ref: &mut PdfLayerIndex,
+                                layer_ref: &mut PdfLayerReference,
+                                p_num: &mut usize| {
             if *y_ref - needed < bottom_limit {
                 // Footer for current page
                 layer_ref.use_text(
-                    format!("ReadTrack · Local-First Confidential Ledger · Page {}", *p_num),
+                    format!(
+                        "ReadTrack · Local-First Confidential Ledger · Page {}",
+                        *p_num
+                    ),
                     8.0,
                     Mm(margin_l),
                     Mm(15.0),
@@ -112,14 +115,24 @@ impl PdfExporter {
         y -= 8.0;
 
         // ---------------- Executive Summary ----------------
-        current_layer.use_text("I. EXECUTIVE SUMMARY", 12.0, Mm(margin_l), Mm(y), &font_bold);
+        current_layer.use_text(
+            "I. EXECUTIVE SUMMARY",
+            12.0,
+            Mm(margin_l),
+            Mm(y),
+            &font_bold,
+        );
         y -= 4.0;
         draw_line(&current_layer, y, 0.75);
         y -= 7.0;
 
         let total_docs = data.documents.len();
         let completed_docs = data.documents.iter().filter(|d| d.completed).count();
-        let total_words: i64 = data.documents.iter().map(|d| d.word_count.unwrap_or(0)).sum();
+        let total_words: i64 = data
+            .documents
+            .iter()
+            .map(|d| d.word_count.unwrap_or(0))
+            .sum();
         let total_sessions = data.sessions.len();
         let total_active_mins: i64 = data.sessions.iter().map(|s| s.active_seconds / 60).sum();
         let total_notes = data.notes.len();
@@ -152,7 +165,13 @@ impl PdfExporter {
             &mut page_num,
         );
 
-        current_layer.use_text("II. LIBRARY INVENTORY", 12.0, Mm(margin_l), Mm(y), &font_bold);
+        current_layer.use_text(
+            "II. LIBRARY INVENTORY",
+            12.0,
+            Mm(margin_l),
+            Mm(y),
+            &font_bold,
+        );
         y -= 4.0;
         draw_line(&current_layer, y, 0.75);
         y -= 7.0;
@@ -376,7 +395,10 @@ impl PdfExporter {
 
         // Final page footer
         current_layer.use_text(
-            format!("ReadTrack | Local-First Confidential Ledger | Page {}", page_num),
+            format!(
+                "ReadTrack | Local-First Confidential Ledger | Page {}",
+                page_num
+            ),
             8.0,
             Mm(margin_l),
             Mm(15.0),
@@ -386,10 +408,9 @@ impl PdfExporter {
         // Save PDF to output file
         let file = File::create(output_path).map_err(AppError::from)?;
         let mut writer = BufWriter::new(file);
-        doc.save(&mut writer)
-            .map_err(|e| AppError::ExportFailed {
-                reason: e.to_string(),
-            })?;
+        doc.save(&mut writer).map_err(|e| AppError::ExportFailed {
+            reason: e.to_string(),
+        })?;
 
         Ok(())
     }

@@ -8,7 +8,6 @@ pub mod settings;
 pub mod tracker;
 
 pub use annotations::*;
-pub use export::*;
 pub use document::{
     BlockPayload, Document, DocumentArchiveInput, DocumentDeleteInput, DocumentDetail,
     DocumentGetInput, DocumentGetSectionsInput, DocumentImportBytesInput, DocumentImportInput,
@@ -20,6 +19,7 @@ pub use document_model::{
     AssetRef, Block, BlockId, DocMetadata, FileType, Inline, Mark, NormalizedDocument, Section,
     SectionKind, TocEntry,
 };
+pub use export::*;
 pub use position::{LogicalPosition, ResolvedPosition};
 pub use search::*;
 pub use settings::{default_settings, SettingRecord};

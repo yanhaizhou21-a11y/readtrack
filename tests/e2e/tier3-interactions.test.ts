@@ -100,14 +100,14 @@ describe("Tier 3: Cross-Feature Interactions (Pairwise Combinations)", () => {
     });
 
     // Create bookmark
-    const bm = await driver.bookmarkCreate({
+    await driver.bookmarkCreate({
       documentId: doc.id,
       position: { documentId: doc.id, sectionId: 0, percentage: 0.1, parserVersion: 1 },
       title: "Note 1",
     });
 
     // Start session
-    const { sessionId } = await driver.readingStartSession({
+    await driver.readingStartSession({
       documentId: doc.id,
       position: { documentId: doc.id, sectionId: 0, percentage: 0, parserVersion: 1 },
     });
@@ -192,9 +192,9 @@ describe("Tier 3: Cross-Feature Interactions (Pairwise Combinations)", () => {
   // --- Interaction 5: Ingestion + Progress Update + Sorting ---
 
   it("T3-11: Progress updates interact with library sorting by progress descending", async () => {
-    const docA = await driver.documentImport({ source: "doc_a.txt", fileContent: VALID_TXT_CONTENT + "\nDoc A" });
+    await driver.documentImport({ source: "doc_a.txt", fileContent: VALID_TXT_CONTENT + "\nDoc A" });
     const docB = await driver.documentImport({ source: "doc_b.txt", fileContent: VALID_TXT_CONTENT + "\nDoc B" });
-    const docC = await driver.documentImport({ source: "doc_c.txt", fileContent: VALID_TXT_CONTENT + "\nDoc C" });
+    await driver.documentImport({ source: "doc_c.txt", fileContent: VALID_TXT_CONTENT + "\nDoc C" });
 
     // Dwell and advance docB
     const { sessionId: sessB } = await driver.readingStartSession({

@@ -62,12 +62,12 @@ Kerjakan urut. Centang `[x]` saat selesai **dan** lolos Definition of Done (`AGE
 **Exit:** anotasi persisten setelah restart; search klik → posisi tepat + sorot.
 
 ## Phase 6 — Export
-- [ ] `export_xlsx` (`rust_xlsxwriter`): 7 sheet, format header/lebar/tanggal/persen/tabel/freeze/autofilter, formula ringkasan
-- [ ] `export_pdf` (`printpdf`): layout helper (halaman, heading, tabel sederhana, bar progres), embed font, ringkasan + per dokumen + chapter progress + activity + bookmarks/highlights/notes
-- [ ] `spawn_blocking` + event `export_progress`
-- [ ] `export_share` (share sheet/save dialog); tulis plugin native kecil bila diperlukan
-- [ ] UI Export (pilih semua/dokumen), progres, hasil + bagikan
-- [ ] Test: buka ulang XLSX, struktur PDF, 0 & banyak dokumen
+- [x] `export_xlsx` (`rust_xlsxwriter`): 7 sheet, format header/lebar/tanggal/persen/tabel/freeze/autofilter, formula ringkasan
+- [x] `export_pdf` (`printpdf`): layout helper (halaman, heading, tabel sederhana, bar progres), embed font, ringkasan + per dokumen + chapter progress + activity + bookmarks/highlights/notes
+- [x] `spawn_blocking` + event `export_progress`
+- [x] `export_share` (share sheet/save dialog); tulis plugin native kecil bila diperlukan
+- [x] UI Export (pilih semua/dokumen), progres, hasil + bagikan
+- [x] Test: buka ulang XLSX, struktur PDF, 0 & banyak dokumen
 **Exit:** file `.xlsx` valid di Excel/Sheets, PDF profesional dan terbaca, bisa dibagikan dari device.
 
 ## Phase 7 — Reminders

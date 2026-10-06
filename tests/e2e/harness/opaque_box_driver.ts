@@ -837,7 +837,6 @@ export class OpaqueBoxDriver {
       // Split into chapters or paragraphs
       const paragraphs = textContent.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
       let secIdx = 0;
-      let segIdx = 0;
 
       for (const para of paragraphs) {
         const trimmed = para.trim();

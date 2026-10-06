@@ -125,13 +125,15 @@ export const SectionPayloadSchema = z.object({
 });
 export type SectionPayload = z.infer<typeof SectionPayloadSchema>;
 
-export const TocEntrySchema: z.ZodType<{
+export interface TocEntry {
   title: string;
   sectionIndex: number;
   blockId?: string;
   page?: number;
-  children?: any[];
-}> = z.lazy(() =>
+  children?: TocEntry[];
+}
+
+export const TocEntrySchema: z.ZodType<TocEntry> = z.lazy(() =>
   z.object({
     title: z.string().min(1),
     sectionIndex: z.number().int().nonnegative(),

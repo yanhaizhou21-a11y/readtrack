@@ -85,42 +85,102 @@ impl XlsxExporter {
         overview.set_column_width(1, 26).map_err(to_export_err)?;
         overview.set_column_width(2, 45).map_err(to_export_err)?;
 
-        overview.write_string_with_format(0, 0, "ReadTrack — Reading Analytics Report", &title_format)
+        overview
+            .write_string_with_format(0, 0, "ReadTrack — Reading Analytics Report", &title_format)
             .map_err(to_export_err)?;
-        overview.write_string(1, 0, format!("Generated on: {}", now_str))
-            .map_err(to_export_err)?;
-
-        overview.write_string_with_format(3, 0, "System Metric", &section_header_format)
-            .map_err(to_export_err)?;
-        overview.write_string_with_format(3, 1, "Formula / Value", &section_header_format)
-            .map_err(to_export_err)?;
-        overview.write_string_with_format(3, 2, "Description", &section_header_format)
+        overview
+            .write_string(1, 0, format!("Generated on: {}", now_str))
             .map_err(to_export_err)?;
 
-        let doc_end_row = if data.documents.is_empty() { 2 } else { data.documents.len() + 1 };
-        let session_end_row = if data.sessions.is_empty() { 2 } else { data.sessions.len() + 1 };
-        let bookmark_end_row = if data.bookmarks.is_empty() { 2 } else { data.bookmarks.len() + 1 };
-        let highlight_end_row = if data.highlights.is_empty() { 2 } else { data.highlights.len() + 1 };
-        let note_end_row = if data.notes.is_empty() { 2 } else { data.notes.len() + 1 };
+        overview
+            .write_string_with_format(3, 0, "System Metric", &section_header_format)
+            .map_err(to_export_err)?;
+        overview
+            .write_string_with_format(3, 1, "Formula / Value", &section_header_format)
+            .map_err(to_export_err)?;
+        overview
+            .write_string_with_format(3, 2, "Description", &section_header_format)
+            .map_err(to_export_err)?;
+
+        let doc_end_row = if data.documents.is_empty() {
+            2
+        } else {
+            data.documents.len() + 1
+        };
+        let session_end_row = if data.sessions.is_empty() {
+            2
+        } else {
+            data.sessions.len() + 1
+        };
+        let bookmark_end_row = if data.bookmarks.is_empty() {
+            2
+        } else {
+            data.bookmarks.len() + 1
+        };
+        let highlight_end_row = if data.highlights.is_empty() {
+            2
+        } else {
+            data.highlights.len() + 1
+        };
+        let note_end_row = if data.notes.is_empty() {
+            2
+        } else {
+            data.notes.len() + 1
+        };
 
         let kpis = [
-            ("Total Documents", format!("=COUNTA(Documents!A2:A{})", doc_end_row), "Total publications registered in library"),
-            ("Completed Documents", format!("=COUNTIF(Documents!I2:I{}, \"Yes\")", doc_end_row), "Documents read to completion (100%)"),
-            ("Total Words in Library", format!("=SUM(Documents!F2:F{})", doc_end_row), "Combined word volume across documents"),
-            ("Total Reading Sessions", format!("=COUNTA('Reading Sessions'!A2:A{})", session_end_row), "Discrete reading periods tracked"),
-            ("Total Active Time (Minutes)", format!("=SUM('Reading Sessions'!F2:F{})", session_end_row), "Active engagement time excluding idle periods"),
-            ("Total Highlights", format!("=COUNTA(Highlights!A2:A{})", highlight_end_row), "Extracted passages across library"),
-            ("Total Notes", format!("=COUNTA(Notes!A2:A{})", note_end_row), "Annotated commentary recorded"),
-            ("Total Bookmarks", format!("=COUNTA(Bookmarks!A2:A{})", bookmark_end_row), "Marked milestones and reference points"),
+            (
+                "Total Documents",
+                format!("=COUNTA(Documents!A2:A{})", doc_end_row),
+                "Total publications registered in library",
+            ),
+            (
+                "Completed Documents",
+                format!("=COUNTIF(Documents!I2:I{}, \"Yes\")", doc_end_row),
+                "Documents read to completion (100%)",
+            ),
+            (
+                "Total Words in Library",
+                format!("=SUM(Documents!F2:F{})", doc_end_row),
+                "Combined word volume across documents",
+            ),
+            (
+                "Total Reading Sessions",
+                format!("=COUNTA('Reading Sessions'!A2:A{})", session_end_row),
+                "Discrete reading periods tracked",
+            ),
+            (
+                "Total Active Time (Minutes)",
+                format!("=SUM('Reading Sessions'!F2:F{})", session_end_row),
+                "Active engagement time excluding idle periods",
+            ),
+            (
+                "Total Highlights",
+                format!("=COUNTA(Highlights!A2:A{})", highlight_end_row),
+                "Extracted passages across library",
+            ),
+            (
+                "Total Notes",
+                format!("=COUNTA(Notes!A2:A{})", note_end_row),
+                "Annotated commentary recorded",
+            ),
+            (
+                "Total Bookmarks",
+                format!("=COUNTA(Bookmarks!A2:A{})", bookmark_end_row),
+                "Marked milestones and reference points",
+            ),
         ];
 
         for (idx, (label, formula, desc)) in kpis.into_iter().enumerate() {
             let row = (4 + idx) as u32;
-            overview.write_string_with_format(row, 0, label, &kpi_label_format)
+            overview
+                .write_string_with_format(row, 0, label, &kpi_label_format)
                 .map_err(to_export_err)?;
-            overview.write_formula_with_format(row, 1, formula.as_str(), &kpi_value_format)
+            overview
+                .write_formula_with_format(row, 1, formula.as_str(), &kpi_value_format)
                 .map_err(to_export_err)?;
-            overview.write_string_with_format(row, 2, desc, &data_format)
+            overview
+                .write_string_with_format(row, 2, desc, &data_format)
                 .map_err(to_export_err)?;
         }
 
@@ -146,40 +206,64 @@ impl XlsxExporter {
         ];
 
         for (col, (hdr, width)) in doc_headers.iter().enumerate() {
-            docs_sheet.set_column_width(col as u16, *width)
+            docs_sheet
+                .set_column_width(col as u16, *width)
                 .map_err(to_export_err)?;
-            docs_sheet.write_string_with_format(0, col as u16, *hdr, &table_header_format)
+            docs_sheet
+                .write_string_with_format(0, col as u16, *hdr, &table_header_format)
                 .map_err(to_export_err)?;
         }
 
         if !data.documents.is_empty() {
-            docs_sheet.autofilter(0, 0, data.documents.len() as u32, (doc_headers.len() - 1) as u16)
+            docs_sheet
+                .autofilter(
+                    0,
+                    0,
+                    data.documents.len() as u32,
+                    (doc_headers.len() - 1) as u16,
+                )
                 .map_err(to_export_err)?;
         }
 
         for (idx, doc) in data.documents.iter().enumerate() {
             let r = (idx + 1) as u32;
-            docs_sheet.write_string_with_format(r, 0, &doc.id, &data_format)
+            docs_sheet
+                .write_string_with_format(r, 0, &doc.id, &data_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_string_with_format(r, 1, &doc.title, &data_format)
+            docs_sheet
+                .write_string_with_format(r, 1, &doc.title, &data_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_string_with_format(r, 2, doc.author.as_deref().unwrap_or("-"), &data_format)
+            docs_sheet
+                .write_string_with_format(r, 2, doc.author.as_deref().unwrap_or("-"), &data_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_string_with_format(r, 3, doc.file_type.to_uppercase(), &data_format)
+            docs_sheet
+                .write_string_with_format(r, 3, doc.file_type.to_uppercase(), &data_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_number_with_format(r, 4, (doc.file_size / 1024) as f64, &number_format)
+            docs_sheet
+                .write_number_with_format(r, 4, (doc.file_size / 1024) as f64, &number_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_number_with_format(r, 5, doc.word_count.unwrap_or(0) as f64, &number_format)
+            docs_sheet
+                .write_number_with_format(r, 5, doc.word_count.unwrap_or(0) as f64, &number_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_number_with_format(r, 6, doc.page_count.unwrap_or(0) as f64, &number_format)
+            docs_sheet
+                .write_number_with_format(r, 6, doc.page_count.unwrap_or(0) as f64, &number_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_number_with_format(r, 7, doc.progress_percent, &percent_format)
+            docs_sheet
+                .write_number_with_format(r, 7, doc.progress_percent, &percent_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_string_with_format(r, 8, if doc.completed { "Yes" } else { "No" }, &data_format)
+            docs_sheet
+                .write_string_with_format(
+                    r,
+                    8,
+                    if doc.completed { "Yes" } else { "No" },
+                    &data_format,
+                )
                 .map_err(to_export_err)?;
-            docs_sheet.write_string_with_format(r, 9, format_ts(Some(doc.created_at)), &date_format)
+            docs_sheet
+                .write_string_with_format(r, 9, format_ts(Some(doc.created_at)), &date_format)
                 .map_err(to_export_err)?;
-            docs_sheet.write_string_with_format(r, 10, format_ts(doc.last_opened_at), &date_format)
+            docs_sheet
+                .write_string_with_format(r, 10, format_ts(doc.last_opened_at), &date_format)
                 .map_err(to_export_err)?;
         }
 
@@ -187,8 +271,12 @@ impl XlsxExporter {
         // 3. Reading Sessions Sheet
         // ----------------------------------------------------
         let session_sheet = workbook.add_worksheet();
-        session_sheet.set_name("Reading Sessions").map_err(to_export_err)?;
-        session_sheet.set_freeze_panes(1, 0).map_err(to_export_err)?;
+        session_sheet
+            .set_name("Reading Sessions")
+            .map_err(to_export_err)?;
+        session_sheet
+            .set_freeze_panes(1, 0)
+            .map_err(to_export_err)?;
 
         let session_headers = [
             ("Session ID", 38),
@@ -202,34 +290,55 @@ impl XlsxExporter {
         ];
 
         for (col, (hdr, width)) in session_headers.iter().enumerate() {
-            session_sheet.set_column_width(col as u16, *width)
+            session_sheet
+                .set_column_width(col as u16, *width)
                 .map_err(to_export_err)?;
-            session_sheet.write_string_with_format(0, col as u16, *hdr, &table_header_format)
+            session_sheet
+                .write_string_with_format(0, col as u16, *hdr, &table_header_format)
                 .map_err(to_export_err)?;
         }
 
         if !data.sessions.is_empty() {
-            session_sheet.autofilter(0, 0, data.sessions.len() as u32, (session_headers.len() - 1) as u16)
+            session_sheet
+                .autofilter(
+                    0,
+                    0,
+                    data.sessions.len() as u32,
+                    (session_headers.len() - 1) as u16,
+                )
                 .map_err(to_export_err)?;
         }
 
         for (idx, sess) in data.sessions.iter().enumerate() {
             let r = (idx + 1) as u32;
-            session_sheet.write_string_with_format(r, 0, &sess.id, &data_format)
+            session_sheet
+                .write_string_with_format(r, 0, &sess.id, &data_format)
                 .map_err(to_export_err)?;
-            session_sheet.write_string_with_format(r, 1, &sess.document_title, &data_format)
+            session_sheet
+                .write_string_with_format(r, 1, &sess.document_title, &data_format)
                 .map_err(to_export_err)?;
-            session_sheet.write_string_with_format(r, 2, format_ts(Some(sess.started_at)), &date_format)
+            session_sheet
+                .write_string_with_format(r, 2, format_ts(Some(sess.started_at)), &date_format)
                 .map_err(to_export_err)?;
-            session_sheet.write_string_with_format(r, 3, format_ts(sess.ended_at), &date_format)
+            session_sheet
+                .write_string_with_format(r, 3, format_ts(sess.ended_at), &date_format)
                 .map_err(to_export_err)?;
-            session_sheet.write_number_with_format(r, 4, (sess.duration_seconds as f64) / 60.0, &number_format)
+            session_sheet
+                .write_number_with_format(
+                    r,
+                    4,
+                    (sess.duration_seconds as f64) / 60.0,
+                    &number_format,
+                )
                 .map_err(to_export_err)?;
-            session_sheet.write_number_with_format(r, 5, (sess.active_seconds as f64) / 60.0, &number_format)
+            session_sheet
+                .write_number_with_format(r, 5, (sess.active_seconds as f64) / 60.0, &number_format)
                 .map_err(to_export_err)?;
-            session_sheet.write_number_with_format(r, 6, sess.pages_read as f64, &number_format)
+            session_sheet
+                .write_number_with_format(r, 6, sess.pages_read as f64, &number_format)
                 .map_err(to_export_err)?;
-            session_sheet.write_number_with_format(r, 7, sess.segments_read as f64, &number_format)
+            session_sheet
+                .write_number_with_format(r, 7, sess.segments_read as f64, &number_format)
                 .map_err(to_export_err)?;
         }
 
@@ -237,7 +346,9 @@ impl XlsxExporter {
         // 4. Reading Progress Sheet
         // ----------------------------------------------------
         let prog_sheet = workbook.add_worksheet();
-        prog_sheet.set_name("Reading Progress").map_err(to_export_err)?;
+        prog_sheet
+            .set_name("Reading Progress")
+            .map_err(to_export_err)?;
         prog_sheet.set_freeze_panes(1, 0).map_err(to_export_err)?;
 
         let prog_headers = [
@@ -251,32 +362,47 @@ impl XlsxExporter {
         ];
 
         for (col, (hdr, width)) in prog_headers.iter().enumerate() {
-            prog_sheet.set_column_width(col as u16, *width)
+            prog_sheet
+                .set_column_width(col as u16, *width)
                 .map_err(to_export_err)?;
-            prog_sheet.write_string_with_format(0, col as u16, *hdr, &table_header_format)
+            prog_sheet
+                .write_string_with_format(0, col as u16, *hdr, &table_header_format)
                 .map_err(to_export_err)?;
         }
 
         if !data.progress_segments.is_empty() {
-            prog_sheet.autofilter(0, 0, data.progress_segments.len() as u32, (prog_headers.len() - 1) as u16)
+            prog_sheet
+                .autofilter(
+                    0,
+                    0,
+                    data.progress_segments.len() as u32,
+                    (prog_headers.len() - 1) as u16,
+                )
                 .map_err(to_export_err)?;
         }
 
         for (idx, seg) in data.progress_segments.iter().enumerate() {
             let r = (idx + 1) as u32;
-            prog_sheet.write_string_with_format(r, 0, &seg.document_title, &data_format)
+            prog_sheet
+                .write_string_with_format(r, 0, &seg.document_title, &data_format)
                 .map_err(to_export_err)?;
-            prog_sheet.write_number_with_format(r, 1, seg.section_index as f64, &number_format)
+            prog_sheet
+                .write_number_with_format(r, 1, seg.section_index as f64, &number_format)
                 .map_err(to_export_err)?;
-            prog_sheet.write_string_with_format(r, 2, &seg.section_title, &data_format)
+            prog_sheet
+                .write_string_with_format(r, 2, &seg.section_title, &data_format)
                 .map_err(to_export_err)?;
-            prog_sheet.write_number_with_format(r, 3, seg.segment_index as f64, &number_format)
+            prog_sheet
+                .write_number_with_format(r, 3, seg.segment_index as f64, &number_format)
                 .map_err(to_export_err)?;
-            prog_sheet.write_string_with_format(r, 4, &seg.status, &data_format)
+            prog_sheet
+                .write_string_with_format(r, 4, &seg.status, &data_format)
                 .map_err(to_export_err)?;
-            prog_sheet.write_number_with_format(r, 5, (seg.dwell_ms as f64) / 1000.0, &number_format)
+            prog_sheet
+                .write_number_with_format(r, 5, (seg.dwell_ms as f64) / 1000.0, &number_format)
                 .map_err(to_export_err)?;
-            prog_sheet.write_string_with_format(r, 6, format_ts(seg.last_read_at), &date_format)
+            prog_sheet
+                .write_string_with_format(r, 6, format_ts(seg.last_read_at), &date_format)
                 .map_err(to_export_err)?;
         }
 
@@ -299,34 +425,62 @@ impl XlsxExporter {
         ];
 
         for (col, (hdr, width)) in bm_headers.iter().enumerate() {
-            bm_sheet.set_column_width(col as u16, *width)
+            bm_sheet
+                .set_column_width(col as u16, *width)
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(0, col as u16, *hdr, &table_header_format)
+            bm_sheet
+                .write_string_with_format(0, col as u16, *hdr, &table_header_format)
                 .map_err(to_export_err)?;
         }
 
         if !data.bookmarks.is_empty() {
-            bm_sheet.autofilter(0, 0, data.bookmarks.len() as u32, (bm_headers.len() - 1) as u16)
+            bm_sheet
+                .autofilter(
+                    0,
+                    0,
+                    data.bookmarks.len() as u32,
+                    (bm_headers.len() - 1) as u16,
+                )
                 .map_err(to_export_err)?;
         }
 
         for (idx, bm) in data.bookmarks.iter().enumerate() {
             let r = (idx + 1) as u32;
-            bm_sheet.write_string_with_format(r, 0, &bm.id, &data_format)
+            bm_sheet
+                .write_string_with_format(r, 0, &bm.id, &data_format)
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(r, 1, &bm.document_title, &data_format)
+            bm_sheet
+                .write_string_with_format(r, 1, &bm.document_title, &data_format)
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(r, 2, bm.page.map(|p| p.to_string()).unwrap_or_else(|| "-".to_string()), &data_format)
+            bm_sheet
+                .write_string_with_format(
+                    r,
+                    2,
+                    bm.page
+                        .map(|p| p.to_string())
+                        .unwrap_or_else(|| "-".to_string()),
+                    &data_format,
+                )
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(r, 3, bm.section_title.as_deref().unwrap_or("-"), &data_format)
+            bm_sheet
+                .write_string_with_format(
+                    r,
+                    3,
+                    bm.section_title.as_deref().unwrap_or("-"),
+                    &data_format,
+                )
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(r, 4, bm.title.as_deref().unwrap_or("-"), &data_format)
+            bm_sheet
+                .write_string_with_format(r, 4, bm.title.as_deref().unwrap_or("-"), &data_format)
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(r, 5, bm.excerpt.as_deref().unwrap_or("-"), &data_format)
+            bm_sheet
+                .write_string_with_format(r, 5, bm.excerpt.as_deref().unwrap_or("-"), &data_format)
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(r, 6, bm.note.as_deref().unwrap_or("-"), &data_format)
+            bm_sheet
+                .write_string_with_format(r, 6, bm.note.as_deref().unwrap_or("-"), &data_format)
                 .map_err(to_export_err)?;
-            bm_sheet.write_string_with_format(r, 7, format_ts(Some(bm.created_at)), &date_format)
+            bm_sheet
+                .write_string_with_format(r, 7, format_ts(Some(bm.created_at)), &date_format)
                 .map_err(to_export_err)?;
         }
 
@@ -349,34 +503,50 @@ impl XlsxExporter {
         ];
 
         for (col, (hdr, width)) in hl_headers.iter().enumerate() {
-            hl_sheet.set_column_width(col as u16, *width)
+            hl_sheet
+                .set_column_width(col as u16, *width)
                 .map_err(to_export_err)?;
-            hl_sheet.write_string_with_format(0, col as u16, *hdr, &table_header_format)
+            hl_sheet
+                .write_string_with_format(0, col as u16, *hdr, &table_header_format)
                 .map_err(to_export_err)?;
         }
 
         if !data.highlights.is_empty() {
-            hl_sheet.autofilter(0, 0, data.highlights.len() as u32, (hl_headers.len() - 1) as u16)
+            hl_sheet
+                .autofilter(
+                    0,
+                    0,
+                    data.highlights.len() as u32,
+                    (hl_headers.len() - 1) as u16,
+                )
                 .map_err(to_export_err)?;
         }
 
         for (idx, hl) in data.highlights.iter().enumerate() {
             let r = (idx + 1) as u32;
-            hl_sheet.write_string_with_format(r, 0, &hl.id, &data_format)
+            hl_sheet
+                .write_string_with_format(r, 0, &hl.id, &data_format)
                 .map_err(to_export_err)?;
-            hl_sheet.write_string_with_format(r, 1, &hl.document_title, &data_format)
+            hl_sheet
+                .write_string_with_format(r, 1, &hl.document_title, &data_format)
                 .map_err(to_export_err)?;
-            hl_sheet.write_string_with_format(r, 2, &hl.color, &data_format)
+            hl_sheet
+                .write_string_with_format(r, 2, &hl.color, &data_format)
                 .map_err(to_export_err)?;
-            hl_sheet.write_string_with_format(r, 3, &hl.selected_text, &data_format)
+            hl_sheet
+                .write_string_with_format(r, 3, &hl.selected_text, &data_format)
                 .map_err(to_export_err)?;
-            hl_sheet.write_string_with_format(r, 4, hl.note.as_deref().unwrap_or("-"), &data_format)
+            hl_sheet
+                .write_string_with_format(r, 4, hl.note.as_deref().unwrap_or("-"), &data_format)
                 .map_err(to_export_err)?;
-            hl_sheet.write_number_with_format(r, 5, hl.start_pos as f64, &number_format)
+            hl_sheet
+                .write_number_with_format(r, 5, hl.start_pos as f64, &number_format)
                 .map_err(to_export_err)?;
-            hl_sheet.write_number_with_format(r, 6, hl.end_pos as f64, &number_format)
+            hl_sheet
+                .write_number_with_format(r, 6, hl.end_pos as f64, &number_format)
                 .map_err(to_export_err)?;
-            hl_sheet.write_string_with_format(r, 7, format_ts(Some(hl.created_at)), &date_format)
+            hl_sheet
+                .write_string_with_format(r, 7, format_ts(Some(hl.created_at)), &date_format)
                 .map_err(to_export_err)?;
         }
 
@@ -395,26 +565,38 @@ impl XlsxExporter {
         ];
 
         for (col, (hdr, width)) in note_headers.iter().enumerate() {
-            note_sheet.set_column_width(col as u16, *width)
+            note_sheet
+                .set_column_width(col as u16, *width)
                 .map_err(to_export_err)?;
-            note_sheet.write_string_with_format(0, col as u16, *hdr, &table_header_format)
+            note_sheet
+                .write_string_with_format(0, col as u16, *hdr, &table_header_format)
                 .map_err(to_export_err)?;
         }
 
         if !data.notes.is_empty() {
-            note_sheet.autofilter(0, 0, data.notes.len() as u32, (note_headers.len() - 1) as u16)
+            note_sheet
+                .autofilter(
+                    0,
+                    0,
+                    data.notes.len() as u32,
+                    (note_headers.len() - 1) as u16,
+                )
                 .map_err(to_export_err)?;
         }
 
         for (idx, note) in data.notes.iter().enumerate() {
             let r = (idx + 1) as u32;
-            note_sheet.write_string_with_format(r, 0, &note.id, &data_format)
+            note_sheet
+                .write_string_with_format(r, 0, &note.id, &data_format)
                 .map_err(to_export_err)?;
-            note_sheet.write_string_with_format(r, 1, &note.document_title, &data_format)
+            note_sheet
+                .write_string_with_format(r, 1, &note.document_title, &data_format)
                 .map_err(to_export_err)?;
-            note_sheet.write_string_with_format(r, 2, &note.content, &data_format)
+            note_sheet
+                .write_string_with_format(r, 2, &note.content, &data_format)
                 .map_err(to_export_err)?;
-            note_sheet.write_string_with_format(r, 3, format_ts(Some(note.created_at)), &date_format)
+            note_sheet
+                .write_string_with_format(r, 3, format_ts(Some(note.created_at)), &date_format)
                 .map_err(to_export_err)?;
         }
 
