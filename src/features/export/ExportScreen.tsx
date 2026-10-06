@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { LoadingSkeleton } from "@/components/feedback/LoadingSkeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { documentList } from "@/features/library/api";
+import { listDocuments } from "@/features/library/api/documents";
 import { exportXlsx, exportPdf, exportShare } from "@/features/export/api";
 import type { DocumentSummary, ExportProgressPayload, ExportResult } from "@/types";
 import { listen } from "@tauri-apps/api/event";
@@ -42,10 +42,10 @@ export const ExportScreen: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const docs = await documentList();
+        const res = await listDocuments();
         if (!cancelled) {
-          setDocuments(docs);
-          setSelectedIds(docs.map((d) => d.id));
+          setDocuments(res.items);
+          setSelectedIds(res.items.map((d: DocumentSummary) => d.id));
         }
       } catch (err) {
         if (!cancelled) {
@@ -80,7 +80,7 @@ export const ExportScreen: React.FC = () => {
   };
 
   const handleSelectAllDocs = () => {
-    setSelectedIds(documents.map((d) => d.id));
+    setSelectedIds(documents.map((d: DocumentSummary) => d.id));
   };
 
   const handleDeselectAllDocs = () => {

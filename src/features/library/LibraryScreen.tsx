@@ -9,6 +9,7 @@ import {
   ArrowUpDown,
   X,
   Bookmark,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { EmptyState } from "@/components/feedback/EmptyState";
@@ -160,6 +161,15 @@ export const LibraryScreen: React.FC = () => {
 
   const headerActions = (
     <div className="flex items-center gap-1.5">
+      <button
+        type="button"
+        onClick={() => navigate("/export")}
+        aria-label="Export Reading Dossier"
+        title="Export Reading Dossier"
+        className="w-9 h-9 border border-border flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+      >
+        <FileSpreadsheet className="w-4 h-4 text-muted hover:text-foreground" />
+      </button>
       <button
         type="button"
         onClick={() => navigate("/annotations")}
