@@ -3,6 +3,7 @@ pub mod document;
 pub mod document_model;
 pub mod export;
 pub mod position;
+pub mod reminder;
 pub mod search;
 pub mod settings;
 pub mod tracker;
@@ -21,6 +22,7 @@ pub use document_model::{
 };
 pub use export::*;
 pub use position::{LogicalPosition, ResolvedPosition};
+pub use reminder::*;
 pub use search::*;
 pub use settings::{default_settings, SettingRecord};
 pub use tracker::*;

@@ -157,7 +157,7 @@ describe("ExportScreen component", () => {
 
     // Deselect one doc
     const checkboxes = screen.getAllByRole("checkbox");
-    fireEvent.click(checkboxes[0]); // uncheck doc-1
+    fireEvent.click(checkboxes[0]!); // uncheck doc-1
 
     fireEvent.click(screen.getByRole("button", { name: "Export .pdf" }));
 

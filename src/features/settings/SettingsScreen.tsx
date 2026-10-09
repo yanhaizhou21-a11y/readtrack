@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Bell } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { settingsGetAll, settingsSet } from "./api";
+import { reminderList } from "./reminderApi";
 import { useUiStore, type AppTheme } from "@/stores/ui.store";
 import { LoadingSkeleton } from "@/components/feedback/LoadingSkeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import type { AppSettings } from "@/types";
+import type { AppSettings, Reminder } from "@/types";
 
 function applyThemeClass(newTheme: AppTheme) {
   const root = document.documentElement;
@@ -26,6 +28,7 @@ function applyThemeClass(newTheme: AppTheme) {
 export const SettingsScreen: React.FC = () => {
   const navigate = useNavigate();
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
@@ -38,9 +41,13 @@ export const SettingsScreen: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await settingsGetAll();
+        const [data, reminderData] = await Promise.all([
+          settingsGetAll(),
+          reminderList().catch(() => []),
+        ]);
         if (!cancelled) {
           setSettings(data);
+          setReminders(reminderData);
           if (data.theme) {
             setTheme(data.theme);
             applyThemeClass(data.theme);
@@ -84,6 +91,21 @@ export const SettingsScreen: React.FC = () => {
       console.error("Failed to save language:", err);
     }
   };
+
+  const habit = reminders.find((r) => r.documentId === null);
+  let reminderSummary = "No active habit reminder";
+  if (habit) {
+    if (habit.enabled) {
+      const h = Math.floor((habit.timeOfDayMin ?? 1200) / 60);
+      const m = (habit.timeOfDayMin ?? 1200) % 60;
+      const timeStr = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+      const typeStr =
+        habit.scheduleType.charAt(0).toUpperCase() + habit.scheduleType.slice(1);
+      reminderSummary = `${typeStr} at ${timeStr} · Active`;
+    } else {
+      reminderSummary = "Notifications paused";
+    }
+  }
 
   return (
     <div className="flex-1 flex flex-col">
@@ -166,6 +188,29 @@ export const SettingsScreen: React.FC = () => {
               </div>
             </section>
 
+            {/* Reading Reminders Section */}
+            <section className="bg-surface rounded-card p-4 border border-border space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-semibold uppercase text-muted tracking-wider flex items-center gap-1.5">
+                    <Bell className="w-3.5 h-3.5 text-accent" />
+                    <span>Reading Reminders</span>
+                  </h2>
+                  <p className="font-serif text-xs text-foreground mt-0.5">
+                    {reminderSummary}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/settings/reminders")}
+                className="w-full min-h-[44px] py-2.5 px-3 border border-border bg-surface-2 text-foreground font-mono text-xs font-bold uppercase tracking-wide hover:bg-surface-3 transition-colors flex items-center justify-between"
+              >
+                <span>Configure Habit Schedules</span>
+                <span className="text-accent text-[11px] font-sans">Open &rarr;</span>
+              </button>
+            </section>
+
             {/* Export & Dossiers Section */}
             <section className="bg-surface rounded-card p-4 border border-border space-y-3">
               <div className="flex items-center justify-between">
@@ -205,7 +250,7 @@ export const SettingsScreen: React.FC = () => {
                 ReadTrack v0.1.0
               </h2>
               <p className="font-mono text-[11px] text-muted mt-1">
-                Phase 1 — Foundation Shell
+                Phase 1: Foundation Shell
               </p>
             </section>
           </>

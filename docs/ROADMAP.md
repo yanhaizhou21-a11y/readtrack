@@ -71,11 +71,11 @@ Kerjakan urut. Centang `[x]` saat selesai **dan** lolos Definition of Done (`AGE
 **Exit:** file `.xlsx` valid di Excel/Sheets, PDF profesional dan terbaca, bisa dibagikan dari device.
 
 ## Phase 7 — Reminders
-- [ ] `reminder_*` CRUD + service jadwal (daily/weekdays/custom/once)
-- [ ] `tauri-plugin-notification` jadwal lokal; izin runtime; `reminder_sync_notifications` saat start/ubah
-- [ ] Isi notifikasi: dokumen terakhir + bab + persen; tap → buka reader di posisi
-- [ ] UI Reminder settings
-- [ ] Test hitung waktu jadwal (zona waktu/DST)
+- [x] `reminder_*` CRUD + service jadwal (daily/weekdays/custom/once)
+- [x] `tauri-plugin-notification` jadwal lokal; izin runtime; `reminder_sync_notifications` saat start/ubah
+- [x] Isi notifikasi: dokumen terakhir + bab + persen; tap → buka reader di posisi
+- [x] UI Reminder settings
+- [x] Test hitung waktu jadwal (zona waktu/DST)
 **Exit:** notifikasi lokal muncul sesuai jadwal tanpa internet.
 
 ## Phase 8 — Polish

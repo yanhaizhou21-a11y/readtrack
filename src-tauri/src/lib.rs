@@ -21,6 +21,7 @@ pub struct AppState {
     pub annotation_service: services::AnnotationService,
     pub search_service: services::SearchService,
     pub export_service: services::ExportService,
+    pub reminder_service: services::ReminderService,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -28,6 +29,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_log::Builder::new().build())
+        .plugin(tauri_plugin_notification::init())
         .register_asynchronous_uri_scheme_protocol("rt", |app_handle, request, responder| {
             let app_handle = app_handle.app_handle().clone();
             let uri = request.uri().to_string();
@@ -200,6 +202,7 @@ pub fn run() {
                 let annotation_service = services::AnnotationService::new(pool.clone());
                 let search_service = services::SearchService::new(pool.clone());
                 let export_service = services::ExportService::new(pool.clone(), storage.clone());
+                let reminder_service = services::ReminderService::new(pool.clone());
 
                 // Run crash recovery for orphaned sessions on startup
                 if let Err(e) = tracker_service.crash_recovery().await {
@@ -207,6 +210,11 @@ pub fn run() {
                 }
 
                 tracker_service.set_app_handle(app_handle.clone()).await;
+                reminder_service.set_app_handle(app_handle.clone()).await;
+
+                if let Err(e) = reminder_service.sync_notifications().await {
+                    eprintln!("Failed to sync reminder schedules: {}", e);
+                }
 
                 app_handle.manage(AppState {
                     db: pool,
@@ -218,6 +226,7 @@ pub fn run() {
                     annotation_service,
                     search_service,
                     export_service,
+                    reminder_service,
                 });
             });
 
@@ -262,7 +271,13 @@ pub fn run() {
             commands::document_search,
             commands::export_xlsx,
             commands::export_pdf,
-            commands::export_share
+            commands::export_share,
+            commands::reminder_list,
+            commands::reminder_get,
+            commands::reminder_upsert,
+            commands::reminder_delete,
+            commands::reminder_sync_notifications,
+            commands::reminder_test_notify
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

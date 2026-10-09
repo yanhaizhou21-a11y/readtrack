@@ -12,18 +12,32 @@ import {
   Archive,
   ArchiveRestore,
   Trash2,
+  Bell,
 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import type { DocumentDetail } from "@/types";
+import type { DocumentDetail, Reminder, ReminderScheduleType } from "@/types";
 import {
   getDocument,
   renameDocument,
   archiveDocument,
   deleteDocument,
 } from "./api/documents";
+import {
+  reminderList,
+  reminderUpsert,
+  reminderDelete,
+} from "@/features/settings/reminderApi";
 import { RenameDialog } from "./components/RenameDialog";
 import { DeleteDialog } from "./components/DeleteDialog";
+import { BookReminderDialog } from "./components/BookReminderDialog";
+
+function minToTimeString(min: number | null | undefined): string {
+  if (min === null || min === undefined) return "20:00";
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+}
 
 export const DocumentDetailScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,14 +52,21 @@ export const DocumentDetailScreen: React.FC = () => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [reminder, setReminder] = useState<Reminder | null>(null);
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
 
   const fetchDetail = React.useCallback(async () => {
     if (!id) return;
     try {
       setLoading(true);
       setError(null);
-      const detail = await getDocument(id);
+      const [detail, reminders] = await Promise.all([
+        getDocument(id),
+        reminderList().catch(() => []),
+      ]);
       setDocument(detail);
+      const docReminder = reminders.find((r) => r.documentId === id) ?? null;
+      setReminder(docReminder);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to load document details";
       setError(msg);
@@ -92,6 +113,31 @@ export const DocumentDetailScreen: React.FC = () => {
       console.error("Delete failed:", err);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleSaveReminder = async (input: {
+    id?: string;
+    documentId: string;
+    enabled: boolean;
+    scheduleType: ReminderScheduleType;
+    timeOfDayMin: number;
+    daysOfWeek?: number | null;
+  }) => {
+    try {
+      const saved = await reminderUpsert(input);
+      setReminder(saved);
+    } catch (err) {
+      console.error("Failed to save reminder:", err);
+    }
+  };
+
+  const handleDeleteReminder = async (remId: string) => {
+    try {
+      await reminderDelete(remId);
+      setReminder(null);
+    } catch (err) {
+      console.error("Failed to delete reminder:", err);
     }
   };
 
@@ -262,6 +308,36 @@ export const DocumentDetailScreen: React.FC = () => {
           </div>
         </div>
 
+        {/* Contextual Reading Reminder Row */}
+        <div className="bg-card border border-border rounded-container p-3.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-control bg-accent/10 text-accent shrink-0">
+              <Bell className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-medium text-foreground truncate">
+                {reminder?.enabled
+                  ? `Reminder: ${reminder.scheduleType} at ${minToTimeString(reminder.timeOfDayMin)}`
+                  : reminder
+                  ? "Reminder paused"
+                  : "No reminder scheduled"}
+              </div>
+              <div className="text-[11px] text-muted truncate">
+                {reminder?.enabled
+                  ? "Alerts scheduled for this book"
+                  : "Set a dedicated schedule for this book"}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsReminderOpen(true)}
+            className="min-h-[44px] px-3 border border-border rounded-control bg-surface-2 hover:bg-surface-3 text-xs font-medium text-foreground transition-colors shrink-0"
+          >
+            {reminder ? "Edit" : "Set"}
+          </button>
+        </div>
+
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-3 pt-2">
           <button
@@ -317,6 +393,15 @@ export const DocumentDetailScreen: React.FC = () => {
         isDeleting={isDeleting}
         onConfirm={handleDelete}
         onClose={() => setIsDeleteOpen(false)}
+      />
+
+      <BookReminderDialog
+        isOpen={isReminderOpen}
+        document={document}
+        reminder={reminder}
+        onSave={handleSaveReminder}
+        onDelete={handleDeleteReminder}
+        onClose={() => setIsReminderOpen(false)}
       />
     </div>
   );
