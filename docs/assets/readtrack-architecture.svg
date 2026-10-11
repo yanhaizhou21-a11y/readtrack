@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="100%" height="100%" style="background:#090d16; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <defs>
+    <linearGradient id="bgGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1726" />
+      <stop offset="100%" stop-color="#060911" />
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="640" fill="url(#bgGlow)" />
+
+  <!-- Subtle Grid Lines -->
+  <g stroke="#1e293b" stroke-width="1" opacity="0.4">
+    <line x1="60" y1="0" x2="60" y2="640" />
+    <line x1="240" y1="0" x2="240" y2="640" />
+    <line x1="600" y1="0" x2="600" y2="640" />
+    <line x1="960" y1="0" x2="960" y2="640" />
+    <line x1="1140" y1="0" x2="1140" y2="640" />
+  </g>
+
+  <!-- Title Badge -->
+  <g transform="translate(60, 40)">
+    <rect width="210" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1" />
+    <circle cx="16" cy="14" r="5" fill="#38bdf8" />
+    <text x="30" y="18" fill="#94a3b8" font-size="12" font-weight="600" letter-spacing="0.05em">READTRACK ARCHITECTURE</text>
+  </g>
+
+  <!-- Main Subtitle -->
+  <text x="60" y="100" fill="#f8fafc" font-size="22" font-weight="700">Mobile-First, Local-First System Flow</text>
+  <text x="60" y="124" fill="#94a3b8" font-size="13">Strict separation between webview presentation and Rust security boundary with 100% offline persistence.</text>
+
+  <!-- ==================== LAYER 1: UI & PRESENTATION ==================== -->
+  <g transform="translate(60, 150)" filter="url(#cardShadow)">
+    <!-- Container Card -->
+    <rect width="1080" height="120" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1.5" />
+    
+    <!-- Header Pill -->
+    <rect x="20" y="16" width="220" height="24" rx="4" fill="#1e293b" />
+    <text x="30" y="32" fill="#38bdf8" font-size="11" font-weight="700" letter-spacing="0.05em">FRONTEND PRESENTATION</text>
+    <text x="250" y="32" fill="#64748b" font-size="12">React 18 · TypeScript · Vite · Tailwind · Zustand UI State</text>
+
+    <!-- Sub-Cards -->
+    <!-- Card 1: Reader UI -->
+    <g transform="translate(20, 52)">
+      <rect width="250" height="52" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="14" y="24" fill="#f1f5f9" font-size="13" font-weight="600">Multi-Format Viewports</text>
+      <text x="14" y="42" fill="#94a3b8" font-size="11">PDF.js · TipTap · Plain Text</text>
+    </g>
+
+    <!-- Card 2: Telemetry Hook -->
+    <g transform="translate(285, 52)">
+      <rect width="250" height="52" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="14" y="24" fill="#f1f5f9" font-size="13" font-weight="600">Reading Tracker Hook</text>
+      <text x="14" y="42" fill="#94a3b8" font-size="11">Activity listener · Scroll debounce</text>
+    </g>
+
+    <!-- Card 3: VirtualGrid -->
+    <g transform="translate(550, 52)">
+      <rect width="250" height="52" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="14" y="24" fill="#f1f5f9" font-size="13" font-weight="600">Library Virtualization</text>
+      <text x="14" y="42" fill="#94a3b8" font-size="11">VirtualGrid (under 30 DOM nodes)</text>
+    </g>
+
+    <!-- Card 4: Local Polish -->
+    <g transform="translate(815, 52)">
+      <rect width="245" height="52" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1" />
+      <text x="14" y="24" fill="#f1f5f9" font-size="13" font-weight="600">Bilingual &amp; Haptics</text>
+      <text x="14" y="42" fill="#94a3b8" font-size="11">i18n (EN/ID) · Web Vibration API</text>
+    </g>
+  </g>
+
+  <!-- Connection: Layer 1 to Layer 2 -->
+  <g stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 4" opacity="0.8">
+    <line x1="300" y1="270" x2="300" y2="300" />
+    <line x1="600" y1="270" x2="600" y2="300" />
+    <line x1="900" y1="270" x2="900" y2="300" />
+  </g>
+
+  <!-- ==================== LAYER 2: TAURI 2 IPC ==================== -->
+  <g transform="translate(180, 290)">
+    <rect width="840" height="34" rx="17" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+    <circle cx="24" cy="17" r="6" fill="#38bdf8" />
+    <text x="40" y="22" fill="#f8fafc" font-size="12" font-weight="600">Tauri 2 IPC Boundary</text>
+    <text x="210" y="22" fill="#94a3b8" font-size="11">Type-Safe Commands (document_*, tracker_*, reminder_*, export_*) with Zod &amp; Serde DTO validation</text>
+  </g>
+
+  <!-- Connection: Layer 2 to Layer 3 -->
+  <g stroke="#818cf8" stroke-width="2" opacity="0.8">
+    <line x1="300" y1="324" x2="300" y2="354" />
+    <line x1="600" y1="324" x2="600" y2="354" />
+    <line x1="900" y1="324" x2="900" y2="354" />
+  </g>
+
+  <!-- ==================== LAYER 3: RUST CORE APPLICATION ==================== -->
+  <g transform="translate(60, 354)" filter="url(#cardShadow)">
+    <rect width="1080" height="135" rx="10" fill="#111827" stroke="#1f2937" stroke-width="1.5" />
+
+    <!-- Header Pill -->
+    <rect x="20" y="16" width="220" height="24" rx="4" fill="#1f2937" />
+    <text x="30" y="32" fill="#818cf8" font-size="11" font-weight="700" letter-spacing="0.05em">RUST CORE APPLICATION</text>
+    <text x="250" y="32" fill="#64748b" font-size="12">Security Boundary · Business Logic · State Machines · Tokio · Tracing</text>
+
+    <!-- Sub-Cards -->
+    <!-- Card 1: Parsers -->
+    <g transform="translate(20, 52)">
+      <rect width="250" height="66" rx="6" fill="#090d16" stroke="#374151" stroke-width="1" />
+      <text x="14" y="24" fill="#f9fafb" font-size="13" font-weight="600">Document Normalizers</text>
+      <text x="14" y="42" fill="#9ca3af" font-size="11">Blake3 deduplication hash</text>
+      <text x="14" y="58" fill="#6b7280" font-size="10">EPUB Quick-XML · Pulldown-Cmark</text>
+    </g>
+
+    <!-- Card 2: Tracker State Machine -->
+    <g transform="translate(285, 52)">
+      <rect width="250" height="66" rx="6" fill="#090d16" stroke="#374151" stroke-width="1" />
+      <text x="14" y="24" fill="#f9fafb" font-size="13" font-weight="600">Reading Detection Engine</text>
+      <text x="14" y="42" fill="#9ca3af" font-size="11">45s idle filter · 10s min chunk</text>
+      <text x="14" y="58" fill="#6b7280" font-size="10">Real-time WPM velocity calculation</text>
+    </g>
+
+    <!-- Card 3: Reminder Scheduler -->
+    <g transform="translate(550, 52)">
+      <rect width="250" height="66" rx="6" fill="#090d16" stroke="#374151" stroke-width="1" />
+      <text x="14" y="24" fill="#f9fafb" font-size="13" font-weight="600">Offline Habit Scheduler</text>
+      <text x="14" y="42" fill="#9ca3af" font-size="11">Timezone &amp; DST calculations</text>
+      <text x="14" y="58" fill="#6b7280" font-size="10">Quiet hour suppression · Contextual payload</text>
+    </g>
+
+    <!-- Card 4: Report Exporters -->
+    <g transform="translate(815, 52)">
+      <rect width="245" height="66" rx="6" fill="#090d16" stroke="#374151" stroke-width="1" />
+      <text x="14" y="24" fill="#f9fafb" font-size="13" font-weight="600">Native Report Exporters</text>
+      <text x="14" y="42" fill="#9ca3af" font-size="11">rust_xlsxwriter (Multi-sheet Excel)</text>
+      <text x="14" y="58" fill="#6b7280" font-size="10">printpdf (Vector reading summaries)</text>
+    </g>
+  </g>
+
+  <!-- Connection: Layer 3 to Layer 4 -->
+  <g stroke="#10b981" stroke-width="2" opacity="0.8">
+    <line x1="380" y1="489" x2="380" y2="520" />
+    <line x1="820" y1="489" x2="820" y2="520" />
+  </g>
+
+  <!-- ==================== LAYER 4: LOCAL PERSISTENCE ==================== -->
+  <g transform="translate(60, 520)">
+    <!-- Box 1: SQLite -->
+    <g transform="translate(0, 0)">
+      <rect width="525" height="85" rx="8" fill="#064e3b" fill-opacity="0.25" stroke="#059669" stroke-width="1.5" />
+      <text x="20" y="28" fill="#34d399" font-size="14" font-weight="700">Embedded SQLite (WAL Mode)</text>
+      <text x="20" y="48" fill="#cbd5e1" font-size="11">Single source of persistent truth. Stores books metadata, reading sessions,</text>
+      <text x="20" y="66" fill="#94a3b8" font-size="11">reading events (debounced batching), bookmarks, highlights, and reminder settings.</text>
+    </g>
+
+    <!-- Box 2: Local Filesystem -->
+    <g transform="translate(555, 0)">
+      <rect width="525" height="85" rx="8" fill="#78350f" fill-opacity="0.25" stroke="#d97706" stroke-width="1.5" />
+      <text x="20" y="28" fill="#fbbf24" font-size="14" font-weight="700">Local Filesystem Storage</text>
+      <text x="20" y="48" fill="#cbd5e1" font-size="11">Document binaries saved in app storage path, organized by Blake3 hash.</text>
+      <text x="20" y="66" fill="#94a3b8" font-size="11">Zero SQLite BLOB overhead. Direct local file reads without network calls.</text>
+    </g>
+  </g>
+</svg>

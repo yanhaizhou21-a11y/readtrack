@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="100%" style="background:#090d16; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <defs>
+    <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+    <filter id="fShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="360" fill="#090d16" />
+
+  <!-- Header -->
+  <g transform="translate(50, 30)">
+    <rect width="250" height="26" rx="4" fill="#1e293b" />
+    <circle cx="14" cy="13" r="4" fill="#34d399" />
+    <text x="26" y="17" fill="#cbd5e1" font-size="11" font-weight="700" letter-spacing="0.05em">READING TELEMETRY STATE FLOW</text>
+    <text x="0" y="55" fill="#f8fafc" font-size="18" font-weight="700">How ReadTrack Measures Pure Reading vs Idle Pauses</text>
+  </g>
+
+  <!-- Step 1 -->
+  <g transform="translate(50, 115)" filter="url(#fShadow)">
+    <rect width="240" height="180" rx="8" fill="#131c2e" stroke="#1e293b" stroke-width="1.5" />
+    <rect x="16" y="16" width="32" height="32" rx="6" fill="#0284c7" fill-opacity="0.3" />
+    <text x="26" y="38" fill="#38bdf8" font-size="16" font-weight="700">1</text>
+    <text x="16" y="74" fill="#f8fafc" font-size="14" font-weight="600">Interaction Trigger</text>
+    <text x="16" y="98" fill="#94a3b8" font-size="12">User scrolls, turns page, or interacts with the viewport.</text>
+    <text x="16" y="132" fill="#64748b" font-size="11">Events emitted: Page visible,</text>
+    <text x="16" y="148" fill="#64748b" font-size="11">character offset changed.</text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <g stroke="#38bdf8" stroke-width="2" opacity="0.7">
+    <line x1="295" y1="205" x2="330" y2="205" />
+    <polygon points="330,201 338,205 330,209" fill="#38bdf8" />
+  </g>
+
+  <!-- Step 2 -->
+  <g transform="translate(345, 115)" filter="url(#fShadow)">
+    <rect width="240" height="180" rx="8" fill="#131c2e" stroke="#1e293b" stroke-width="1.5" />
+    <rect x="16" y="16" width="32" height="32" rx="6" fill="#4f46e5" fill-opacity="0.3" />
+    <text x="26" y="38" fill="#818cf8" font-size="16" font-weight="700">2</text>
+    <text x="16" y="74" fill="#f8fafc" font-size="14" font-weight="600">Idle Filter Guard</text>
+    <text x="16" y="98" fill="#94a3b8" font-size="12">Inactivity timer counts up to 45 seconds.</text>
+    <text x="16" y="132" fill="#818cf8" font-size="11">If idle > 45s: pauses session.</text>
+    <text x="16" y="148" fill="#94a3b8" font-size="11">Minimum chunk: 10s of focus.</text>
+  </g>
+
+  <!-- Arrow 2 to 3 -->
+  <g stroke="#818cf8" stroke-width="2" opacity="0.7">
+    <line x1="590" y1="205" x2="625" y2="205" />
+    <polygon points="625,201 633,205 625,209" fill="#818cf8" />
+  </g>
+
+  <!-- Step 3 -->
+  <g transform="translate(640, 115)" filter="url(#fShadow)">
+    <rect width="240" height="180" rx="8" fill="#131c2e" stroke="#1e293b" stroke-width="1.5" />
+    <rect x="16" y="16" width="32" height="32" rx="6" fill="#d97706" fill-opacity="0.3" />
+    <text x="26" y="38" fill="#fbbf24" font-size="16" font-weight="700">3</text>
+    <text x="16" y="74" fill="#f8fafc" font-size="14" font-weight="600">Velocity Engine</text>
+    <text x="16" y="98" fill="#94a3b8" font-size="12">Words traversed divided by pure reading duration.</text>
+    <text x="16" y="132" fill="#fbbf24" font-size="11">Computes real-time WPM.</text>
+    <text x="16" y="148" fill="#94a3b8" font-size="11">Updates chapter progress %.</text>
+  </g>
+
+  <!-- Arrow 3 to 4 -->
+  <g stroke="#34d399" stroke-width="2" opacity="0.7">
+    <line x1="885" y1="205" x2="920" y2="205" />
+    <polygon points="920,201 928,205 920,209" fill="#34d399" />
+  </g>
+
+  <!-- Step 4 -->
+  <g transform="translate(935, 115)" filter="url(#fShadow)">
+    <rect width="215" height="180" rx="8" fill="#064e3b" fill-opacity="0.3" stroke="#059669" stroke-width="1.5" />
+    <rect x="16" y="16" width="32" height="32" rx="6" fill="#059669" fill-opacity="0.4" />
+    <text x="26" y="38" fill="#34d399" font-size="16" font-weight="700">4</text>
+    <text x="16" y="74" fill="#34d399" font-size="14" font-weight="600">Debounced Batch</text>
+    <text x="16" y="98" fill="#cbd5e1" font-size="12">Writes to SQLite only in debounced chunks.</text>
+    <text x="16" y="132" fill="#34d399" font-size="11">Zero scroll-lag &amp; no I/O thrash.</text>
+    <text x="16" y="148" fill="#94a3b8" font-size="11">Battery-friendly persistence.</text>
+  </g>
+</svg>
