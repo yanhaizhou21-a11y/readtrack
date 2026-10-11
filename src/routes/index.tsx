@@ -30,4 +30,8 @@ export const router = createBrowserRouter([
       { path: "settings/reminders", element: <ReminderSettingsScreen /> },
     ],
   },
-]);
+], {
+  future: {
+    v7_relativeSplatPath: true,
+  },
+});

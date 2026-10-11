@@ -6,7 +6,7 @@ import { ErrorState } from "@/components/feedback/ErrorState";
 import { listDocuments } from "@/features/library/api/documents";
 import { exportXlsx, exportPdf, exportShare } from "@/features/export/api";
 import type { DocumentSummary, ExportProgressPayload, ExportResult } from "@/types";
-import { listen } from "@tauri-apps/api/event";
+import { safeListen } from "@/lib/ipc";
 import {
   FileSpreadsheet,
   FileText,
@@ -64,7 +64,7 @@ export const ExportScreen: React.FC = () => {
     loadLibrary();
 
     // Listen for real-time progress events from Rust backend
-    const unlistenPromise = listen<ExportProgressPayload>("export_progress", (event) => {
+    const unlistenPromise = safeListen<ExportProgressPayload>("export_progress", (event) => {
       if (!cancelled) {
         setProgress(event.payload);
       }

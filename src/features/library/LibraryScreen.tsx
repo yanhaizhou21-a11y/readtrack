@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { listen } from "@tauri-apps/api/event";
+import { safeListen } from "@/lib/ipc";
 import {
   Search,
   Plus,
@@ -91,7 +91,7 @@ export const LibraryScreen: React.FC = () => {
   // Listen for library_changed events
   useEffect(() => {
     let unlisten: (() => void) | undefined;
-    listen("library_changed", () => {
+    safeListen("library_changed", () => {
       fetchDocuments();
     }).then((fn) => {
       unlisten = fn;

@@ -37,7 +37,7 @@ import {
   ReadingProgressUpdatedPayload,
   Bookmark,
 } from "@/types";
-import { listen } from "@tauri-apps/api/event";
+import { safeListen } from "@/lib/ipc";
 import { triggerHaptic } from "@/lib/haptic";
 import { useTranslation } from "@/i18n";
 
@@ -117,7 +117,7 @@ export const ReaderScreen: React.FC = () => {
     if (!id) return;
 
     let unlisten: (() => void) | undefined;
-    listen<ReadingProgressUpdatedPayload>("reading_progress_updated", (event) => {
+    safeListen<ReadingProgressUpdatedPayload>("reading_progress_updated", (event) => {
       if (event.payload.documentId === id) {
         setProgress(event.payload.progress);
       }

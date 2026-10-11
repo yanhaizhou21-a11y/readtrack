@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "@/routes";
 import { useUiStore } from "@/stores/ui.store";
-import { listen } from "@tauri-apps/api/event";
+import { safeListen } from "@/lib/ipc";
 import { onAction, type ActionNotification } from "@/lib/notification";
 import { settingsGetAll } from "@/features/settings/api";
 import { parseImportSource } from "@/lib/deepLink";
@@ -57,7 +57,7 @@ export const App: React.FC = () => {
     }
 
     // Tauri external file open event (e.g. Android intent / file association)
-    listen<string | { path?: string; source?: string }>("open-file", (event) => {
+    safeListen<string | { path?: string; source?: string }>("open-file", (event) => {
       const raw =
         typeof event.payload === "string"
           ? event.payload
@@ -73,7 +73,7 @@ export const App: React.FC = () => {
       .catch(() => {});
 
     // Tauri deep-link event (e.g. rt://import?source=...)
-    listen<string | { url?: string }>("deep-link", (event) => {
+    safeListen<string | { url?: string }>("deep-link", (event) => {
       const rawUrl = typeof event.payload === "string" ? event.payload : event.payload?.url;
       const parsed = parseImportSource(rawUrl);
       if (parsed) {
@@ -85,7 +85,7 @@ export const App: React.FC = () => {
       })
       .catch(() => {});
 
-    listen<NotificationPayload>("reminder_notification_triggered", (event) => {
+    safeListen<NotificationPayload>("reminder_notification_triggered", (event) => {
       if (event.payload?.documentId) {
         router.navigate(`/read/${event.payload.documentId}`);
       }
@@ -114,5 +114,5 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} future={{ v7_startTransition: true }} />;
 };

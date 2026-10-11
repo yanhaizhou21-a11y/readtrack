@@ -1,4 +1,5 @@
-import { invoke as tauriInvoke } from "@tauri-apps/api/core";
+import { invoke as tauriInvoke, isTauri } from "@tauri-apps/api/core";
+import { listen as tauriListen, type EventCallback, type UnlistenFn } from "@tauri-apps/api/event";
 import { z, type ZodType } from "zod";
 import type { AppErrorDto, AppErrorCode } from "@/types";
 
@@ -99,3 +100,31 @@ export async function ipc<T>(
 
   return raw as T;
 }
+
+export function isTauriEnvironment(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    if (typeof isTauri === "function") {
+      return isTauri();
+    }
+    return "__TAURI_INTERNALS__" in window;
+  } catch {
+    return false;
+  }
+}
+
+export async function safeListen<T>(
+  event: string,
+  handler: EventCallback<T>
+): Promise<UnlistenFn> {
+  if (!isTauriEnvironment()) {
+    return () => {};
+  }
+  try {
+    return await tauriListen<T>(event, handler);
+  } catch (err: unknown) {
+    console.warn(`[IPC] Failed to listen to event "${event}":`, err);
+    return () => {};
+  }
+}
+

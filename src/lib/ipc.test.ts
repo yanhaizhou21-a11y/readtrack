@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { z } from "zod";
-import { ipc, IpcException, parseIpcError } from "./ipc";
+import { ipc, IpcException, parseIpcError, safeListen } from "./ipc";
 import { invoke } from "@tauri-apps/api/core";
 
 vi.mock("@tauri-apps/api/core", () => ({
@@ -61,5 +61,12 @@ describe("IPC client wrapper", () => {
     expect(err.code).toBe("Internal");
     expect(err.message).toBe("Some panic or network drop");
     expect(err.retryable).toBe(false);
+  });
+
+  it("safeListen safely returns no-op when outside Tauri runtime", async () => {
+    const unlisten = await safeListen("dummy_event", () => {});
+    expect(typeof unlisten).toBe("function");
+    // Executing the no-op unlisten does not throw
+    expect(() => unlisten()).not.toThrow();
   });
 });

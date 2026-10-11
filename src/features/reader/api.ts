@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { ipc } from "@/lib/ipc";
 import { z } from "zod";
 
 export const LogicalPositionSchema = z.object({
@@ -45,17 +45,17 @@ export const ReadingProgressSchema = z.object({
 export type ReadingProgress = z.infer<typeof ReadingProgressSchema>;
 
 export const document_resolve_position = async (position: LogicalPosition): Promise<ResolvedPosition> => {
-  return invoke("document_resolve_position", { position });
+  return ipc("document_resolve_position", { position }, ResolvedPositionSchema);
 };
 
 export const reading_update_progress = async (documentId: string, position: LogicalPosition): Promise<void> => {
-  return invoke("reading_update_progress", { documentId, position });
+  return ipc("reading_update_progress", { documentId, position });
 };
 
 export const reading_get_progress = async (documentId: string): Promise<ReadingProgress> => {
-  return invoke("reading_get_progress", { documentId });
+  return ipc("reading_get_progress", { documentId }, ReadingProgressSchema);
 };
 
 export const document_get_sections = async (id: string, fromIndex?: number, count?: number): Promise<unknown[]> => {
-  return invoke("document_get_sections", { id, fromIndex, count });
+  return ipc("document_get_sections", { id, fromIndex, count });
 };
