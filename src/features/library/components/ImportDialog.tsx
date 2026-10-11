@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
 import { X, Upload, Loader2, AlertCircle, FileText, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { importDocumentBytes } from "@/features/library/api/documents";
+import { triggerHaptic } from "@/lib/haptic";
+import { useTranslation } from "@/i18n";
 
 export interface ImportDialogProps {
   isOpen: boolean;
@@ -19,6 +21,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
   onImport,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [manualPath, setManualPath] = useState("");
   const [showManualInput, setShowManualInput] = useState(false);
@@ -78,6 +81,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
             fileName: selectedFile.name,
             data: bytes,
           });
+          triggerHaptic("success");
           onSuccess?.();
           onClose();
         }
@@ -93,7 +97,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
     // Fallback: manual path was entered
     const cleanPath = manualPath.trim();
     if (!cleanPath) {
-      setLocalError("Please choose a document to import.");
+      setLocalError(t("library.selectPrompt"));
       return;
     }
 
@@ -117,7 +121,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
           <div className="flex items-center gap-2">
             <Upload className="w-5 h-5 text-accent" />
             <h2 className="font-serif font-black text-xl text-foreground uppercase tracking-tight">
-              Import Document
+              {t("library.importDocument")}
             </h2>
           </div>
           <button
@@ -163,10 +167,10 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
               </div>
               <div>
                 <p className="font-serif font-bold text-base text-foreground mb-1">
-                  Choose Document to Import
+                  {t("library.chooseDocument")}
                 </p>
                 <p className="text-xs text-muted">
-                  Tap to browse from your device storage or files
+                  {t("library.browseHint")}
                 </p>
               </div>
               <div className="px-3 py-1 bg-surface border border-border text-[11px] font-mono text-muted uppercase">
@@ -218,7 +222,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
               ) : (
                 <ChevronDown className="w-3.5 h-3.5" />
               )}
-              <span>Advanced: Enter path manually</span>
+              <span>{t("library.advancedManual")}</span>
             </button>
 
             {showManualInput && (
@@ -259,7 +263,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
               className="h-10 px-4 border border-border bg-transparent text-foreground font-medium text-xs uppercase tracking-wider hover:bg-neutral-100 transition-colors"
               style={{ borderRadius: "0px" }}
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
@@ -270,12 +274,12 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({
               {effectiveLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Importing...</span>
+                  <span>{t("library.importing")}</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Import Document</span>
+                  <span>{t("library.importDocument")}</span>
                 </>
               )}
             </button>

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FileText, Copy, Check, X } from "lucide-react";
+import { triggerHaptic } from "@/lib/haptic";
+import { useTranslation } from "@/i18n";
 import { HighlightColor } from "@/types";
 
 export interface SelectionToolbarProps {
@@ -25,6 +27,7 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
   onAddNote,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [isNoteOpen, setIsNoteOpen] = useState(false);
   const [noteContent, setNoteContent] = useState("");
   const [copied, setCopied] = useState(false);
@@ -71,17 +74,25 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
       onClick={(e) => e.stopPropagation()}
     >
       {!isNoteOpen ? (
-        <div className="flex items-center gap-1 p-1">
-          {/* Highlight Color Pickers */}
-          <div className="flex items-center gap-1 px-1 border-r border-border">
+        <div className="flex items-center gap-0.5 p-1">
+          {/* Highlight Color Pickers with 44px touch target */}
+          <div className="flex items-center border-r border-border pr-1">
             {COLORS.map((col) => (
               <button
                 key={col.id}
                 type="button"
-                onClick={() => onHighlight(col.id)}
-                title={`Highlight in ${col.id}`}
-                className={`w-5 h-5 border border-foreground/60 transition-transform hover:scale-125 ${col.bg}`}
-              />
+                onClick={() => {
+                  triggerHaptic("tick");
+                  onHighlight(col.id);
+                }}
+                aria-label={t("selection.highlightColor", { color: col.id })}
+                title={t("selection.highlightColor", { color: col.id })}
+                className="w-8 h-8 min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center p-1"
+              >
+                <div
+                  className={`w-5 h-5 border border-foreground/60 transition-transform hover:scale-125 ${col.bg}`}
+                />
+              </button>
             ))}
           </div>
 
@@ -89,34 +100,36 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
           <button
             type="button"
             onClick={() => setIsNoteOpen(true)}
-            title="Attach Note"
-            className="flex items-center gap-1 px-2 py-1 text-xs font-mono uppercase text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            aria-label={t("selection.note")}
+            title={t("selection.note")}
+            className="flex items-center gap-1 min-h-[44px] px-2.5 py-1 text-xs font-mono uppercase text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <FileText className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Note</span>
+            <span className="hidden sm:inline">{t("selection.note")}</span>
           </button>
 
           {/* Copy Button */}
           <button
             type="button"
             onClick={handleCopy}
-            title="Copy passage"
-            className="flex items-center gap-1 px-2 py-1 text-xs font-mono uppercase text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            aria-label={t("selection.copy")}
+            title={t("selection.copy")}
+            className="flex items-center gap-1 min-h-[44px] px-2.5 py-1 text-xs font-mono uppercase text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             {copied ? (
               <Check className="w-3.5 h-3.5 text-accent" />
             ) : (
               <Copy className="w-3.5 h-3.5" />
             )}
-            <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+            <span className="hidden sm:inline">{copied ? t("selection.copied") : t("selection.copy")}</span>
           </button>
 
           {/* Close Button */}
           <button
             type="button"
             onClick={onClose}
-            aria-label="Dismiss selection"
-            className="p-1 text-muted hover:text-foreground transition-colors ml-0.5"
+            aria-label={t("selection.dismiss")}
+            className="w-8 h-8 min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-muted hover:text-foreground transition-colors ml-0.5"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -125,11 +138,12 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
         /* Note Inline Composer */
         <div className="p-2 w-64 space-y-2">
           <div className="flex items-center justify-between text-[10px] font-mono uppercase text-muted border-b border-border pb-1">
-            <span>Marginal Note</span>
+            <span>{t("selection.marginalNote")}</span>
             <button
               type="button"
               onClick={() => setIsNoteOpen(false)}
-              className="text-muted hover:text-foreground"
+              aria-label={t("selection.dismiss")}
+              className="w-6 h-6 min-w-[36px] min-h-[36px] flex items-center justify-center text-muted hover:text-foreground"
             >
               <X className="w-3 h-3" />
             </button>
@@ -138,7 +152,7 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
             value={noteContent}
             onChange={(e) => setNoteContent(e.target.value)}
             rows={2}
-            placeholder="Type note on passage..."
+            placeholder={t("selection.typeNote")}
             className="w-full bg-background border border-border p-1.5 text-xs font-serif text-foreground focus:outline-none focus:border-accent"
             autoFocus
           />
@@ -146,16 +160,16 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
             <button
               type="button"
               onClick={() => setIsNoteOpen(false)}
-              className="px-2 py-1 border border-border text-muted hover:text-foreground"
+              className="min-h-[36px] px-2.5 py-1 border border-border text-muted hover:text-foreground"
             >
-              Cancel
+              {t("selection.cancel")}
             </button>
             <button
               type="button"
               onClick={handleSaveNote}
-              className="px-2 py-1 bg-foreground text-background font-bold hover:bg-accent"
+              className="min-h-[36px] px-2.5 py-1 bg-foreground text-background font-bold hover:bg-accent"
             >
-              Save Note
+              {t("selection.saveNote")}
             </button>
           </div>
         </div>

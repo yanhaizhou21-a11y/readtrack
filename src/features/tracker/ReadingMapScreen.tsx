@@ -23,10 +23,13 @@ import {
   Layers,
   Sparkles,
 } from "lucide-react";
+import { useTranslation } from "@/i18n";
+import { triggerHaptic } from "@/lib/haptic";
 
 export const ReadingMapScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +70,7 @@ export const ReadingMapScreen: React.FC = () => {
     setIsUpdating(true);
     try {
       await markDocumentCompleted(id);
+      triggerHaptic("success");
       await loadData();
     } catch (err) {
       console.error("Failed to mark completed:", err);
@@ -80,6 +84,7 @@ export const ReadingMapScreen: React.FC = () => {
     setIsUpdating(true);
     try {
       await markDocumentUnread(id);
+      triggerHaptic("tick");
       await loadData();
     } catch (err) {
       console.error("Failed to mark unread:", err);
@@ -90,6 +95,7 @@ export const ReadingMapScreen: React.FC = () => {
 
   const handleContinueReading = (segment?: MapSegment) => {
     if (!id) return;
+    triggerHaptic("tick");
     if (segment && selectedSection) {
       navigate(`/read/${id}?section=${selectedSection.index}&segment=${segment.index}`);
     } else {
@@ -100,7 +106,7 @@ export const ReadingMapScreen: React.FC = () => {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header title="Reading Map" showBack />
+        <Header title={t("map.title")} showBack />
         <div className="p-4 space-y-4">
           <LoadingSkeleton className="h-36 w-full rounded-card" />
           <LoadingSkeleton className="h-28 w-full rounded-card" />
@@ -113,12 +119,12 @@ export const ReadingMapScreen: React.FC = () => {
   if (error || !map || !doc) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header title="Reading Map" showBack />
+        <Header title={t("map.title")} showBack />
         <div className="flex-1 flex items-center justify-center p-4">
           <ErrorState
-            title="Failed to Load Reading Map"
-            message={error || "Could not retrieve reading tracking data."}
-            actions={[{ label: "Try Again", onClick: loadData }]}
+            title={t("map.errorTitle")}
+            message={error || t("map.errorMessage")}
+            actions={[{ label: t("map.tryAgain"), onClick: loadData }]}
           />
         </div>
       </div>
@@ -133,7 +139,7 @@ export const ReadingMapScreen: React.FC = () => {
     <div className="flex-1 flex flex-col pb-safe">
       <Header
         title={doc.title}
-        subtitle="Reading Progress & Map"
+        subtitle={t("map.subtitle")}
         showBack
       />
 
@@ -153,17 +159,22 @@ export const ReadingMapScreen: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-serif font-bold text-base text-foreground leading-snug">
-                  {map.completed ? "Book Completed!" : `${percent}% Completed`}
+                  {map.completed
+                    ? t("map.bookCompleted")
+                    : t("map.percentCompleted", { percent })}
                 </h3>
                 <p className="text-xs text-muted">
-                  {map.sections.length} Chapters · {allSegments.length} Total Segments
+                  {t("map.chapterSegmentsCount", {
+                    chapters: map.sections.length,
+                    segments: allSegments.length,
+                  })}
                 </p>
               </div>
             </div>
 
             {map.completed && (
               <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Finished
+                <CheckCircle2 className="w-3.5 h-3.5" /> {t("map.finishedBadge")}
               </span>
             )}
           </div>
@@ -176,7 +187,7 @@ export const ReadingMapScreen: React.FC = () => {
                 <strong className="text-foreground font-mono font-semibold">
                   {totalMinutes}m
                 </strong>{" "}
-                read time
+                {t("map.readTime")}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -185,7 +196,7 @@ export const ReadingMapScreen: React.FC = () => {
                 <strong className="text-foreground font-mono font-semibold">
                   {map.sessions}
                 </strong>{" "}
-                sessions
+                {t("map.sessions")}
               </span>
             </div>
           </div>
@@ -198,7 +209,7 @@ export const ReadingMapScreen: React.FC = () => {
               className="flex-1 h-10 rounded-control bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
             >
               <Play className="w-4 h-4 fill-current" />
-              Continue Reading
+              {t("map.continueReading")}
             </button>
 
             {!map.completed ? (
@@ -210,7 +221,7 @@ export const ReadingMapScreen: React.FC = () => {
                 title="Mark all as read"
               >
                 <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-                Complete
+                {t("map.complete")}
               </button>
             ) : (
               <button
@@ -221,7 +232,7 @@ export const ReadingMapScreen: React.FC = () => {
                 title="Reset progress"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-muted" />
-                Reset
+                {t("map.reset")}
               </button>
             )}
           </div>
@@ -233,12 +244,14 @@ export const ReadingMapScreen: React.FC = () => {
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-primary" />
               <h4 className="font-serif font-bold text-sm text-foreground">
-                Reading Heatmap
+                {t("map.readingHeatmap")}
               </h4>
             </div>
             <span className="text-xs text-muted font-mono">
-              {allSegments.filter((s) => s.status === "read").length} /{" "}
-              {allSegments.length} read
+              {t("map.heatmapReadRatio", {
+                read: allSegments.filter((s) => s.status === "read").length,
+                total: allSegments.length,
+              })}
             </span>
           </div>
 
@@ -252,13 +265,13 @@ export const ReadingMapScreen: React.FC = () => {
         {/* Chapter Breakdown */}
         <div className="flex flex-col gap-3">
           <h4 className="font-serif font-bold text-sm text-foreground px-1">
-            Chapters & Sections
+            {t("map.chaptersAndSections")}
           </h4>
 
           {map.sections.length === 0 ? (
             <EmptyState
-              title="No Sections"
-              body="This document has no structured sections."
+              title={t("map.noSectionsTitle")}
+              body={t("map.noSectionsBody")}
             />
           ) : (
             <div className="space-y-2.5">

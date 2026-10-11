@@ -11,6 +11,7 @@ describe("useUiStore", () => {
       libraryFilter: "all",
       librarySort: "recent_opened",
       libraryView: "grid",
+      language: "en",
     });
   });
 
@@ -18,6 +19,12 @@ describe("useUiStore", () => {
     expect(useUiStore.getState().theme).toBe("system");
     useUiStore.getState().setTheme("dark");
     expect(useUiStore.getState().theme).toBe("dark");
+  });
+
+  it("updates language correctly", () => {
+    expect(useUiStore.getState().language).toBe("en");
+    useUiStore.getState().setLanguage("id");
+    expect(useUiStore.getState().language).toBe("id");
   });
 
   it("toggles reader chrome visibility", () => {

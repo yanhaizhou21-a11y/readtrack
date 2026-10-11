@@ -4,9 +4,11 @@ export type AppTheme = "system" | "light" | "dark";
 export type LibraryFilter = "all" | "in_progress" | "completed" | "archived";
 export type LibrarySort = "recent_opened" | "recent_added" | "title" | "progress";
 export type LibraryView = "grid" | "list";
+export type AppLanguage = "en" | "id";
 
 export interface UiState {
   theme: AppTheme;
+  language: AppLanguage;
   readerChromeVisible: boolean;
   zoom: number;
   activeModal: string | null;
@@ -15,6 +17,7 @@ export interface UiState {
   libraryView: LibraryView;
 
   setTheme: (theme: AppTheme) => void;
+  setLanguage: (language: AppLanguage) => void;
   setReaderChromeVisible: (visible: boolean) => void;
   toggleReaderChrome: () => void;
   setZoom: (zoom: number) => void;
@@ -26,6 +29,7 @@ export interface UiState {
 
 export const useUiStore = create<UiState>((set) => ({
   theme: "system",
+  language: "en",
   readerChromeVisible: true,
   zoom: 1.0,
   activeModal: null,
@@ -34,6 +38,7 @@ export const useUiStore = create<UiState>((set) => ({
   libraryView: "grid",
 
   setTheme: (theme) => set({ theme }),
+  setLanguage: (language) => set({ language }),
   setReaderChromeVisible: (readerChromeVisible) => set({ readerChromeVisible }),
   toggleReaderChrome: () =>
     set((state) => ({ readerChromeVisible: !state.readerChromeVisible })),

@@ -17,9 +17,12 @@ import {
   ChevronUp,
   RefreshCw,
 } from "lucide-react";
+import { useTranslation } from "@/i18n";
+import { triggerHaptic } from "@/lib/haptic";
 
 export const ExportScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +92,7 @@ export const ExportScreen: React.FC = () => {
 
   const executeExport = async (format: "xlsx" | "pdf") => {
     try {
+      triggerHaptic("tick");
       setExporting(format);
       setError(null);
       setExportResult(null);
@@ -107,6 +111,7 @@ export const ExportScreen: React.FC = () => {
           : await exportPdf({ documentIds: docIdsParam });
 
       setExportResult(result);
+      triggerHaptic("success");
       setProgress({
         jobId: "done",
         kind: format,
@@ -123,7 +128,9 @@ export const ExportScreen: React.FC = () => {
   const handleShare = async () => {
     if (!exportResult) return;
     try {
+      triggerHaptic("tick");
       await exportShare({ path: exportResult.path });
+      triggerHaptic("success");
       setShareSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to share or open exported file");
@@ -131,6 +138,7 @@ export const ExportScreen: React.FC = () => {
   };
 
   const handleReset = () => {
+    triggerHaptic("tick");
     setExportResult(null);
     setProgress(null);
     setError(null);
@@ -139,20 +147,20 @@ export const ExportScreen: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-[#F9F9F7] text-[#111111] min-h-screen">
-      <Header title="Export Dossier" />
+      <Header title={t("export.title")} />
 
       <main className="flex-1 p-4 max-w-xl mx-auto w-full space-y-6">
         {/* Newsprint Masthead Subtitle */}
         <div className="border-b-2 border-[#111111] pb-3">
           <div className="flex items-center justify-between text-[11px] font-mono tracking-widest uppercase text-neutral-600 mb-1">
-            <span>DISPATCH & ARCHIVES</span>
-            <span>CONFIDENTIAL RECORD</span>
+            <span>{t("export.ledgerSubtitle")}</span>
+            <span>{t("export.confidentialRecord")}</span>
           </div>
           <h1 className="font-serif text-2xl font-black tracking-tight text-[#111111]">
-            OFFLINE READING LEDGER
+            {t("export.offlineLedger")}
           </h1>
           <p className="font-serif text-xs italic text-neutral-700 mt-1">
-            Produce complete local-first documentation. Export comprehensive spreadsheets or editorial PDF chronicles directly to local storage.
+            {t("export.ledgerDescription")}
           </p>
         </div>
 
@@ -169,17 +177,20 @@ export const ExportScreen: React.FC = () => {
         ) : documents.length === 0 ? (
           <div className="border-2 border-[#111111] p-6 text-center bg-white space-y-3">
             <h2 className="font-serif text-base font-bold uppercase tracking-wide">
-              No Publications Archived
+              {t("export.noPubsTitle")}
             </h2>
             <p className="font-serif text-xs text-neutral-600 max-w-sm mx-auto">
-              Your ReadTrack library does not contain any imported documents yet. Import documents before generating an export report.
+              {t("export.noPubsBody")}
             </p>
             <button
               type="button"
-              onClick={() => navigate("/library")}
+              onClick={() => {
+                triggerHaptic("tick");
+                navigate("/library");
+              }}
               className="mt-3 px-4 py-2 border-2 border-[#111111] text-xs font-mono uppercase font-bold bg-[#111111] text-white hover:bg-neutral-800 transition-colors"
             >
-              Go to Library
+              {t("export.goToLibrary")}
             </button>
           </div>
         ) : exportResult ? (
@@ -188,17 +199,17 @@ export const ExportScreen: React.FC = () => {
             <div className="flex items-center gap-2 border-b border-[#111111] pb-2 text-[#CC0000]">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
               <span className="font-mono text-xs uppercase font-bold tracking-wider">
-                DOSSIER GENERATION COMPLETE
+                {t("export.completeTitle")}
               </span>
             </div>
 
             <div className="space-y-2">
-              <div className="text-[11px] font-mono uppercase text-neutral-500">File Name:</div>
+              <div className="text-[11px] font-mono uppercase text-neutral-500">{t("export.fileName")}</div>
               <div className="font-mono text-xs font-bold text-[#111111] bg-[#F5F5F5] p-2 border border-[#111111] break-all">
                 {exportResult.fileName}
               </div>
 
-              <div className="text-[11px] font-mono uppercase text-neutral-500 pt-1">Saved Location:</div>
+              <div className="text-[11px] font-mono uppercase text-neutral-500 pt-1">{t("export.savedLocation")}</div>
               <div className="font-mono text-[11px] text-neutral-700 bg-[#F5F5F5] p-2 border border-neutral-300 break-all">
                 {exportResult.path}
               </div>
@@ -206,7 +217,7 @@ export const ExportScreen: React.FC = () => {
 
             {shareSuccess && (
               <div className="text-xs font-mono text-emerald-800 bg-emerald-50 border border-emerald-300 p-2 text-center">
-                Document dispatched to default operating system viewer.
+                {t("export.shareSuccess")}
               </div>
             )}
 
@@ -217,7 +228,7 @@ export const ExportScreen: React.FC = () => {
                 className="flex-1 flex items-center justify-center gap-2 border-2 border-[#111111] bg-[#111111] text-white py-2.5 px-3 font-mono text-xs font-bold uppercase hover:bg-neutral-800 active:translate-x-0.5 active:translate-y-0.5 transition-all"
               >
                 <Share2 className="w-4 h-4" />
-                <span>Open / Share File</span>
+                <span>{t("export.shareFile")}</span>
               </button>
               <button
                 type="button"
@@ -225,7 +236,7 @@ export const ExportScreen: React.FC = () => {
                 className="flex items-center justify-center gap-1.5 border-2 border-[#111111] bg-white text-[#111111] py-2.5 px-4 font-mono text-xs font-bold uppercase hover:bg-neutral-100 transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>New Export</span>
+                <span>{t("export.newExport")}</span>
               </button>
             </div>
           </div>
@@ -236,10 +247,12 @@ export const ExportScreen: React.FC = () => {
             <div className="border border-[#111111] bg-white p-4 space-y-3">
               <div className="flex items-center justify-between border-b border-[#E5E5E0] pb-2">
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#111111]">
-                  Scope of Ledger
+                  {t("export.scopeTitle")}
                 </span>
                 <span className="font-mono text-[11px] text-neutral-500">
-                  {exportAll ? "ALL TITLES" : `${selectedIds.length} SELECTED`}
+                  {exportAll
+                    ? t("export.allTitles")
+                    : t("export.selectedCount", { count: selectedIds.length })}
                 </span>
               </div>
 
@@ -249,10 +262,15 @@ export const ExportScreen: React.FC = () => {
                     type="radio"
                     name="scope"
                     checked={exportAll}
-                    onChange={() => setExportAll(true)}
+                    onChange={() => {
+                      triggerHaptic("tick");
+                      setExportAll(true);
+                    }}
                     className="accent-[#111111]"
                   />
-                  <span>Entire Library ({documents.length} Publications)</span>
+                  <span>
+                    {t("export.entireLibrary", { count: documents.length })}
+                  </span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer font-serif text-xs text-[#111111]">
@@ -261,12 +279,13 @@ export const ExportScreen: React.FC = () => {
                     name="scope"
                     checked={!exportAll}
                     onChange={() => {
+                      triggerHaptic("tick");
                       setExportAll(false);
                       setShowDocPicker(true);
                     }}
                     className="accent-[#111111]"
                   />
-                  <span>Select Publications</span>
+                  <span>{t("export.selectPublications")}</span>
                 </label>
               </div>
 
@@ -276,27 +295,36 @@ export const ExportScreen: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <button
                       type="button"
-                      onClick={() => setShowDocPicker(!showDocPicker)}
+                      onClick={() => {
+                        triggerHaptic("tick");
+                        setShowDocPicker(!showDocPicker);
+                      }}
                       className="flex items-center gap-1 text-[11px] font-mono uppercase font-bold text-neutral-700 hover:text-black"
                     >
                       {showDocPicker ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                      <span>{showDocPicker ? "Hide Document List" : "Show Document List"}</span>
+                      <span>{showDocPicker ? t("export.hideList") : t("export.showList")}</span>
                     </button>
                     <div className="flex items-center gap-2 text-[10px] font-mono uppercase">
                       <button
                         type="button"
-                        onClick={handleSelectAllDocs}
+                        onClick={() => {
+                          triggerHaptic("tick");
+                          handleSelectAllDocs();
+                        }}
                         className="underline hover:text-black"
                       >
-                        All
+                        {t("export.all")}
                       </button>
                       <span>|</span>
                       <button
                         type="button"
-                        onClick={handleDeselectAllDocs}
+                        onClick={() => {
+                          triggerHaptic("tick");
+                          handleDeselectAllDocs();
+                        }}
                         className="underline hover:text-black"
                       >
-                        None
+                        {t("export.none")}
                       </button>
                     </div>
                   </div>
@@ -315,7 +343,10 @@ export const ExportScreen: React.FC = () => {
                             <input
                               type="checkbox"
                               checked={isChecked}
-                              onChange={() => handleToggleDoc(doc.id)}
+                              onChange={() => {
+                                triggerHaptic("tick");
+                                handleToggleDoc(doc.id);
+                              }}
                               className="accent-[#111111]"
                             />
                             <div className="flex-1 truncate">
@@ -340,7 +371,9 @@ export const ExportScreen: React.FC = () => {
             {exporting && progress && (
               <div className="border-2 border-[#111111] p-4 bg-white space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono font-bold uppercase">
-                  <span>Compiling {exporting.toUpperCase()} Dossier...</span>
+                  <span>
+                    {t("export.compiling", { kind: exporting.toUpperCase() })}
+                  </span>
                   <span>{progress.percent}%</span>
                 </div>
                 <div className="w-full bg-[#E5E5E0] h-3 border border-[#111111] overflow-hidden">
@@ -350,7 +383,7 @@ export const ExportScreen: React.FC = () => {
                   />
                 </div>
                 <div className="text-[11px] font-mono text-neutral-600 capitalize">
-                  Current stage: {progress.stage}
+                  {t("export.currentStage", { stage: progress.stage })}
                 </div>
               </div>
             )}
@@ -362,15 +395,15 @@ export const ExportScreen: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono font-bold tracking-widest uppercase bg-[#111111] text-white px-1.5 py-0.5">
-                      7 SHEETS
+                      {t("export.excelSheetsBadge")}
                     </span>
                     <FileSpreadsheet className="w-5 h-5 text-[#111111]" />
                   </div>
                   <h3 className="font-serif text-lg font-bold leading-tight pt-1">
-                    Excel Ledger (.xlsx)
+                    {t("export.excelLedger")}
                   </h3>
                   <p className="font-serif text-xs text-neutral-600 leading-relaxed">
-                    Seven structured sheets featuring automated Excel KPI formulas, library inventory, session audits, bookmark records, text highlights, and margin notes.
+                    {t("export.excelDesc")}
                   </p>
                 </div>
 
@@ -381,7 +414,7 @@ export const ExportScreen: React.FC = () => {
                     onClick={() => executeExport("xlsx")}
                     className="w-full py-2.5 px-3 border-2 border-[#111111] bg-[#111111] text-white font-mono text-xs font-bold uppercase tracking-wide hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {exporting === "xlsx" ? "Compiling..." : "Export .xlsx"}
+                    {exporting === "xlsx" ? "Compiling..." : t("export.exportXlsx")}
                   </button>
                 </div>
               </div>
@@ -391,15 +424,15 @@ export const ExportScreen: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-mono font-bold tracking-widest uppercase bg-[#CC0000] text-white px-1.5 py-0.5">
-                      EDITORIAL PDF
+                      {t("export.pdfBadge")}
                     </span>
                     <FileText className="w-5 h-5 text-[#111111]" />
                   </div>
                   <h3 className="font-serif text-lg font-bold leading-tight pt-1">
-                    Print Report (.pdf)
+                    {t("export.printReport")}
                   </h3>
                   <p className="font-serif text-xs text-neutral-600 leading-relaxed">
-                    Clean publication-grade typographic layout with executive summary, catalog index, reading timeline, and annotation digest prepared for offline reading.
+                    {t("export.pdfDesc")}
                   </p>
                 </div>
 
@@ -410,7 +443,7 @@ export const ExportScreen: React.FC = () => {
                     onClick={() => executeExport("pdf")}
                     className="w-full py-2.5 px-3 border-2 border-[#111111] bg-white text-[#111111] font-mono text-xs font-bold uppercase tracking-wide hover:bg-neutral-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {exporting === "pdf" ? "Compiling..." : "Export .pdf"}
+                    {exporting === "pdf" ? "Compiling..." : t("export.exportPdf")}
                   </button>
                 </div>
               </div>
@@ -419,9 +452,7 @@ export const ExportScreen: React.FC = () => {
             {/* Confidentiality Notice */}
             <div className="border-t border-[#111111] pt-3 text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">
               <FileCheck className="w-3.5 h-3.5 shrink-0" />
-              <span>
-                Generated files remain exclusively on local device storage at library/exports/.
-              </span>
+              <span>{t("export.storageNotice")}</span>
             </div>
           </div>
         )}

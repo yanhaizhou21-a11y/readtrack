@@ -1,5 +1,6 @@
 import React from "react";
 import { AlertTriangle, BookOpen, RefreshCw, X } from "lucide-react";
+import { useTranslation } from "@/i18n";
 
 export interface DuplicateDialogProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
   onReplace,
   onClose,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -31,12 +33,12 @@ export const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
             <AlertTriangle className="w-5 h-5 text-warning" />
           </div>
           <h2 className="font-serif font-semibold text-lg text-foreground">
-            Duplicate Document
+            {t("duplicate.title")}
           </h2>
         </div>
 
         <p className="text-sm text-muted mb-6 leading-relaxed">
-          An identical document already exists in your library. What would you like to do?
+          {t("duplicate.body")}
         </p>
 
         <div className="space-y-2">
@@ -46,7 +48,7 @@ export const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
             className="flex items-center justify-center gap-2 w-full h-11 px-4 rounded-control bg-accent text-accent-foreground text-sm font-medium hover:opacity-95 transition-opacity"
           >
             <BookOpen className="w-4 h-4" />
-            <span>Open Existing Document</span>
+            <span>{t("duplicate.openExisting")}</span>
           </button>
 
           <button
@@ -55,7 +57,7 @@ export const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
             className="flex items-center justify-center gap-2 w-full h-11 px-4 rounded-control bg-secondary border border-border text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            <span>Replace with New Copy</span>
+            <span>{t("duplicate.replace")}</span>
           </button>
 
           <button
@@ -64,7 +66,7 @@ export const DuplicateDialog: React.FC<DuplicateDialogProps> = ({
             className="flex items-center justify-center gap-2 w-full h-10 px-4 rounded-control text-sm font-medium text-muted hover:text-foreground hover:bg-secondary transition-colors"
           >
             <X className="w-4 h-4" />
-            <span>Cancel</span>
+            <span>{t("common.cancel")}</span>
           </button>
         </div>
       </div>

@@ -24,6 +24,10 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all"
+    "targets": "all",
+    "shortDescription": "Local-first document reader and reading tracker",
+    "longDescription": "ReadTrack is an offline, local-first document reader and reading tracker designed for deep focus without cloud surveillance or accounts.",
+    "copyright": "Copyright 2026 ReadTrack Contributors",
+    "category": "Education"
   }
 }

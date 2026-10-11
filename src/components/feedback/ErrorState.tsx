@@ -1,5 +1,6 @@
 import React from "react";
 import type { AppErrorCode } from "@/types";
+import { useTranslation } from "@/i18n";
 
 export interface ErrorAction {
   label: string;
@@ -18,10 +19,13 @@ export interface ErrorStateProps {
 export const ErrorState: React.FC<ErrorStateProps> = ({
   code,
   message,
-  title = "Something went wrong",
+  title,
   actions = [],
   className = "",
 }) => {
+  const { t } = useTranslation();
+  const displayTitle = title ?? t("common.somethingWentWrong");
+
   return (
     <div
       className={`flex flex-col items-center justify-center p-8 text-center max-w-sm mx-auto min-h-[260px] ${className}`}
@@ -40,7 +44,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
       </div>
 
       <h3 className="text-lg font-semibold text-foreground mb-1">
-        {title}
+        {displayTitle}
       </h3>
 
       <p className="text-sm text-muted mb-6 leading-relaxed">

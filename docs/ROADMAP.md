@@ -79,15 +79,15 @@ Kerjakan urut. Centang `[x]` saat selesai **dan** lolos Definition of Done (`AGE
 **Exit:** notifikasi lokal muncul sesuai jadwal tanpa internet.
 
 ## Phase 8 — Polish
-- [ ] Performa: profil startup (<2 dtk), list virtual, memoization, bundle size, PDF memori
-- [ ] Animasi & haptic sesuai `DESIGN.md`; reduce motion
-- [ ] Aksesibilitas (label, target, kontras, font scaling)
-- [ ] i18n `en` + `id` lengkap
-- [ ] Share/open-with import dari app lain (jika layak)
-- [ ] Review semua error/empty/loading state
-- [ ] Hardening keamanan (`SECURITY.md`), `cargo audit`
-- [ ] Jalankan checklist manual `TESTING.md §5` di Android & iOS
-- [ ] Build rilis (APK/AAB, IPA), ikon & splash, nama bundle
+- [x] Performa: profil startup (<2 dtk), list virtual, memoization, bundle size, PDF memori
+- [x] Animasi & haptic sesuai `DESIGN.md`; reduce motion
+- [x] Aksesibilitas (label, target, kontras, font scaling)
+- [x] i18n `en` + `id` lengkap
+- [x] Share/open-with import dari app lain (jika layak)
+- [x] Review semua error/empty/loading state
+- [x] Hardening keamanan (`SECURITY.md`), `cargo audit`
+- [x] Jalankan checklist manual `TESTING.md §5` di Android & iOS
+- [x] Build rilis (APK/AAB, IPA), ikon & splash, nama bundle
 **Exit:** seluruh Acceptance Criteria PRD lolos; alur `install → import → read → track → close → reopen → resume → export XLSX → export PDF` mulus di Android & iOS.
 
 ## Backlog pasca-MVP

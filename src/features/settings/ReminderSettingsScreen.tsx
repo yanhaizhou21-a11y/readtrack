@@ -10,6 +10,8 @@ import {
 import { Header } from "@/components/layout/Header";
 import { LoadingSkeleton } from "@/components/feedback/LoadingSkeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { triggerHaptic } from "@/lib/haptic";
+import { useTranslation, type TranslationKey } from "@/i18n";
 import {
   reminderList,
   reminderUpsert,
@@ -21,14 +23,14 @@ import {
 import { listDocuments } from "@/features/library/api/documents";
 import type { Reminder, ReminderScheduleType, DocumentSummary } from "@/types";
 
-const DAYS_MAP = [
-  { bit: 1, label: "Mon", full: "Monday" },
-  { bit: 2, label: "Tue", full: "Tuesday" },
-  { bit: 4, label: "Wed", full: "Wednesday" },
-  { bit: 8, label: "Thu", full: "Thursday" },
-  { bit: 16, label: "Fri", full: "Friday" },
-  { bit: 32, label: "Sat", full: "Saturday" },
-  { bit: 64, label: "Sun", full: "Sunday" },
+const DAYS_CONFIG: { bit: number; labelKey: TranslationKey; fullKey: TranslationKey }[] = [
+  { bit: 1, labelKey: "days.mon", fullKey: "days.monday" },
+  { bit: 2, labelKey: "days.tue", fullKey: "days.tuesday" },
+  { bit: 4, labelKey: "days.wed", fullKey: "days.wednesday" },
+  { bit: 8, labelKey: "days.thu", fullKey: "days.thursday" },
+  { bit: 16, labelKey: "days.fri", fullKey: "days.friday" },
+  { bit: 32, labelKey: "days.sat", fullKey: "days.saturday" },
+  { bit: 64, labelKey: "days.sun", fullKey: "days.sunday" },
 ];
 
 function minToTimeString(min: number | null): string {
@@ -44,6 +46,7 @@ function timeStringToMin(str: string): number {
 }
 
 export const ReminderSettingsScreen: React.FC = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -110,13 +113,13 @@ export const ReminderSettingsScreen: React.FC = () => {
     daysMask: number
   ) => {
     try {
-      setSavingStatus("Saving...");
+      setSavingStatus(t("reminder.saving"));
       if (enabled) {
         const hasPermission = await checkNotificationPermission();
         if (!hasPermission) {
           const granted = await requestNotificationPermission();
           if (!granted) {
-            setTestStatus("Notification permissions are required on this device.");
+            setTestStatus(t("reminder.permReq"));
           }
         }
       }
@@ -130,8 +133,9 @@ export const ReminderSettingsScreen: React.FC = () => {
         daysOfWeek: scheduleType === "custom" ? daysMask : null,
       });
 
+      triggerHaptic("tick");
       setHabitId(saved.id);
-      setSavingStatus("Saved");
+      setSavingStatus(t("reminder.saved"));
       setTimeout(() => setSavingStatus(null), 2000);
       setReminders((prev) => {
         const filtered = prev.filter((r) => r.id !== saved.id);
@@ -139,7 +143,7 @@ export const ReminderSettingsScreen: React.FC = () => {
       });
     } catch (err: unknown) {
       console.error("Failed to save habit reminder:", err);
-      setSavingStatus("Save failed");
+      setSavingStatus(t("reminder.saveFailed"));
       setTimeout(() => setSavingStatus(null), 3000);
     }
   };
@@ -169,22 +173,22 @@ export const ReminderSettingsScreen: React.FC = () => {
 
   const handleTestNotification = async () => {
     try {
-      setTestStatus("Sending test notification...");
+      setTestStatus(t("reminder.sendingTest"));
       const hasPermission = await checkNotificationPermission();
       if (!hasPermission) {
         const granted = await requestNotificationPermission();
         if (!granted) {
-          setTestStatus("Permission was not granted. Please enable notifications in device settings.");
+          setTestStatus(t("reminder.permDenied"));
           return;
         }
       }
 
       await reminderTestNotify(habitId);
-      setTestStatus("Test notification sent. Check your notification center.");
+      setTestStatus(t("reminder.testSent"));
       setTimeout(() => setTestStatus(null), 4000);
     } catch (err: unknown) {
       console.error("Test notification error:", err);
-      setTestStatus("Could not send notification. Please check system permissions.");
+      setTestStatus(t("reminder.testFailed"));
       setTimeout(() => setTestStatus(null), 4000);
     }
   };
@@ -219,7 +223,7 @@ export const ReminderSettingsScreen: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col">
-      <Header title="Reading Reminders" showBack />
+      <Header title={t("reminder.screenTitle")} showBack />
 
       <div className="flex-1 p-4 max-w-md mx-auto w-full space-y-6">
         {loading ? (
@@ -228,9 +232,9 @@ export const ReminderSettingsScreen: React.FC = () => {
           </div>
         ) : error ? (
           <ErrorState
-            title="Unable to load reminders"
+            title={t("reminder.unableToLoad")}
             message={error}
-            actions={[{ label: "Retry", onClick: loadData }]}
+            actions={[{ label: t("common.retry"), onClick: loadData }]}
           />
         ) : (
           <>
@@ -241,11 +245,10 @@ export const ReminderSettingsScreen: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-xs font-semibold uppercase text-muted tracking-wider">
-                  Offline and Private
+                  {t("reminder.offlinePrivate")}
                 </h2>
                 <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
-                  Reminders are scheduled and triggered entirely on this device.
-                  No internet connection or account is required.
+                  {t("reminder.offlinePrivateDesc")}
                 </p>
               </div>
             </div>
@@ -256,17 +259,17 @@ export const ReminderSettingsScreen: React.FC = () => {
                 <div>
                   <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                     <Bell className="w-4 h-4 text-accent" />
-                    <span>Habit Reminder</span>
+                    <span>{t("reminder.habitReminder")}</span>
                   </h2>
                   <p className="text-xs text-muted mt-0.5">
-                    Reminds you to continue your active book
+                    {t("reminder.habitSubtitle")}
                   </p>
                 </div>
                 <button
                   type="button"
                   role="switch"
                   aria-checked={habitEnabled}
-                  aria-label="Toggle habit reminder"
+                  aria-label={t("reminder.toggleHabit")}
                   onClick={() => handleToggleHabit(!habitEnabled)}
                   className={`w-12 h-7 flex items-center rounded-full p-1 transition-colors min-h-[44px] justify-center ${
                     habitEnabled ? "bg-accent" : "bg-surface-3"
@@ -285,7 +288,7 @@ export const ReminderSettingsScreen: React.FC = () => {
                   {/* Schedule Selector */}
                   <div>
                     <label className="text-xs font-medium text-foreground block mb-2">
-                      Frequency
+                      {t("reminder.frequency")}
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {(["daily", "weekdays", "custom"] as ReminderScheduleType[]).map((st) => (
@@ -299,7 +302,11 @@ export const ReminderSettingsScreen: React.FC = () => {
                               : "border-border text-foreground hover:bg-surface-2"
                           }`}
                         >
-                          {st}
+                          {st === "daily"
+                            ? t("reminder.daily")
+                            : st === "weekdays"
+                            ? t("reminder.weekdays")
+                            : t("reminder.custom")}
                         </button>
                       ))}
                     </div>
@@ -309,25 +316,25 @@ export const ReminderSettingsScreen: React.FC = () => {
                   {habitScheduleType === "custom" && (
                     <div>
                       <label className="text-xs font-medium text-foreground block mb-2">
-                        Active Days
+                        {t("reminder.activeDays")}
                       </label>
                       <div className="grid grid-cols-7 gap-1">
-                        {DAYS_MAP.map((d) => {
+                        {DAYS_CONFIG.map((d) => {
                           const isSelected = (habitDaysMask & d.bit) !== 0;
                           return (
                             <button
                               key={d.bit}
                               type="button"
                               onClick={() => handleToggleDay(d.bit)}
-                              aria-label={d.full}
-                              title={d.full}
+                              aria-label={t(d.fullKey)}
+                              title={t(d.fullKey)}
                               className={`min-h-[44px] h-11 rounded-control text-[11px] font-medium border flex items-center justify-center transition-all ${
                                 isSelected
                                   ? "bg-accent text-accent-foreground border-accent font-bold"
                                   : "border-border text-foreground hover:bg-surface-2"
                               }`}
                             >
-                              {d.label}
+                              {t(d.labelKey)}
                             </button>
                           );
                         })}
@@ -341,7 +348,7 @@ export const ReminderSettingsScreen: React.FC = () => {
                       htmlFor="habit-time-input"
                       className="text-xs font-medium text-foreground block mb-2"
                     >
-                      Reminder Time
+                      {t("reminder.reminderTime")}
                     </label>
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1">
@@ -355,7 +362,7 @@ export const ReminderSettingsScreen: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-muted px-2">
                         <Clock className="w-4 h-4 shrink-0" />
-                        <span>Daily trigger</span>
+                        <span>{t("reminder.dailyTrigger")}</span>
                       </div>
                     </div>
                   </div>
@@ -363,11 +370,11 @@ export const ReminderSettingsScreen: React.FC = () => {
                   {/* Summary note */}
                   <div className="p-3 bg-surface-2 rounded-control text-xs text-muted leading-relaxed">
                     {habitScheduleType === "daily" &&
-                      `Sends a calm notification every day at ${habitTimeStr} with your current chapter.`}
+                      t("reminder.summaryDaily", { time: habitTimeStr })}
                     {habitScheduleType === "weekdays" &&
-                      `Sends a calm notification Monday through Friday at ${habitTimeStr}.`}
+                      t("reminder.summaryWeekdays", { time: habitTimeStr })}
                     {habitScheduleType === "custom" &&
-                      `Sends a calm notification on selected days at ${habitTimeStr}.`}
+                      t("reminder.summaryCustom", { time: habitTimeStr })}
                   </div>
                 </div>
               )}
@@ -384,10 +391,10 @@ export const ReminderSettingsScreen: React.FC = () => {
             <section className="bg-surface rounded-card p-4 border border-border space-y-3">
               <div>
                 <h2 className="text-xs font-semibold uppercase text-muted tracking-wider">
-                  Test Delivery
+                  {t("reminder.testDelivery")}
                 </h2>
                 <p className="text-xs text-foreground/80 mt-1 leading-relaxed">
-                  Verify notification delivery and test the deep link into your reader.
+                  {t("reminder.testDeliveryDesc")}
                 </p>
               </div>
 
@@ -396,8 +403,8 @@ export const ReminderSettingsScreen: React.FC = () => {
                 onClick={handleTestNotification}
                 className="w-full min-h-[44px] h-11 px-4 border border-border bg-surface-2 text-foreground font-mono text-xs font-bold uppercase tracking-wide hover:bg-surface-3 transition-colors flex items-center justify-between"
               >
-                <span>Send Test Notification</span>
-                <span className="text-accent text-[11px] font-sans">Trigger &rarr;</span>
+                <span>{t("reminder.sendTestBtn")}</span>
+                <span className="text-accent text-[11px] font-sans">{t("reminder.triggerAction")}</span>
               </button>
 
               {testStatus && (
@@ -411,27 +418,27 @@ export const ReminderSettingsScreen: React.FC = () => {
             <section className="bg-surface rounded-card p-4 border border-border space-y-4">
               <div>
                 <h2 className="text-xs font-semibold uppercase text-muted tracking-wider">
-                  Book Specific Reminders
+                  {t("reminder.bookReminders")}
                 </h2>
                 <p className="text-xs text-muted mt-0.5">
-                  Dedicated alerts configured for specific volumes
+                  {t("reminder.bookRemindersDesc")}
                 </p>
               </div>
 
               {bookReminders.length === 0 ? (
                 <div className="p-4 border border-dashed border-border rounded-control text-center space-y-1">
                   <p className="text-xs font-medium text-foreground">
-                    No book specific reminders configured
+                    {t("reminder.noBookRemindersTitle")}
                   </p>
                   <p className="text-[11px] text-muted leading-relaxed">
-                    Habit reminders automatically keep track of your active books. You can also configure reminders on individual book detail screens.
+                    {t("reminder.noBookRemindersDesc")}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {bookReminders.map((r) => {
                     const doc = r.documentId ? documents[r.documentId] : null;
-                    const title = doc?.title || "Document reminder";
+                    const title = doc?.title || t("reminder.docReminder");
                     return (
                       <div
                         key={r.id}
@@ -443,7 +450,13 @@ export const ReminderSettingsScreen: React.FC = () => {
                             <span className="truncate">{title}</span>
                           </div>
                           <div className="flex items-center gap-2 text-[11px] text-muted mt-0.5">
-                            <span className="capitalize">{r.scheduleType}</span>
+                            <span className="capitalize">
+                              {r.scheduleType === "daily"
+                                ? t("reminder.daily")
+                                : r.scheduleType === "weekdays"
+                                ? t("reminder.weekdays")
+                                : t("reminder.custom")}
+                            </span>
                             <span>&middot;</span>
                             <span>{minToTimeString(r.timeOfDayMin)}</span>
                           </div>
@@ -454,7 +467,7 @@ export const ReminderSettingsScreen: React.FC = () => {
                             type="button"
                             role="switch"
                             aria-checked={r.enabled}
-                            aria-label={`Toggle reminder for ${title}`}
+                            aria-label={t("reminder.toggleForDoc", { title })}
                             onClick={() => handleToggleBookReminder(r)}
                             className={`min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-control transition-colors ${
                               r.enabled
@@ -467,7 +480,7 @@ export const ReminderSettingsScreen: React.FC = () => {
 
                           <button
                             type="button"
-                            aria-label={`Delete reminder for ${title}`}
+                            aria-label={t("reminder.deleteForDoc", { title })}
                             onClick={() => handleDeleteBookReminder(r.id)}
                             className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-control text-danger hover:bg-danger/10 transition-colors"
                           >

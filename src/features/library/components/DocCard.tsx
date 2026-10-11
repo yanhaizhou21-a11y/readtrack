@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, MoreVertical, Archive, ArchiveRestore, Edit3, Trash2, Info } from "lucide-react";
+import { useTranslation } from "@/i18n";
 import type { DocumentSummary } from "@/types";
 
 export interface DocCardProps {
@@ -18,6 +19,7 @@ export const DocCard: React.FC<DocCardProps> = ({
   onArchive,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
@@ -117,7 +119,7 @@ export const DocCard: React.FC<DocCardProps> = ({
                   className="flex items-center gap-2 w-full px-3 py-2 text-xs text-foreground hover:bg-secondary text-left"
                 >
                   <Info className="w-3.5 h-3.5" />
-                  <span>View Details</span>
+                  <span>{t("card.viewDetails")}</span>
                 </button>
                 <button
                   type="button"
@@ -128,7 +130,7 @@ export const DocCard: React.FC<DocCardProps> = ({
                   className="flex items-center gap-2 w-full px-3 py-2 text-xs text-foreground hover:bg-secondary text-left"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
-                  <span>Rename</span>
+                  <span>{t("card.rename")}</span>
                 </button>
                 <button
                   type="button"
@@ -141,12 +143,12 @@ export const DocCard: React.FC<DocCardProps> = ({
                   {doc.isArchived ? (
                     <>
                       <ArchiveRestore className="w-3.5 h-3.5" />
-                      <span>Unarchive</span>
+                      <span>{t("card.unarchive")}</span>
                     </>
                   ) : (
                     <>
                       <Archive className="w-3.5 h-3.5" />
-                      <span>Archive</span>
+                      <span>{t("card.archive")}</span>
                     </>
                   )}
                 </button>
@@ -160,7 +162,7 @@ export const DocCard: React.FC<DocCardProps> = ({
                   className="flex items-center gap-2 w-full px-3 py-2 text-xs text-danger hover:bg-danger/10 text-left"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Delete</span>
+                  <span>{t("card.delete")}</span>
                 </button>
               </div>
             )}
@@ -184,18 +186,22 @@ export const DocCard: React.FC<DocCardProps> = ({
           </span>
           <span>{formatFileSize(doc.fileSize)}</span>
           {doc.wordCount && doc.wordCount > 0 ? (
-            <span>· {doc.wordCount.toLocaleString()} words</span>
+            <span>{t("card.words", { count: doc.wordCount.toLocaleString() })}</span>
           ) : doc.pageCount && doc.pageCount > 0 ? (
-            <span>· {doc.pageCount} pages</span>
+            <span>{t("card.pages", { count: doc.pageCount })}</span>
           ) : (
-            <span>· {doc.sectionCount} sections</span>
+            <span>{t("card.sections", { count: doc.sectionCount })}</span>
           )}
         </div>
 
         {/* Progress Bar */}
         <div className="mt-3">
           <div className="flex justify-between items-center text-[10px] text-muted mb-1">
-            <span>{doc.completed ? "Completed" : `${progressPercent}% read`}</span>
+            <span>
+              {doc.completed
+                ? t("card.completed")
+                : t("card.percentRead", { percent: progressPercent })}
+            </span>
           </div>
           <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
             <div

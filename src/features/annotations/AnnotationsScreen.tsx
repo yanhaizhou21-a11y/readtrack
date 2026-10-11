@@ -33,11 +33,14 @@ import {
   Note,
   DocumentSummary,
 } from "@/types";
+import { useTranslation } from "@/i18n";
+import { triggerHaptic } from "@/lib/haptic";
 
 type TabKind = "bookmarks" | "highlights" | "notes";
 
 export const AnnotationsScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabKind>("bookmarks");
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string>("all");
@@ -130,7 +133,8 @@ export const AnnotationsScreen: React.FC = () => {
       });
       setBookmarks((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
       setEditingBookmark(null);
-      showToast("Bookmark updated");
+      triggerHaptic("success");
+      showToast(t("annotations.bookmarkUpdated"));
     } catch (err) {
       console.error("Failed to update bookmark:", err);
     }
@@ -153,7 +157,8 @@ export const AnnotationsScreen: React.FC = () => {
       });
       setHighlights((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
       setEditingHighlight(null);
-      showToast("Highlight updated");
+      triggerHaptic("success");
+      showToast(t("annotations.highlightUpdated"));
     } catch (err) {
       console.error("Failed to update highlight:", err);
     }
@@ -174,7 +179,8 @@ export const AnnotationsScreen: React.FC = () => {
       });
       setNotes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
       setEditingNote(null);
-      showToast("Note updated");
+      triggerHaptic("success");
+      showToast(t("annotations.noteUpdated"));
     } catch (err) {
       console.error("Failed to update note:", err);
     }
@@ -187,15 +193,18 @@ export const AnnotationsScreen: React.FC = () => {
       if (itemToDelete.type === "bookmark") {
         await deleteBookmark(itemToDelete.id);
         setBookmarks((prev) => prev.filter((b) => b.id !== itemToDelete.id));
-        showToast("Bookmark deleted");
+        triggerHaptic("success");
+        showToast(t("annotations.bookmarkDeleted"));
       } else if (itemToDelete.type === "highlight") {
         await deleteHighlight(itemToDelete.id);
         setHighlights((prev) => prev.filter((h) => h.id !== itemToDelete.id));
-        showToast("Highlight deleted");
+        triggerHaptic("success");
+        showToast(t("annotations.highlightDeleted"));
       } else if (itemToDelete.type === "note") {
         await deleteNote(itemToDelete.id);
         setNotes((prev) => prev.filter((n) => n.id !== itemToDelete.id));
-        showToast("Note deleted");
+        triggerHaptic("success");
+        showToast(t("annotations.noteDeleted"));
       }
     } catch (err) {
       console.error("Failed to delete annotation:", err);
@@ -236,8 +245,8 @@ export const AnnotationsScreen: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col pb-16 bg-background text-foreground select-none">
       <Header
-        title="ANNOTATIONS"
-        subtitle="DISPATCHES & CLIPPINGS"
+        title={t("annotations.title")}
+        subtitle={t("annotations.subtitle")}
         showBack
       />
 
@@ -247,14 +256,19 @@ export const AnnotationsScreen: React.FC = () => {
         <div className="px-4 py-2 border-b border-border flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-1.5 text-muted uppercase">
             <Filter className="w-3.5 h-3.5" />
-            <span>Document:</span>
+            <span>{t("annotations.filterDoc")}</span>
           </div>
           <select
             value={selectedDocId}
-            onChange={(e) => setSelectedDocId(e.target.value)}
+            onChange={(e) => {
+              triggerHaptic("tick");
+              setSelectedDocId(e.target.value);
+            }}
             className="bg-transparent border border-border px-2 py-1 text-foreground focus:outline-none focus:border-accent text-xs font-mono max-w-[200px] truncate"
           >
-            <option value="all">ALL PUBLICATIONS ({documents.length})</option>
+            <option value="all">
+              {t("annotations.allPublications", { count: documents.length })}
+            </option>
             {documents.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.title}
@@ -267,7 +281,10 @@ export const AnnotationsScreen: React.FC = () => {
         <div className="flex items-stretch text-center font-mono text-xs uppercase tracking-wider">
           <button
             type="button"
-            onClick={() => setActiveTab("bookmarks")}
+            onClick={() => {
+              triggerHaptic("tick");
+              setActiveTab("bookmarks");
+            }}
             className={`flex-1 py-3 px-2 border-r border-border flex items-center justify-center gap-1.5 transition-colors ${
               activeTab === "bookmarks"
                 ? "bg-foreground text-background font-bold"
@@ -275,13 +292,16 @@ export const AnnotationsScreen: React.FC = () => {
             }`}
           >
             <BookmarkIcon className="w-3.5 h-3.5" />
-            <span>Bookmarks</span>
+            <span>{t("annotations.bookmarks")}</span>
             <span className="text-[10px] opacity-80">({bookmarks.length})</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab("highlights")}
+            onClick={() => {
+              triggerHaptic("tick");
+              setActiveTab("highlights");
+            }}
             className={`flex-1 py-3 px-2 border-r border-border flex items-center justify-center gap-1.5 transition-colors ${
               activeTab === "highlights"
                 ? "bg-foreground text-background font-bold"
@@ -289,13 +309,16 @@ export const AnnotationsScreen: React.FC = () => {
             }`}
           >
             <Highlighter className="w-3.5 h-3.5" />
-            <span>Highlights</span>
+            <span>{t("annotations.highlights")}</span>
             <span className="text-[10px] opacity-80">({highlights.length})</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setActiveTab("notes")}
+            onClick={() => {
+              triggerHaptic("tick");
+              setActiveTab("notes");
+            }}
             className={`flex-1 py-3 px-2 flex items-center justify-center gap-1.5 transition-colors ${
               activeTab === "notes"
                 ? "bg-foreground text-background font-bold"
@@ -303,7 +326,7 @@ export const AnnotationsScreen: React.FC = () => {
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>Notes</span>
+            <span>{t("annotations.notes")}</span>
             <span className="text-[10px] opacity-80">({notes.length})</span>
           </button>
         </div>
@@ -336,8 +359,8 @@ export const AnnotationsScreen: React.FC = () => {
             {activeTab === "bookmarks" && (
               bookmarks.length === 0 ? (
                 <EmptyState
-                  title="No Bookmarks Filed"
-                  body="Place markers in any article to return to your reading dispatch instantly."
+                  title={t("annotations.emptyBookmarks")}
+                  body={t("annotations.emptyBookmarksBody")}
                   hint="Tap the Bookmark icon in the reader navigation bar"
                 />
               ) : (
@@ -423,8 +446,8 @@ export const AnnotationsScreen: React.FC = () => {
             {activeTab === "highlights" && (
               highlights.length === 0 ? (
                 <EmptyState
-                  title="No Highlights Recorded"
-                  body="Select text passages while reading to file and highlight notable excerpts."
+                  title={t("annotations.emptyHighlights")}
+                  body={t("annotations.emptyHighlightsBody")}
                   hint="Long-press or select text in reader to highlight"
                 />
               ) : (
@@ -508,8 +531,8 @@ export const AnnotationsScreen: React.FC = () => {
             {activeTab === "notes" && (
               notes.length === 0 ? (
                 <EmptyState
-                  title="No Editorial Notes"
-                  body="Record margin notes, critiques, and thoughts alongside your reading material."
+                  title={t("annotations.emptyNotes")}
+                  body={t("annotations.emptyNotesBody")}
                   hint="Select text in reader and tap 'Add Note'"
                 />
               ) : (
@@ -587,7 +610,7 @@ export const AnnotationsScreen: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-surface border-2 border-foreground w-full max-w-sm p-4 hard-shadow-hover">
             <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
-              <h3 className="font-serif font-black text-base uppercase">Edit Bookmark</h3>
+              <h3 className="font-serif font-black text-base uppercase">{t("annotations.editBookmark")}</h3>
               <button
                 type="button"
                 onClick={() => setEditingBookmark(null)}
@@ -598,7 +621,7 @@ export const AnnotationsScreen: React.FC = () => {
             </div>
             <div className="space-y-3 font-mono text-xs">
               <div>
-                <label className="block text-muted uppercase text-[10px] mb-1">Title</label>
+                <label className="block text-muted uppercase text-[10px] mb-1">{t("annotations.titleLabel")}</label>
                 <input
                   type="text"
                   value={editBmTitle}
@@ -608,7 +631,7 @@ export const AnnotationsScreen: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-muted uppercase text-[10px] mb-1">Note (optional)</label>
+                <label className="block text-muted uppercase text-[10px] mb-1">{t("annotations.noteLabel")}</label>
                 <textarea
                   value={editBmNote}
                   onChange={(e) => setEditBmNote(e.target.value)}
@@ -623,14 +646,14 @@ export const AnnotationsScreen: React.FC = () => {
                   onClick={() => setEditingBookmark(null)}
                   className="px-3 py-1.5 border border-border text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 uppercase"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveBookmark}
                   className="px-3 py-1.5 bg-foreground text-background font-bold uppercase hover:bg-accent"
                 >
-                  Save
+                  {t("common.save")}
                 </button>
               </div>
             </div>
@@ -643,7 +666,7 @@ export const AnnotationsScreen: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-surface border-2 border-foreground w-full max-w-sm p-4 hard-shadow-hover">
             <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
-              <h3 className="font-serif font-black text-base uppercase">Edit Highlight</h3>
+              <h3 className="font-serif font-black text-base uppercase">{t("annotations.editHighlight")}</h3>
               <button
                 type="button"
                 onClick={() => setEditingHighlight(null)}
@@ -654,7 +677,7 @@ export const AnnotationsScreen: React.FC = () => {
             </div>
             <div className="space-y-3 font-mono text-xs">
               <div>
-                <label className="block text-muted uppercase text-[10px] mb-1">Color Palette</label>
+                <label className="block text-muted uppercase text-[10px] mb-1">{t("annotations.paletteLabel")}</label>
                 <div className="flex gap-2">
                   {["yellow", "green", "blue", "pink", "purple"].map((col) => (
                     <button
@@ -671,7 +694,7 @@ export const AnnotationsScreen: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-muted uppercase text-[10px] mb-1">Note (optional)</label>
+                <label className="block text-muted uppercase text-[10px] mb-1">{t("annotations.noteLabel")}</label>
                 <textarea
                   value={editHlNote}
                   onChange={(e) => setEditHlNote(e.target.value)}
@@ -686,14 +709,14 @@ export const AnnotationsScreen: React.FC = () => {
                   onClick={() => setEditingHighlight(null)}
                   className="px-3 py-1.5 border border-border text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 uppercase"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveHighlight}
                   className="px-3 py-1.5 bg-foreground text-background font-bold uppercase hover:bg-accent"
                 >
-                  Save
+                  {t("common.save")}
                 </button>
               </div>
             </div>
@@ -706,7 +729,7 @@ export const AnnotationsScreen: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-surface border-2 border-foreground w-full max-w-sm p-4 hard-shadow-hover">
             <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
-              <h3 className="font-serif font-black text-base uppercase">Edit Note</h3>
+              <h3 className="font-serif font-black text-base uppercase">{t("annotations.editNote")}</h3>
               <button
                 type="button"
                 onClick={() => setEditingNote(null)}
@@ -717,7 +740,7 @@ export const AnnotationsScreen: React.FC = () => {
             </div>
             <div className="space-y-3 font-mono text-xs">
               <div>
-                <label className="block text-muted uppercase text-[10px] mb-1">Content</label>
+                <label className="block text-muted uppercase text-[10px] mb-1">{t("annotations.contentLabel")}</label>
                 <textarea
                   value={editNoteContent}
                   onChange={(e) => setEditNoteContent(e.target.value)}
@@ -732,14 +755,14 @@ export const AnnotationsScreen: React.FC = () => {
                   onClick={() => setEditingNote(null)}
                   className="px-3 py-1.5 border border-border text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 uppercase"
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveNote}
                   className="px-3 py-1.5 bg-foreground text-background font-bold uppercase hover:bg-accent"
                 >
-                  Save
+                  {t("common.save")}
                 </button>
               </div>
             </div>
@@ -752,10 +775,10 @@ export const AnnotationsScreen: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-surface border-2 border-foreground w-full max-w-xs p-4 hard-shadow-hover">
             <h3 className="font-serif font-black text-base text-foreground mb-1 uppercase">
-              Delete {itemToDelete.type}?
+              {t("annotations.deleteTitle", { type: itemToDelete.type })}
             </h3>
             <p className="font-mono text-xs text-muted mb-3 line-clamp-2">
-              Are you sure you want to remove "{itemToDelete.title}"? This cannot be undone.
+              {t("annotations.deleteBody", { title: itemToDelete.title })}
             </p>
             <div className="flex justify-end gap-2">
               <button
@@ -763,14 +786,14 @@ export const AnnotationsScreen: React.FC = () => {
                 onClick={() => setItemToDelete(null)}
                 className="px-3 py-1.5 border border-border font-mono text-xs text-foreground uppercase hover:bg-neutral-100 dark:hover:bg-neutral-800"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDelete}
                 className="px-3 py-1.5 bg-accent text-white font-mono text-xs font-bold uppercase hover:bg-red-700"
               >
-                Delete
+                {t("common.delete")}
               </button>
             </div>
           </div>

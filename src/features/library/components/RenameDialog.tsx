@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Edit3, X } from "lucide-react";
+import { useTranslation } from "@/i18n";
 import type { DocumentSummary } from "@/types";
 
 export interface RenameDialogProps {
@@ -17,6 +18,7 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
   onConfirm,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -33,11 +35,11 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
     e.preventDefault();
     const clean = title.trim();
     if (!clean) {
-      setError("Title cannot be empty");
+      setError(t("rename.emptyError"));
       return;
     }
     if (clean.length > 200) {
-      setError("Title cannot exceed 200 characters");
+      setError(t("rename.lengthError"));
       return;
     }
     setError(null);
@@ -54,14 +56,15 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
           <div className="flex items-center gap-2">
             <Edit3 className="w-5 h-5 text-accent" />
             <h2 className="font-serif font-semibold text-lg text-foreground">
-              Rename Document
+              {t("rename.title")}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={isRenaming}
-            className="p-1 rounded-control text-muted hover:text-foreground hover:bg-secondary transition-colors"
+            aria-label="Close dialog"
+            className="w-8 h-8 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-control text-muted hover:text-foreground hover:bg-secondary transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,7 +76,7 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
               htmlFor="document-title"
               className="block text-xs font-medium text-foreground mb-1.5"
             >
-              Document Title
+              {t("rename.label")}
             </label>
             <input
               id="document-title"
@@ -89,7 +92,7 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
               className="w-full h-11 px-3.5 rounded-control bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
             />
             <div className="flex justify-between items-center text-[11px] text-muted mt-1.5">
-              <span>{error ? <span className="text-danger">{error}</span> : "1–200 characters"}</span>
+              <span>{error ? <span className="text-danger">{error}</span> : t("rename.charHint")}</span>
               <span>{title.length}/200</span>
             </div>
           </div>
@@ -99,16 +102,16 @@ export const RenameDialog: React.FC<RenameDialogProps> = ({
               type="button"
               onClick={onClose}
               disabled={isRenaming}
-              className="h-10 px-4 rounded-control text-sm font-medium text-muted hover:text-foreground hover:bg-secondary transition-colors"
+              className="h-10 min-h-[44px] px-4 rounded-control text-sm font-medium text-muted hover:text-foreground hover:bg-secondary transition-colors"
             >
-              Cancel
+              {t("rename.cancel")}
             </button>
             <button
               type="submit"
               disabled={isRenaming || !title.trim()}
-              className="h-10 px-5 rounded-control bg-accent text-accent-foreground text-sm font-medium hover:opacity-95 transition-opacity disabled:opacity-50"
+              className="h-10 min-h-[44px] px-5 rounded-control bg-accent text-accent-foreground text-sm font-medium hover:opacity-95 transition-opacity disabled:opacity-50"
             >
-              {isRenaming ? "Saving..." : "Save"}
+              {isRenaming ? t("rename.saving") : t("rename.save")}
             </button>
           </div>
         </form>

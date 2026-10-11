@@ -17,9 +17,12 @@ import {
   Map,
   Flame,
 } from "lucide-react";
+import { useTranslation } from "@/i18n";
+import { triggerHaptic } from "@/lib/haptic";
 
 export const TrackerScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [overview, setOverview] = useState<TrackerOverview | null>(null);
@@ -50,7 +53,7 @@ export const TrackerScreen: React.FC = () => {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header title="Reading Tracker" />
+        <Header title={t("tracker.title")} />
         <div className="p-4 space-y-4">
           <LoadingSkeleton className="h-28 w-full rounded-card" />
           <LoadingSkeleton className="h-40 w-full rounded-card" />
@@ -63,12 +66,12 @@ export const TrackerScreen: React.FC = () => {
   if (error || !overview) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header title="Reading Tracker" />
+        <Header title={t("tracker.title")} />
         <div className="flex-1 flex items-center justify-center p-4">
           <ErrorState
-            title="Failed to Load Tracker"
-            message={error || "Could not retrieve reading tracker data."}
-            actions={[{ label: "Try Again", onClick: loadData }]}
+            title={t("tracker.errorTitle")}
+            message={error || t("tracker.errorMessage")}
+            actions={[{ label: t("tracker.tryAgain"), onClick: loadData }]}
           />
         </div>
       </div>
@@ -87,13 +90,13 @@ export const TrackerScreen: React.FC = () => {
   if (!hasActivity) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header title="Reading Tracker" />
+        <Header title={t("tracker.title")} />
         <div className="flex-1 flex items-center justify-center p-4">
           <EmptyState
-            title="Your reading map is waiting."
-            body="Open any document to start tracking your reading time, speed, and chapter progress automatically."
+            title={t("tracker.emptyTitle")}
+            body={t("tracker.emptyBody")}
             primaryAction={{
-              label: "Open Library",
+              label: t("tracker.openLibrary"),
               onClick: () => navigate("/library"),
             }}
           />
@@ -107,7 +110,7 @@ export const TrackerScreen: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col pb-safe">
-      <Header title="Reading Tracker" subtitle="Habits, Progress & Statistics" />
+      <Header title={t("tracker.title")} subtitle={t("tracker.subtitle")} />
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6 max-w-lg mx-auto w-full">
         {/* Key metrics cards */}
@@ -115,45 +118,45 @@ export const TrackerScreen: React.FC = () => {
           <div className="p-4 rounded-card bg-surface border border-border shadow-xs">
             <div className="flex items-center gap-2 text-xs text-muted mb-1.5">
               <Clock className="w-4 h-4 text-primary" />
-              <span>Today</span>
+              <span>{t("tracker.todayMinutes")}</span>
             </div>
             <div className="font-serif font-bold text-2xl text-foreground">
               {todayMinutes} <span className="text-sm font-sans font-normal text-muted">min</span>
             </div>
-            <div className="text-[11px] text-muted mt-1">Active reading time</div>
+            <div className="text-[11px] text-muted mt-1">{t("tracker.activeReadingTime")}</div>
           </div>
 
           <div className="p-4 rounded-card bg-surface border border-border shadow-xs">
             <div className="flex items-center gap-2 text-xs text-muted mb-1.5">
               <Flame className="w-4 h-4 text-amber-500" />
-              <span>This Week</span>
+              <span>{t("tracker.thisWeek")}</span>
             </div>
             <div className="font-serif font-bold text-2xl text-foreground">
               {weekMinutes} <span className="text-sm font-sans font-normal text-muted">min</span>
             </div>
-            <div className="text-[11px] text-muted mt-1">Past 7 days total</div>
+            <div className="text-[11px] text-muted mt-1">{t("tracker.past7DaysTotal")}</div>
           </div>
 
           <div className="p-4 rounded-card bg-surface border border-border shadow-xs">
             <div className="flex items-center gap-2 text-xs text-muted mb-1.5">
               <BookOpen className="w-4 h-4 text-blue-500" />
-              <span>In Library</span>
+              <span>{t("tracker.inLibrary")}</span>
             </div>
             <div className="font-serif font-bold text-2xl text-foreground">
               {overview.documents}
             </div>
-            <div className="text-[11px] text-muted mt-1">Imported documents</div>
+            <div className="text-[11px] text-muted mt-1">{t("tracker.importedDocuments")}</div>
           </div>
 
           <div className="p-4 rounded-card bg-surface border border-border shadow-xs">
             <div className="flex items-center gap-2 text-xs text-muted mb-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              <span>Finished</span>
+              <span>{t("tracker.finished")}</span>
             </div>
             <div className="font-serif font-bold text-2xl text-foreground">
               {overview.completed}
             </div>
-            <div className="text-[11px] text-muted mt-1">Completed reading</div>
+            <div className="text-[11px] text-muted mt-1">{t("tracker.completedReading")}</div>
           </div>
         </div>
 
@@ -163,7 +166,7 @@ export const TrackerScreen: React.FC = () => {
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-primary" />
               <h3 className="font-serif font-bold text-sm text-foreground">
-                Daily Activity (7 Days)
+                {t("tracker.dailyActivity")}
               </h3>
             </div>
             <span className="text-xs text-muted font-mono">{weekMinutes}m total</span>
@@ -208,10 +211,10 @@ export const TrackerScreen: React.FC = () => {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between px-1">
               <h3 className="font-serif font-bold text-sm text-foreground">
-                Currently Reading
+                {t("tracker.currentlyReading")}
               </h3>
               <span className="text-xs text-muted">
-                {overview.currentlyReading.length} books
+                {t("tracker.booksCount", { count: overview.currentlyReading.length })}
               </span>
             </div>
 
@@ -222,11 +225,15 @@ export const TrackerScreen: React.FC = () => {
                   <div
                     key={doc.id}
                     className="p-3.5 rounded-card bg-surface border border-border flex items-center justify-between gap-3 hover:bg-surface-2 transition-colors cursor-pointer"
-                    onClick={() => navigate(`/tracker/${doc.id}`)}
+                    onClick={() => {
+                      triggerHaptic("tick");
+                      navigate(`/tracker/${doc.id}`);
+                    }}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
+                        triggerHaptic("tick");
                         navigate(`/tracker/${doc.id}`);
                       }
                     }}
@@ -251,11 +258,12 @@ export const TrackerScreen: React.FC = () => {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
+                          triggerHaptic("tick");
                           navigate(`/read/${doc.id}`);
                         }}
                         className="px-2.5 py-1 rounded-control bg-primary/10 text-primary hover:bg-primary/20 text-xs font-medium transition-colors"
                       >
-                        Read
+                        {t("tracker.readAction")}
                       </button>
                       <Map className="w-4 h-4 text-muted" />
                     </div>
@@ -270,7 +278,7 @@ export const TrackerScreen: React.FC = () => {
         {sessions.length > 0 && (
           <div className="flex flex-col gap-3">
             <h3 className="font-serif font-bold text-sm text-foreground px-1">
-              Recent Sessions
+              {t("tracker.recentSessions")}
             </h3>
 
             <div className="space-y-2">
@@ -291,12 +299,19 @@ export const TrackerScreen: React.FC = () => {
                   >
                     <div>
                       <div className="font-medium text-foreground">
-                        {durationMin} min session ({activeMin}m active)
+                        {t("tracker.sessionSummary", {
+                          duration: durationMin,
+                          active: activeMin,
+                        })}
                       </div>
                       <div className="text-muted mt-0.5">{dateStr}</div>
                     </div>
                     <div className="text-right font-mono text-muted">
-                      {s.segmentsRead > 0 && <span>{s.segmentsRead} segs read</span>}
+                      {s.segmentsRead > 0 && (
+                        <span>
+                          {t("tracker.segmentsRead", { count: s.segmentsRead })}
+                        </span>
+                      )}
                     </div>
                   </div>
                 );

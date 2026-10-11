@@ -1,4 +1,6 @@
+import React from "react";
 import { AlertCircle, Trash2 } from "lucide-react";
+import { useTranslation } from "@/i18n";
 import type { DocumentSummary } from "@/types";
 
 export interface DeleteDialogProps {
@@ -16,6 +18,7 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({
   onConfirm,
   onClose,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen || !doc) return null;
 
   return (
@@ -29,7 +32,7 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({
             <AlertCircle className="w-5 h-5 text-danger" />
           </div>
           <h2 className="font-serif font-semibold text-lg text-foreground">
-            Delete Document
+            {t("delete.title")}
           </h2>
         </div>
 
@@ -37,7 +40,7 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({
           Are you sure you want to delete <span className="font-semibold text-foreground">"{doc.title}"</span>?
         </p>
         <p className="text-xs text-muted mb-6 leading-relaxed">
-          This will permanently delete the document file from your device, along with all reading progress, statistics, and notes. This action cannot be undone.
+          {t("delete.body")}
         </p>
 
         <div className="flex items-center justify-end gap-3">
@@ -47,7 +50,7 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({
             disabled={isDeleting}
             className="flex-1 h-10 px-4 rounded-control text-sm font-medium text-muted hover:text-foreground hover:bg-secondary transition-colors"
           >
-            Cancel
+            {t("delete.cancel")}
           </button>
           <button
             type="button"
@@ -56,7 +59,7 @@ export const DeleteDialog: React.FC<DeleteDialogProps> = ({
             className="flex-1 flex items-center justify-center gap-2 h-10 px-4 rounded-control bg-danger text-white text-sm font-medium hover:opacity-95 transition-opacity disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
-            <span>{isDeleting ? "Deleting..." : "Delete"}</span>
+            <span>{isDeleting ? "Deleting..." : t("delete.confirm")}</span>
           </button>
         </div>
       </div>

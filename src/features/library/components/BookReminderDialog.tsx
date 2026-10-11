@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Bell, Clock, X, Trash2 } from "lucide-react";
+import { triggerHaptic } from "@/lib/haptic";
+import { useTranslation, type TranslationKey } from "@/i18n";
 import type { DocumentDetail, Reminder, ReminderScheduleType } from "@/types";
 
 export interface BookReminderDialogProps {
@@ -18,14 +20,14 @@ export interface BookReminderDialogProps {
   onClose: () => void;
 }
 
-const DAYS = [
-  { bit: 1, label: "Mon" },
-  { bit: 2, label: "Tue" },
-  { bit: 4, label: "Wed" },
-  { bit: 8, label: "Thu" },
-  { bit: 16, label: "Fri" },
-  { bit: 32, label: "Sat" },
-  { bit: 64, label: "Sun" },
+const DAYS: { bit: number; key: TranslationKey }[] = [
+  { bit: 1, key: "days.mon" },
+  { bit: 2, key: "days.tue" },
+  { bit: 4, key: "days.wed" },
+  { bit: 8, key: "days.thu" },
+  { bit: 16, key: "days.fri" },
+  { bit: 32, key: "days.sat" },
+  { bit: 64, key: "days.sun" },
 ];
 
 function minToTimeString(min: number | null | undefined): string {
@@ -48,6 +50,7 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
   onDelete,
   onClose,
 }) => {
+  const { t } = useTranslation();
   const [enabled, setEnabled] = useState(true);
   const [scheduleType, setScheduleType] = useState<ReminderScheduleType>("daily");
   const [timeStr, setTimeStr] = useState("20:00");
@@ -74,6 +77,7 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
     e.preventDefault();
     setSubmitting(true);
     try {
+      triggerHaptic("tick");
       await onSave({
         id: reminder?.id,
         documentId: doc.id,
@@ -115,13 +119,13 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
           <div className="flex items-center gap-2">
             <Bell className="w-5 h-5 text-accent" />
             <h2 className="font-serif font-semibold text-lg text-foreground">
-              Book Reminder
+              {t("reminder.bookTitle")}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={t("common.close")}
             className="w-8 h-8 flex items-center justify-center rounded-control text-muted hover:text-foreground hover:bg-surface-2 transition-colors min-h-[44px] min-w-[44px]"
           >
             <X className="w-4 h-4" />
@@ -130,17 +134,17 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="text-xs text-muted">
-            Configure reading reminder for{" "}
+            {t("reminder.configurePrefix")}{" "}
             <span className="font-medium text-foreground">{doc.title}</span>.
           </div>
 
           <div className="flex items-center justify-between p-3 bg-surface-2 rounded-control">
-            <span className="text-xs font-medium text-foreground">Reminder Active</span>
+            <span className="text-xs font-medium text-foreground">{t("reminder.active")}</span>
             <button
               type="button"
               role="switch"
               aria-checked={enabled}
-              aria-label="Toggle reminder active"
+              aria-label={t("reminder.toggleActive")}
               onClick={() => setEnabled(!enabled)}
               className={`w-12 h-7 flex items-center rounded-full p-1 transition-colors min-h-[44px] justify-center ${
                 enabled ? "bg-accent" : "bg-surface-3"
@@ -156,7 +160,7 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
 
           <div>
             <label className="text-xs font-medium text-foreground block mb-2">
-              Frequency
+              {t("reminder.frequency")}
             </label>
             <div className="grid grid-cols-3 gap-2">
               {(["daily", "weekdays", "custom"] as ReminderScheduleType[]).map((st) => (
@@ -170,7 +174,11 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
                       : "border-border text-foreground hover:bg-surface-2"
                   }`}
                 >
-                  {st}
+                  {st === "daily"
+                    ? t("reminder.daily")
+                    : st === "weekdays"
+                    ? t("reminder.weekdays")
+                    : t("reminder.custom")}
                 </button>
               ))}
             </div>
@@ -179,7 +187,7 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
           {scheduleType === "custom" && (
             <div>
               <label className="text-xs font-medium text-foreground block mb-2">
-                Active Days
+                {t("reminder.activeDays")}
               </label>
               <div className="grid grid-cols-7 gap-1">
                 {DAYS.map((d) => {
@@ -195,7 +203,7 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
                           : "border-border text-foreground hover:bg-surface-2"
                       }`}
                     >
-                      {d.label}
+                      {t(d.key)}
                     </button>
                   );
                 })}
@@ -208,7 +216,7 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
               htmlFor="book-reminder-time"
               className="text-xs font-medium text-foreground block mb-2"
             >
-              Reminder Time
+              {t("reminder.reminderTime")}
             </label>
             <div className="flex items-center gap-2">
               <input
@@ -231,7 +239,7 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
                 className="min-h-[44px] h-10 px-3 rounded-control border border-danger/20 text-danger hover:bg-danger/10 text-xs font-medium flex items-center gap-1.5 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Remove</span>
+                <span>{t("reminder.remove")}</span>
               </button>
             ) : (
               <div />
@@ -244,14 +252,14 @@ export const BookReminderDialog: React.FC<BookReminderDialogProps> = ({
                 disabled={submitting}
                 className="min-h-[44px] h-10 px-4 rounded-control border border-border text-foreground hover:bg-surface-2 text-xs font-medium transition-colors"
               >
-                Cancel
+                {t("reminder.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={submitting}
                 className="min-h-[44px] h-10 px-4 rounded-control bg-accent text-accent-foreground font-medium text-xs hover:bg-accent/90 transition-colors"
               >
-                {submitting ? "Saving..." : "Save Reminder"}
+                {submitting ? t("reminder.saving") : t("reminder.save")}
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { listen } from "@tauri-apps/api/event";
 import {
   Search,
@@ -14,6 +14,9 @@ import {
 import { Header } from "@/components/layout/Header";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { VirtualGrid } from "@/components/common/VirtualGrid";
+import { triggerHaptic } from "@/lib/haptic";
+import { useTranslation } from "@/i18n";
 import type { DocumentSummary } from "@/types";
 import {
   listDocuments,
@@ -34,6 +37,8 @@ type FormatFilter = "all" | "pdf" | "md" | "txt" | "epub" | "docx";
 
 export const LibraryScreen: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,13 +108,14 @@ export const LibraryScreen: React.FC = () => {
   }, [documents, formatFilter]);
 
   // Handlers
-  const handleImport = async (sourcePath: string, onDuplicate?: "ask" | "open_existing" | "replace") => {
+  const handleImport = useCallback(async (sourcePath: string, onDuplicate?: "ask" | "open_existing" | "replace") => {
     setIsImporting(true);
     setImportError(null);
     try {
       await importDocument({ source: sourcePath, onDuplicate });
       setIsImportOpen(false);
       setDuplicateInfo(null);
+      triggerHaptic("success");
       await fetchDocuments();
     } catch (err: unknown) {
       const e = err as { code?: string; details?: { existingId?: string }; message?: string };
@@ -122,7 +128,19 @@ export const LibraryScreen: React.FC = () => {
     } finally {
       setIsImporting(false);
     }
-  };
+  }, [fetchDocuments]);
+
+  // Check external open-with / deep-link query parameter
+  useEffect(() => {
+    const importSrc = searchParams.get("importSource") || searchParams.get("source");
+    if (importSrc) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("importSource");
+      nextParams.delete("source");
+      setSearchParams(nextParams, { replace: true });
+      handleImport(importSrc);
+    }
+  }, [searchParams, setSearchParams, handleImport]);
 
   const handleRename = async (doc: DocumentSummary, newTitle: string) => {
     setIsRenaming(true);
@@ -166,7 +184,7 @@ export const LibraryScreen: React.FC = () => {
         onClick={() => navigate("/export")}
         aria-label="Export Reading Dossier"
         title="Export Reading Dossier"
-        className="w-9 h-9 border border-border flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+        className="w-11 h-11 min-w-[44px] min-h-[44px] border border-border flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
       >
         <FileSpreadsheet className="w-4 h-4 text-muted hover:text-foreground" />
       </button>
@@ -175,7 +193,7 @@ export const LibraryScreen: React.FC = () => {
         onClick={() => navigate("/annotations")}
         aria-label="Clippings & Annotations"
         title="Clippings & Annotations"
-        className="w-9 h-9 border border-border flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+        className="w-11 h-11 min-w-[44px] min-h-[44px] border border-border flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
       >
         <Bookmark className="w-4 h-4 text-muted hover:text-foreground" />
       </button>
@@ -186,17 +204,17 @@ export const LibraryScreen: React.FC = () => {
           setIsImportOpen(true);
         }}
         aria-label="Import document"
-        className="flex items-center gap-1.5 h-9 px-3 border border-border bg-foreground text-background text-xs font-mono font-bold uppercase hover:bg-accent hover:text-white transition-colors"
+        className="flex items-center gap-1.5 min-h-[44px] px-3.5 border border-border bg-foreground text-background text-xs font-mono font-bold uppercase hover:bg-accent hover:text-white transition-colors"
       >
         <Plus className="w-4 h-4" />
-        <span>Import</span>
+        <span>{t("library.import")}</span>
       </button>
     </div>
   );
 
   return (
     <div className="flex-1 flex flex-col relative pb-20">
-      <Header title="Library" actions={headerActions} />
+      <Header title={t("library.title")} actions={headerActions} />
 
       {/* Search and Filter Section */}
       <div className="p-4 border-b border-border space-y-3 bg-surface">
@@ -207,7 +225,7 @@ export const LibraryScreen: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by title or author..."
+            placeholder={t("library.searchPlaceholder")}
             className="w-full h-10 pl-10 pr-9 rounded-control bg-background border border-border text-foreground text-sm placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/40"
           />
           {searchQuery && (
@@ -228,19 +246,19 @@ export const LibraryScreen: React.FC = () => {
               key={status}
               type="button"
               onClick={() => setStatusFilter(status)}
-              className={`h-7 px-3 rounded-full font-medium whitespace-nowrap transition-colors ${
+              className={`min-h-[44px] px-3.5 rounded-full font-medium whitespace-nowrap transition-colors flex items-center justify-center ${
                 statusFilter === status
                   ? "bg-accent text-accent-foreground"
                   : "bg-secondary text-muted hover:text-foreground"
               }`}
             >
               {status === "all"
-                ? "All"
+                ? t("library.filterAll")
                 : status === "in_progress"
-                ? "In Progress"
+                ? t("library.filterInProgress")
                 : status === "completed"
-                ? "Completed"
-                : "Archived"}
+                ? t("library.filterCompleted")
+                : t("library.filterArchived")}
             </button>
           ))}
         </div>
@@ -254,7 +272,7 @@ export const LibraryScreen: React.FC = () => {
                 key={fmt}
                 type="button"
                 onClick={() => setFormatFilter(fmt)}
-                className={`px-2 py-0.5 rounded text-[11px] font-mono uppercase transition-colors border ${
+                className={`min-h-[44px] px-2.5 py-1 rounded text-[11px] font-mono uppercase transition-colors border flex items-center justify-center ${
                   formatFilter === fmt
                     ? "bg-foreground text-background border-foreground font-semibold"
                     : "bg-background text-muted border-border hover:border-muted"
@@ -272,12 +290,12 @@ export const LibraryScreen: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="h-7 pl-6 pr-2 rounded bg-secondary border border-border text-[11px] text-foreground focus:outline-none cursor-pointer"
+                className="h-9 min-h-[36px] pl-6 pr-2 rounded bg-secondary border border-border text-[11px] text-foreground focus:outline-none cursor-pointer"
               >
-                <option value="recent_opened">Recent</option>
-                <option value="recent_added">Added</option>
-                <option value="title">Title</option>
-                <option value="progress">Progress</option>
+                <option value="recent_opened">{t("library.sortRecent")}</option>
+                <option value="recent_added">{t("library.sortAdded")}</option>
+                <option value="title">{t("library.sortTitle")}</option>
+                <option value="progress">{t("library.sortProgress")}</option>
               </select>
             </div>
 
@@ -286,17 +304,17 @@ export const LibraryScreen: React.FC = () => {
                 type="button"
                 onClick={() => setViewMode("grid")}
                 aria-label="Grid view"
-                className={`p-1 rounded ${viewMode === "grid" ? "bg-card text-foreground shadow-sm" : "text-muted"}`}
+                className={`w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded transition-colors ${viewMode === "grid" ? "bg-card text-foreground shadow-sm" : "text-muted hover:text-foreground"}`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
                 aria-label="List view"
-                className={`p-1 rounded ${viewMode === "list" ? "bg-card text-foreground shadow-sm" : "text-muted"}`}
+                className={`w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded transition-colors ${viewMode === "list" ? "bg-card text-foreground shadow-sm" : "text-muted hover:text-foreground"}`}
               >
-                <ListIcon className="w-3.5 h-3.5" />
+                <ListIcon className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -313,17 +331,17 @@ export const LibraryScreen: React.FC = () => {
           </div>
         ) : error ? (
           <ErrorState
-            title="Failed to load library"
+            title={t("library.errorTitle")}
             message={error}
-            actions={[{ label: "Retry", onClick: fetchDocuments }]}
+            actions={[{ label: t("library.retry"), onClick: fetchDocuments }]}
           />
         ) : filteredDocuments.length === 0 ? (
           searchQuery || statusFilter !== "all" || formatFilter !== "all" ? (
             <EmptyState
-              title="No documents found"
-              body="No documents match your current filter and search criteria."
+              title={t("library.noResultsTitle")}
+              body={t("library.noResultsBody")}
               primaryAction={{
-                label: "Clear Filters",
+                label: t("library.clearFilters"),
                 onClick: () => {
                   setSearchQuery("");
                   setStatusFilter("all");
@@ -333,24 +351,29 @@ export const LibraryScreen: React.FC = () => {
             />
           ) : (
             <EmptyState
-              title="Your reading library is empty."
-              body="Bring your first document here and start tracking your reading journey."
+              title={t("library.emptyTitle")}
+              body={t("library.emptyBody")}
               primaryAction={{
-                label: "Import Document",
+                label: t("library.importDocument"),
                 onClick: () => setIsImportOpen(true),
               }}
               hint="PDF · DOCX · EPUB · RTF · TXT · Markdown"
             />
           )
         ) : (
-          <div
-            className={
+          <VirtualGrid
+            items={filteredDocuments}
+            itemKey={(doc) => doc.id}
+            columns={viewMode === "grid" ? 2 : 1}
+            itemHeight={viewMode === "grid" ? 260 : 76}
+            overscan={2}
+            className="flex-1 min-h-[400px]"
+            gridClassName={
               viewMode === "grid"
-                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                ? "grid grid-cols-2 gap-3"
                 : "flex flex-col gap-2.5"
             }
-          >
-            {filteredDocuments.map((doc) => (
+            renderItem={(doc) => (
               <DocCard
                 key={doc.id}
                 document={doc}
@@ -359,8 +382,8 @@ export const LibraryScreen: React.FC = () => {
                 onArchive={handleArchive}
                 onDelete={(d) => setDeleteDoc(d)}
               />
-            ))}
-          </div>
+            )}
+          />
         )}
       </div>
 

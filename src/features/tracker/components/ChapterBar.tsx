@@ -1,6 +1,7 @@
 import React from "react";
 import { MapSection } from "@/types";
 import { CheckCircle2, BookOpen, Circle } from "lucide-react";
+import { useTranslation } from "@/i18n";
 
 interface ChapterBarProps {
   section: MapSection;
@@ -13,6 +14,7 @@ export const ChapterBar: React.FC<ChapterBarProps> = ({
   onClick,
   isActive = false,
 }) => {
+  const { t } = useTranslation();
   const percent = Math.round(section.progress * 100);
 
   const getStatusIcon = () => {
@@ -29,20 +31,20 @@ export const ChapterBar: React.FC<ChapterBarProps> = ({
     if (section.status === "read" || percent >= 98) {
       return (
         <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-          Completed
+          {t("chapter.completed")}
         </span>
       );
     }
     if (section.status === "reading" || percent > 0) {
       return (
         <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
-          In Progress
+          {t("chapter.inProgress")}
         </span>
       );
     }
     return (
       <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-muted/10 text-muted">
-        Unread
+        {t("chapter.unread")}
       </span>
     );
   };
@@ -67,7 +69,7 @@ export const ChapterBar: React.FC<ChapterBarProps> = ({
         <div className="flex items-center gap-2 min-w-0">
           {getStatusIcon()}
           <span className="font-medium text-sm text-foreground truncate">
-            {section.title || `Section ${section.index + 1}`}
+            {section.title || t("chapter.defaultTitle", { index: section.index + 1 })}
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -94,9 +96,9 @@ export const ChapterBar: React.FC<ChapterBarProps> = ({
 
       {/* Section segments count & read time */}
       <div className="flex justify-between items-center mt-2 text-xs text-muted font-mono">
-        <span>{section.segments.length} segments</span>
+        <span>{t("chapter.segments", { count: section.segments.length })}</span>
         {section.readMs > 0 && (
-          <span>{Math.round(section.readMs / 1000)}s reading time</span>
+          <span>{t("chapter.readingTime", { seconds: Math.round(section.readMs / 1000) })}</span>
         )}
       </div>
     </div>

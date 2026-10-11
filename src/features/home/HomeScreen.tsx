@@ -4,6 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { LoadingSkeleton } from "@/components/feedback/LoadingSkeleton";
+import { useTranslation } from "@/i18n";
 import { getHomeDashboard } from "@/features/tracker/api";
 import { HomeDashboard } from "@/types";
 import {
@@ -21,6 +22,7 @@ import {
 
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<HomeDashboard | null>(null);
@@ -50,7 +52,7 @@ export const HomeScreen: React.FC = () => {
         onClick={() => navigate("/annotations")}
         aria-label="Clippings & Annotations"
         title="Clippings & Annotations"
-        className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+        className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
       >
         <Bookmark className="w-4 h-4 text-muted" />
       </button>
@@ -59,7 +61,7 @@ export const HomeScreen: React.FC = () => {
         onClick={() => navigate("/search")}
         aria-label="Search documents"
         title="Search"
-        className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+        className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
       >
         <Search className="w-4 h-4 text-muted" />
       </button>
@@ -70,8 +72,8 @@ export const HomeScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col">
         <Header
-          title="ReadTrack"
-          subtitle="Local-first reading tracker"
+          title={t("home.title")}
+          subtitle={t("home.subtitle")}
           actions={headerActions}
         />
         <div className="p-4 space-y-4 max-w-lg mx-auto w-full">
@@ -87,15 +89,15 @@ export const HomeScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col">
         <Header
-          title="ReadTrack"
-          subtitle="Local-first reading tracker"
+          title={t("home.title")}
+          subtitle={t("home.subtitle")}
           actions={headerActions}
         />
         <div className="flex-1 flex items-center justify-center p-4">
           <ErrorState
-            title="Failed to Load Dashboard"
-            message={error || "Could not retrieve reading dashboard."}
-            actions={[{ label: "Try Again", onClick: loadDashboard }]}
+            title={t("home.errorTitle")}
+            message={error || t("home.errorMessage")}
+            actions={[{ label: t("home.tryAgain"), onClick: loadDashboard }]}
           />
         </div>
       </div>
@@ -112,16 +114,16 @@ export const HomeScreen: React.FC = () => {
     return (
       <div className="flex-1 flex flex-col">
         <Header
-          title="ReadTrack"
-          subtitle="Local-first reading tracker"
+          title={t("home.title")}
+          subtitle={t("home.subtitle")}
           actions={headerActions}
         />
         <div className="flex-1 flex flex-col items-center justify-center p-4">
           <EmptyState
-            title="Welcome to ReadTrack"
-            body="Import a document to begin. Everything stays on your device."
+            title={t("home.welcomeTitle")}
+            body={t("home.welcomeBody")}
             primaryAction={{
-              label: "Open Library",
+              label: t("home.openLibrary"),
               onClick: () => navigate("/library"),
             }}
             hint="PDF · DOCX · EPUB · RTF · TXT · Markdown"
@@ -159,8 +161,8 @@ export const HomeScreen: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col pb-safe">
       <Header
-        title="ReadTrack"
-        subtitle="Local-first reading tracker"
+        title={t("home.title")}
+        subtitle={t("home.subtitle")}
         actions={headerActions}
       />
 
@@ -170,7 +172,7 @@ export const HomeScreen: React.FC = () => {
           <div className="p-4 rounded-card bg-surface border border-border shadow-xs hover:border-primary/40 transition-colors">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[11px] font-mono uppercase tracking-wider text-primary font-medium">
-                Continue Reading
+                {t("home.continueReading")}
               </span>
               <span
                 className={`text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase ${getFormatBadge(
@@ -187,14 +189,14 @@ export const HomeScreen: React.FC = () => {
 
             {dashboard.continueReading.sectionTitle && (
               <p className="text-xs text-muted truncate mb-3">
-                Chapter: {dashboard.continueReading.sectionTitle}
+                {t("home.chapter", { title: dashboard.continueReading.sectionTitle })}
               </p>
             )}
 
             {/* Progress bar */}
             <div className="space-y-1.5 my-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted">Progress</span>
+                <span className="text-muted">{t("home.progress")}</span>
                 <span className="font-mono font-medium text-foreground">
                   {continueProgressPercent}%
                 </span>
@@ -215,7 +217,7 @@ export const HomeScreen: React.FC = () => {
                 className="flex-1 h-9 rounded-control bg-primary text-primary-foreground font-medium text-xs flex items-center justify-center gap-1.5 hover:opacity-90 active:scale-[0.98] transition-all"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                Resume Reading
+                {t("home.resumeReading")}
               </button>
               <button
                 type="button"
@@ -224,7 +226,7 @@ export const HomeScreen: React.FC = () => {
                 className="h-9 px-3 rounded-control border border-border bg-surface hover:bg-surface-2 text-foreground font-medium text-xs flex items-center justify-center gap-1.5 transition-colors"
               >
                 <Map className="w-3.5 h-3.5 text-muted" />
-                Map
+                {t("home.map")}
               </button>
             </div>
           </div>
@@ -243,10 +245,10 @@ export const HomeScreen: React.FC = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
               <Flame className="w-4 h-4 text-amber-500" />
-              <span>Reading Activity</span>
+              <span>{t("home.readingActivity")}</span>
             </div>
             <div className="flex items-center text-xs text-muted hover:text-foreground">
-              <span>View Details</span>
+              <span>{t("home.viewDetails")}</span>
               <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
             </div>
           </div>
@@ -255,7 +257,7 @@ export const HomeScreen: React.FC = () => {
             <div className="p-2 rounded-control bg-surface-2">
               <div className="text-[10px] text-muted flex items-center justify-center gap-1">
                 <Clock className="w-3 h-3 text-primary" />
-                Today
+                {t("home.today")}
               </div>
               <div className="font-serif font-bold text-sm text-foreground mt-0.5">
                 {todayMinutes}m
@@ -265,7 +267,7 @@ export const HomeScreen: React.FC = () => {
             <div className="p-2 rounded-control bg-surface-2">
               <div className="text-[10px] text-muted flex items-center justify-center gap-1">
                 <Flame className="w-3 h-3 text-amber-500" />
-                7 Days
+                {t("home.days7")}
               </div>
               <div className="font-serif font-bold text-sm text-foreground mt-0.5">
                 {weekMinutes}m
@@ -275,7 +277,7 @@ export const HomeScreen: React.FC = () => {
             <div className="p-2 rounded-control bg-surface-2">
               <div className="text-[10px] text-muted flex items-center justify-center gap-1">
                 <BookOpen className="w-3 h-3 text-blue-500" />
-                Reading
+                {t("home.reading")}
               </div>
               <div className="font-serif font-bold text-sm text-foreground mt-0.5">
                 {dashboard.currentlyReading}
@@ -285,7 +287,7 @@ export const HomeScreen: React.FC = () => {
             <div className="p-2 rounded-control bg-surface-2">
               <div className="text-[10px] text-muted flex items-center justify-center gap-1">
                 <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                Finished
+                {t("home.finished")}
               </div>
               <div className="font-serif font-bold text-sm text-foreground mt-0.5">
                 {dashboard.completed}
@@ -296,7 +298,7 @@ export const HomeScreen: React.FC = () => {
           {/* Mini 7-day activity bar chart */}
           {dashboard.activity.length > 0 && (
             <div className="pt-2 border-t border-border/50">
-              <div className="text-[10px] text-muted mb-2">Past 7 Days</div>
+              <div className="text-[10px] text-muted mb-2">{t("home.past7Days")}</div>
               <div className="flex items-end justify-between gap-1.5 h-12">
                 {dashboard.activity.map((item, idx) => {
                   const dayName = new Date(item.date).toLocaleDateString(undefined, {
@@ -328,14 +330,14 @@ export const HomeScreen: React.FC = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-serif font-bold text-base text-foreground">
-                Recent Documents
+                {t("home.recentDocuments")}
               </h3>
               <button
                 type="button"
                 onClick={() => navigate("/library")}
                 className="text-xs text-muted hover:text-foreground flex items-center gap-0.5"
               >
-                <span>All Books</span>
+                <span>{t("home.allBooks")}</span>
                 <ChevronRight className="w-3 h-3" />
               </button>
             </div>
@@ -394,7 +396,7 @@ export const HomeScreen: React.FC = () => {
                         navigate(`/tracker/${doc.id}`);
                       }}
                       aria-label="View Map"
-                      className="w-8 h-8 rounded-control flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-2 transition-colors shrink-0"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-control flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-2 transition-colors shrink-0"
                     >
                       <Map className="w-4 h-4" />
                     </button>
@@ -413,7 +415,7 @@ export const HomeScreen: React.FC = () => {
             className="w-full h-11 rounded-control border border-border/80 bg-surface hover:bg-surface-2 text-foreground font-medium text-xs flex items-center justify-center gap-2 transition-colors"
           >
             <Plus className="w-4 h-4 text-muted" />
-            <span>Import or browse library</span>
+            <span>{t("home.importOrBrowse")}</span>
           </button>
         </div>
       </div>

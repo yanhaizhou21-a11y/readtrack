@@ -1,21 +1,24 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Home, BookOpen, Activity, Settings } from "lucide-react";
+import { useTranslation, type TranslationKey } from "@/i18n";
 
 interface NavItem {
   to: string;
-  label: string;
+  labelKey: TranslationKey;
   icon: React.ComponentType<{ className?: string }>;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/library", label: "Library", icon: BookOpen },
-  { to: "/tracker", label: "Tracker", icon: Activity },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/", labelKey: "nav.home", icon: Home },
+  { to: "/library", labelKey: "nav.library", icon: BookOpen },
+  { to: "/tracker", labelKey: "nav.tracker", icon: Activity },
+  { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ];
 
 export const BottomNav: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <nav
       data-testid="bottom-nav"
@@ -49,7 +52,7 @@ export const BottomNav: React.FC = () => {
                     }`}
                   />
                   <span className="text-[10px] font-mono uppercase tracking-widest mt-1 leading-none">
-                    {item.label}
+                    {t(item.labelKey)}
                   </span>
                 </>
               )}

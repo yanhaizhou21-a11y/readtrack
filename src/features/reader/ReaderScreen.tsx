@@ -38,10 +38,13 @@ import {
   Bookmark,
 } from "@/types";
 import { listen } from "@tauri-apps/api/event";
+import { triggerHaptic } from "@/lib/haptic";
+import { useTranslation } from "@/i18n";
 
 export const ReaderScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { readerChromeVisible, toggleReaderChrome } = useUiStore();
 
   const [loading, setLoading] = useState(true);
@@ -148,7 +151,8 @@ export const ReaderScreen: React.FC = () => {
       try {
         await deleteBookmark(existing.id);
         setBookmarks((prev) => prev.filter((b) => b.id !== existing.id));
-        showToast("Bookmark removed");
+        triggerHaptic("tick");
+        showToast(t("reader.bookmarkRemoved"));
       } catch (err) {
         console.error("Failed to remove bookmark:", err);
       }
@@ -166,7 +170,8 @@ export const ReaderScreen: React.FC = () => {
           title: `${Math.round(currentPct * 100)}% through ${doc.title}`,
         });
         setBookmarks((prev) => [newBm, ...prev]);
-        showToast("Bookmark filed");
+        triggerHaptic("tick");
+        showToast(t("reader.bookmarkFiled"));
       } catch (err) {
         console.error("Failed to create bookmark:", err);
       }
@@ -178,6 +183,7 @@ export const ReaderScreen: React.FC = () => {
     try {
       const res = await markDocumentCompleted(id);
       setProgress(res.progressPercent);
+      triggerHaptic("success");
       const updatedMap = await getReadingMap(id).catch(() => null);
       if (updatedMap) setReadingMap(updatedMap);
     } catch (err) {
@@ -210,16 +216,16 @@ export const ReaderScreen: React.FC = () => {
     return (
       <div className="fixed inset-0 bg-background text-foreground flex flex-col items-center justify-center z-50 p-6">
         <ErrorState
-          title="Could Not Open Document"
-          message={error || "Document could not be found."}
-          actions={[{ label: "Try Again", onClick: loadDocumentData }]}
+          title={t("reader.errorTitle")}
+          message={error || t("reader.errorMessage")}
+          actions={[{ label: t("reader.tryAgain"), onClick: loadDocumentData }]}
         />
         <button
           type="button"
           onClick={() => navigate("/library")}
           className="mt-4 px-4 py-2 border-2 border-border text-xs font-mono uppercase"
         >
-          Back to Library
+          {t("reader.backToLibrary")}
         </button>
       </div>
     );
@@ -256,8 +262,8 @@ export const ReaderScreen: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            aria-label="Back"
-            className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            aria-label={t("reader.back")}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -271,9 +277,9 @@ export const ReaderScreen: React.FC = () => {
             <button
               type="button"
               onClick={handleToggleBookmark}
-              aria-label={isBookmarkedHere ? "Remove bookmark" : "Add bookmark"}
-              title={isBookmarkedHere ? "Remove bookmark" : "Add bookmark"}
-              className={`w-9 h-9 flex items-center justify-center transition-colors ${
+              aria-label={isBookmarkedHere ? t("reader.bookmarkRemoved") : t("reader.bookmarkFiled")}
+              title={isBookmarkedHere ? t("reader.bookmarkRemoved") : t("reader.bookmarkFiled")}
+              className={`w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors ${
                 isBookmarkedHere
                   ? "text-accent bg-accent/10"
                   : "text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800"
@@ -288,9 +294,9 @@ export const ReaderScreen: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate("/search")}
-              aria-label="Search"
-              title="Search Archives"
-              className="w-9 h-9 flex items-center justify-center text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              aria-label={t("reader.searchInDoc")}
+              title={t("reader.searchInDoc")}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             >
               <SearchIcon className="w-4 h-4" />
             </button>
@@ -299,9 +305,9 @@ export const ReaderScreen: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate(`/tracker/${doc.id}`)}
-              aria-label="Reading Map"
-              title="Reading Map"
-              className="w-9 h-9 flex items-center justify-center text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              aria-label={t("reader.readingMap")}
+              title={t("reader.readingMap")}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             >
               <Map className="w-4 h-4" />
             </button>
@@ -334,7 +340,7 @@ export const ReaderScreen: React.FC = () => {
               Format: {doc.fileType.toUpperCase()}
             </p>
             <p className="font-serif text-xs text-muted mt-4">
-              Content is ready. Scroll to start tracking.
+              {t("reader.contentReady")}
             </p>
           </div>
         )}
@@ -347,14 +353,14 @@ export const ReaderScreen: React.FC = () => {
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between h-12 max-w-md mx-auto text-xs px-4 font-mono uppercase">
+        <div className="flex items-center justify-between h-14 max-w-md mx-auto text-xs px-4 font-mono uppercase">
           <button
             type="button"
             onClick={() => navigate(`/annotations`)}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+            className="flex items-center gap-1.5 min-h-[44px] px-2.5 py-1 text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
           >
             <BookmarkIcon className="w-3.5 h-3.5" />
-            <span>Clippings ({bookmarks.length})</span>
+            <span>{t("reader.clippings", { count: bookmarks.length })}</span>
           </button>
 
           <div className="flex items-center gap-1">
@@ -362,21 +368,21 @@ export const ReaderScreen: React.FC = () => {
               <button
                 type="button"
                 onClick={handleMarkCompleted}
-                className="flex items-center gap-1 px-2.5 py-1 text-accent font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                title="Mark entire document as read"
+                className="flex items-center gap-1 min-h-[44px] px-2.5 py-1 text-accent font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                title={t("reader.markComplete")}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Mark Read</span>
+                <span>{t("reader.markComplete")}</span>
               </button>
             ) : (
               <button
                 type="button"
                 onClick={handleMarkUnread}
-                className="flex items-center gap-1 px-2.5 py-1 text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                title="Reset progress to unread"
+                className="flex items-center gap-1 min-h-[44px] px-2.5 py-1 text-muted hover:text-foreground hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                title={t("reader.resetProgress")}
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset</span>
+                <span>{t("reader.resetProgress")}</span>
               </button>
             )}
           </div>

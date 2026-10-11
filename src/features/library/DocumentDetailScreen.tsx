@@ -31,6 +31,7 @@ import {
 import { RenameDialog } from "./components/RenameDialog";
 import { DeleteDialog } from "./components/DeleteDialog";
 import { BookReminderDialog } from "./components/BookReminderDialog";
+import { useTranslation } from "@/i18n";
 
 function minToTimeString(min: number | null | undefined): string {
   if (min === null || min === undefined) return "20:00";
@@ -42,6 +43,7 @@ function minToTimeString(min: number | null | undefined): string {
 export const DocumentDetailScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [document, setDocument] = useState<DocumentDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,7 +167,7 @@ export const DocumentDetailScreen: React.FC = () => {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header title="Document Details" showBack />
+        <Header title={t("detail.title")} showBack />
         <div className="p-6 space-y-4 animate-pulse">
           <div className="h-8 bg-secondary rounded w-2/3" />
           <div className="h-4 bg-secondary rounded w-1/3" />
@@ -178,12 +180,12 @@ export const DocumentDetailScreen: React.FC = () => {
   if (error || !document) {
     return (
       <div className="flex-1 flex flex-col">
-        <Header title="Document Details" showBack />
+        <Header title={t("detail.title")} showBack />
         <div className="flex-1 flex items-center justify-center p-4">
           <ErrorState
-            title="Document Not Found"
-            message={error ?? `Unable to find document with ID: ${id}`}
-            actions={[{ label: "Back to Library", onClick: () => navigate("/library") }]}
+            title={t("detail.notFoundTitle")}
+            message={error ?? t("detail.notFoundMsg", { id: id ?? "" })}
+            actions={[{ label: t("detail.backToLibrary"), onClick: () => navigate("/library") }]}
           />
         </div>
       </div>
@@ -194,7 +196,7 @@ export const DocumentDetailScreen: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col pb-16">
-      <Header title="Document Details" showBack />
+      <Header title={t("detail.title")} showBack />
 
       <div className="p-4 sm:p-6 max-w-xl mx-auto w-full space-y-6">
         {/* Title & Author Header */}
@@ -205,7 +207,7 @@ export const DocumentDetailScreen: React.FC = () => {
             </span>
             {document.isArchived && (
               <span className="px-2 py-0.5 rounded text-xs font-medium bg-muted/20 text-muted">
-                Archived
+                {t("detail.archived")}
               </span>
             )}
           </div>
@@ -224,13 +226,17 @@ export const DocumentDetailScreen: React.FC = () => {
           className="flex items-center justify-center gap-2 w-full h-12 rounded-control bg-accent text-accent-foreground font-medium text-base shadow-sm hover:opacity-95 transition-opacity"
         >
           <BookOpen className="w-5 h-5" />
-          <span>{document.progress > 0 ? "Continue Reading" : "Start Reading"}</span>
+          <span>
+            {document.progress > 0
+              ? t("detail.continueReading")
+              : t("detail.startReading")}
+          </span>
         </button>
 
         {/* Progress Card */}
         <div className="bg-card border border-border rounded-container p-4 space-y-3">
           <div className="flex justify-between items-center text-sm font-medium">
-            <span className="text-foreground">Reading Progress</span>
+            <span className="text-foreground">{t("detail.readingProgress")}</span>
             <span className="text-accent">{progressPercent}%</span>
           </div>
           <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
@@ -242,8 +248,8 @@ export const DocumentDetailScreen: React.FC = () => {
             />
           </div>
           <div className="flex justify-between text-xs text-muted pt-1">
-            <span>{document.completed ? "Completed" : "In Progress"}</span>
-            <span>{formatDuration(document.totalReadMs)} spent</span>
+            <span>{document.completed ? t("detail.completed") : t("detail.inProgress")}</span>
+            <span>{t("detail.spent", { time: formatDuration(document.totalReadMs) })}</span>
           </div>
         </div>
 
@@ -252,7 +258,7 @@ export const DocumentDetailScreen: React.FC = () => {
           <div className="flex items-center justify-between p-3.5">
             <div className="flex items-center gap-2 text-muted">
               <FileText className="w-4 h-4" />
-              <span>Filename</span>
+              <span>{t("detail.filename")}</span>
             </div>
             <span className="text-foreground truncate max-w-[200px]" title={document.originalFilename}>
               {document.originalFilename}
@@ -262,7 +268,7 @@ export const DocumentDetailScreen: React.FC = () => {
           <div className="flex items-center justify-between p-3.5">
             <div className="flex items-center gap-2 text-muted">
               <HardDrive className="w-4 h-4" />
-              <span>File Size</span>
+              <span>{t("detail.fileSize")}</span>
             </div>
             <span className="text-foreground">{formatFileSize(document.fileSize)}</span>
           </div>
@@ -270,19 +276,19 @@ export const DocumentDetailScreen: React.FC = () => {
           <div className="flex items-center justify-between p-3.5">
             <div className="flex items-center gap-2 text-muted">
               <Layers className="w-4 h-4" />
-              <span>Structure</span>
+              <span>{t("detail.structure")}</span>
             </div>
             <span className="text-foreground">
               {document.wordCount
-                ? `${document.wordCount.toLocaleString()} words`
-                : `${document.sectionCount} sections`}
+                ? t("card.words", { count: document.wordCount.toLocaleString() })
+                : t("card.sections", { count: document.sectionCount })}
             </span>
           </div>
 
           <div className="flex items-center justify-between p-3.5">
             <div className="flex items-center gap-2 text-muted">
               <Calendar className="w-4 h-4" />
-              <span>Added On</span>
+              <span>{t("detail.addedOn")}</span>
             </div>
             <span className="text-foreground">{formatDate(document.createdAt)}</span>
           </div>
@@ -291,7 +297,7 @@ export const DocumentDetailScreen: React.FC = () => {
             <div className="flex items-center justify-between p-3.5">
               <div className="flex items-center gap-2 text-muted">
                 <Clock className="w-4 h-4" />
-                <span>Last Opened</span>
+                <span>{t("detail.lastOpened")}</span>
               </div>
               <span className="text-foreground">{formatDate(document.lastOpenedAt)}</span>
             </div>
@@ -300,7 +306,7 @@ export const DocumentDetailScreen: React.FC = () => {
           <div className="flex items-center justify-between p-3.5">
             <div className="flex items-center gap-2 text-muted">
               <Hash className="w-4 h-4" />
-              <span>Checksum (BLAKE3)</span>
+              <span>{t("detail.checksum")}</span>
             </div>
             <span className="font-mono text-xs text-muted truncate max-w-[160px]" title={document.contentHash}>
               {document.contentHash}
@@ -317,15 +323,18 @@ export const DocumentDetailScreen: React.FC = () => {
             <div className="min-w-0">
               <div className="text-xs font-medium text-foreground truncate">
                 {reminder?.enabled
-                  ? `Reminder: ${reminder.scheduleType} at ${minToTimeString(reminder.timeOfDayMin)}`
+                  ? t("detail.reminderConfig", {
+                      type: reminder.scheduleType,
+                      time: minToTimeString(reminder.timeOfDayMin),
+                    })
                   : reminder
-                  ? "Reminder paused"
-                  : "No reminder scheduled"}
+                  ? t("detail.reminderPaused")
+                  : t("detail.noReminder")}
               </div>
               <div className="text-[11px] text-muted truncate">
                 {reminder?.enabled
-                  ? "Alerts scheduled for this book"
-                  : "Set a dedicated schedule for this book"}
+                  ? t("detail.alertsScheduled")
+                  : t("detail.setScheduleHint")}
               </div>
             </div>
           </div>
@@ -334,7 +343,7 @@ export const DocumentDetailScreen: React.FC = () => {
             onClick={() => setIsReminderOpen(true)}
             className="min-h-[44px] px-3 border border-border rounded-control bg-surface-2 hover:bg-surface-3 text-xs font-medium text-foreground transition-colors shrink-0"
           >
-            {reminder ? "Edit" : "Set"}
+            {reminder ? t("detail.edit") : t("detail.set")}
           </button>
         </div>
 
@@ -343,26 +352,26 @@ export const DocumentDetailScreen: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsRenameOpen(true)}
-            className="flex items-center justify-center gap-2 h-11 rounded-control bg-secondary border border-border text-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
+            className="flex items-center justify-center gap-2 min-h-[44px] h-11 rounded-control bg-secondary border border-border text-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
           >
             <Edit3 className="w-4 h-4" />
-            <span>Rename</span>
+            <span>{t("detail.rename")}</span>
           </button>
 
           <button
             type="button"
             onClick={handleArchive}
-            className="flex items-center justify-center gap-2 h-11 rounded-control bg-secondary border border-border text-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
+            className="flex items-center justify-center gap-2 min-h-[44px] h-11 rounded-control bg-secondary border border-border text-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
           >
             {document.isArchived ? (
               <>
                 <ArchiveRestore className="w-4 h-4" />
-                <span>Unarchive</span>
+                <span>{t("detail.unarchive")}</span>
               </>
             ) : (
               <>
                 <Archive className="w-4 h-4" />
-                <span>Archive</span>
+                <span>{t("detail.archive")}</span>
               </>
             )}
           </button>
@@ -370,10 +379,10 @@ export const DocumentDetailScreen: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsDeleteOpen(true)}
-            className="flex items-center justify-center gap-2 h-11 rounded-control bg-danger/10 border border-danger/20 text-danger text-xs font-medium hover:bg-danger/20 transition-colors"
+            className="flex items-center justify-center gap-2 min-h-[44px] h-11 rounded-control bg-danger/10 border border-danger/20 text-danger text-xs font-medium hover:bg-danger/20 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
-            <span>Delete</span>
+            <span>{t("detail.delete")}</span>
           </button>
         </div>
       </div>

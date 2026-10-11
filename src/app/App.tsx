@@ -4,10 +4,23 @@ import { router } from "@/routes";
 import { useUiStore } from "@/stores/ui.store";
 import { listen } from "@tauri-apps/api/event";
 import { onAction, type ActionNotification } from "@/lib/notification";
+import { settingsGetAll } from "@/features/settings/api";
+import { parseImportSource } from "@/lib/deepLink";
 import type { NotificationPayload } from "@/types";
 
 export const App: React.FC = () => {
-  const { theme } = useUiStore();
+  const { theme, setLanguage } = useUiStore();
+
+  useEffect(() => {
+    // Synchronize saved user language from database on launch
+    settingsGetAll()
+      .then((settings) => {
+        if (settings.language === "en" || settings.language === "id") {
+          setLanguage(settings.language);
+        }
+      })
+      .catch(() => {});
+  }, [setLanguage]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -25,9 +38,52 @@ export const App: React.FC = () => {
     }
   }, [theme]);
 
+  // Deep-link & open-with external file handler
   useEffect(() => {
     let unlistenEvent: (() => void) | undefined;
     let unlistenAction: (() => void) | undefined;
+    let unlistenOpenFile: (() => void) | undefined;
+    let unlistenDeepLink: (() => void) | undefined;
+
+    // Check startup query parameters or rt:// custom scheme URL
+    const startupCandidate =
+      window.location.search ||
+      (window.location.href.startsWith("rt://") || window.location.href.startsWith("readtrack://")
+        ? window.location.href
+        : null);
+    const initialSource = parseImportSource(startupCandidate);
+    if (initialSource) {
+      router.navigate(`/library?importSource=${encodeURIComponent(initialSource)}`);
+    }
+
+    // Tauri external file open event (e.g. Android intent / file association)
+    listen<string | { path?: string; source?: string }>("open-file", (event) => {
+      const raw =
+        typeof event.payload === "string"
+          ? event.payload
+          : event.payload?.path || event.payload?.source;
+      const parsed = parseImportSource(raw);
+      if (parsed) {
+        router.navigate(`/library?importSource=${encodeURIComponent(parsed)}`);
+      }
+    })
+      .then((unlisten) => {
+        unlistenOpenFile = unlisten;
+      })
+      .catch(() => {});
+
+    // Tauri deep-link event (e.g. rt://import?source=...)
+    listen<string | { url?: string }>("deep-link", (event) => {
+      const rawUrl = typeof event.payload === "string" ? event.payload : event.payload?.url;
+      const parsed = parseImportSource(rawUrl);
+      if (parsed) {
+        router.navigate(`/library?importSource=${encodeURIComponent(parsed)}`);
+      }
+    })
+      .then((unlisten) => {
+        unlistenDeepLink = unlisten;
+      })
+      .catch(() => {});
 
     listen<NotificationPayload>("reminder_notification_triggered", (event) => {
       if (event.payload?.documentId) {
@@ -53,6 +109,8 @@ export const App: React.FC = () => {
     return () => {
       unlistenEvent?.();
       unlistenAction?.();
+      unlistenOpenFile?.();
+      unlistenDeepLink?.();
     };
   }, []);
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { MapSegment } from "@/types";
 import { X, Play, Clock, FileText } from "lucide-react";
+import { useTranslation } from "@/i18n";
 
 interface SegmentModalProps {
   segment: MapSegment | null;
@@ -13,6 +14,7 @@ export const SegmentModal: React.FC<SegmentModalProps> = ({
   onClose,
   onContinueReading,
 }) => {
+  const { t } = useTranslation();
   if (!segment) return null;
 
   const estSeconds = Math.max(1, Math.round((segment.wordCount / 250) * 60));
@@ -29,7 +31,7 @@ export const SegmentModal: React.FC<SegmentModalProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-serif font-bold text-base text-foreground">
-              Segment #{segment.index + 1}
+              {t("segment.title", { index: segment.index + 1 })}
             </span>
             <span
               className={`px-2 py-0.5 text-[11px] font-medium rounded-full uppercase tracking-wider ${
@@ -48,10 +50,10 @@ export const SegmentModal: React.FC<SegmentModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-2 transition-colors"
-            aria-label="Close"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-2 transition-colors"
+            aria-label={t("segment.close")}
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -60,9 +62,9 @@ export const SegmentModal: React.FC<SegmentModalProps> = ({
           <div className="p-3 rounded-lg bg-surface-2/60 border border-border/40 flex items-center gap-2.5">
             <FileText className="w-4 h-4 text-primary shrink-0" />
             <div>
-              <div className="text-xs text-muted">Length</div>
+              <div className="text-xs text-muted">{t("segment.length")}</div>
               <div className="text-sm font-semibold font-mono text-foreground">
-                {segment.wordCount} words
+                {t("segment.words", { count: segment.wordCount })}
               </div>
             </div>
           </div>
@@ -70,7 +72,7 @@ export const SegmentModal: React.FC<SegmentModalProps> = ({
           <div className="p-3 rounded-lg bg-surface-2/60 border border-border/40 flex items-center gap-2.5">
             <Clock className="w-4 h-4 text-primary shrink-0" />
             <div>
-              <div className="text-xs text-muted">Est. Read Time</div>
+              <div className="text-xs text-muted">{t("segment.estTime")}</div>
               <div className="text-sm font-semibold font-mono text-foreground">
                 {estSeconds}s
               </div>
@@ -85,10 +87,10 @@ export const SegmentModal: React.FC<SegmentModalProps> = ({
             onContinueReading?.(segment);
             onClose();
           }}
-          className="w-full h-11 rounded-control bg-primary text-primary-foreground font-medium flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
+          className="w-full h-11 min-h-[44px] rounded-control bg-primary text-primary-foreground font-medium flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
         >
           <Play className="w-4 h-4 fill-current" />
-          Continue Reading From Here
+          {t("segment.continueHere")}
         </button>
       </div>
     </div>

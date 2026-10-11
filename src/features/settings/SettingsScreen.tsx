@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { settingsGetAll, settingsSet } from "./api";
 import { reminderList } from "./reminderApi";
 import { useUiStore, type AppTheme } from "@/stores/ui.store";
+import { useTranslation } from "@/i18n";
 import { LoadingSkeleton } from "@/components/feedback/LoadingSkeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import type { AppSettings, Reminder } from "@/types";
@@ -27,6 +28,7 @@ function applyThemeClass(newTheme: AppTheme) {
 
 export const SettingsScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { t, setLanguage } = useTranslation();
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,9 @@ export const SettingsScreen: React.FC = () => {
             setTheme(data.theme);
             applyThemeClass(data.theme);
           }
+          if (data.language) {
+            setLanguage(data.language);
+          }
         }
       } catch (err: unknown) {
         if (!cancelled) {
@@ -70,7 +75,7 @@ export const SettingsScreen: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [setTheme, reloadTrigger]);
+  }, [setTheme, setLanguage, reloadTrigger]);
 
   const handleThemeChange = async (newTheme: AppTheme) => {
     try {
@@ -85,6 +90,7 @@ export const SettingsScreen: React.FC = () => {
 
   const handleLanguageChange = async (lang: "en" | "id") => {
     try {
+      setLanguage(lang);
       await settingsSet("language", lang);
       setSettings((prev) => (prev ? { ...prev, language: lang } : null));
     } catch (err) {
@@ -93,7 +99,7 @@ export const SettingsScreen: React.FC = () => {
   };
 
   const habit = reminders.find((r) => r.documentId === null);
-  let reminderSummary = "No active habit reminder";
+  let reminderSummary = t("settings.noActiveHabit");
   if (habit) {
     if (habit.enabled) {
       const h = Math.floor((habit.timeOfDayMin ?? 1200) / 60);
@@ -103,13 +109,13 @@ export const SettingsScreen: React.FC = () => {
         habit.scheduleType.charAt(0).toUpperCase() + habit.scheduleType.slice(1);
       reminderSummary = `${typeStr} at ${timeStr} · Active`;
     } else {
-      reminderSummary = "Notifications paused";
+      reminderSummary = t("settings.notificationsPaused");
     }
   }
 
   return (
     <div className="flex-1 flex flex-col">
-      <Header title="Settings" />
+      <Header title={t("settings.title")} />
       <div className="flex-1 p-4 max-w-md mx-auto w-full space-y-6">
         {loading ? (
           <div className="p-4 space-y-4">
@@ -117,11 +123,11 @@ export const SettingsScreen: React.FC = () => {
           </div>
         ) : error ? (
           <ErrorState
-            title="Unable to load settings"
+            title={t("settings.unableToLoad")}
             message={error}
             actions={[
               {
-                label: "Retry",
+                label: t("settings.retry"),
                 onClick: () => setReloadTrigger((prev) => prev + 1),
               },
             ]}
@@ -131,26 +137,26 @@ export const SettingsScreen: React.FC = () => {
             {/* Appearance Section */}
             <section className="bg-surface rounded-card p-4 border border-border">
               <h2 className="text-xs font-semibold uppercase text-muted tracking-wider mb-3">
-                Appearance
+                {t("settings.appearance")}
               </h2>
               <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-2">
-                    App Theme
+                    {t("settings.appTheme")}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
-                    {(["system", "light", "dark"] as AppTheme[]).map((t) => (
+                    {(["system", "light", "dark"] as AppTheme[]).map((tVal) => (
                       <button
-                        key={t}
+                        key={tVal}
                         type="button"
-                        onClick={() => handleThemeChange(t)}
+                        onClick={() => handleThemeChange(tVal)}
                         className={`h-10 rounded-control text-xs font-medium capitalize border transition-all ${
-                          theme === t
+                          theme === tVal
                             ? "bg-accent text-accent-foreground border-accent"
                             : "border-border text-foreground hover:bg-surface-2"
                         }`}
                       >
-                        {t}
+                        {tVal}
                       </button>
                     ))}
                   </div>
@@ -158,7 +164,7 @@ export const SettingsScreen: React.FC = () => {
 
                 <div className="pt-2 border-t border-border/50">
                   <label className="text-sm font-medium text-foreground block mb-2">
-                    Language
+                    {t("settings.language")}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -170,7 +176,7 @@ export const SettingsScreen: React.FC = () => {
                           : "border-border text-foreground hover:bg-surface-2"
                       }`}
                     >
-                      English
+                      {t("settings.english")}
                     </button>
                     <button
                       type="button"
@@ -181,7 +187,7 @@ export const SettingsScreen: React.FC = () => {
                           : "border-border text-foreground hover:bg-surface-2"
                       }`}
                     >
-                      Bahasa Indonesia
+                      {t("settings.indonesian")}
                     </button>
                   </div>
                 </div>
@@ -194,7 +200,7 @@ export const SettingsScreen: React.FC = () => {
                 <div>
                   <h2 className="text-xs font-semibold uppercase text-muted tracking-wider flex items-center gap-1.5">
                     <Bell className="w-3.5 h-3.5 text-accent" />
-                    <span>Reading Reminders</span>
+                    <span>{t("settings.reminders")}</span>
                   </h2>
                   <p className="font-serif text-xs text-foreground mt-0.5">
                     {reminderSummary}
@@ -206,7 +212,7 @@ export const SettingsScreen: React.FC = () => {
                 onClick={() => navigate("/settings/reminders")}
                 className="w-full min-h-[44px] py-2.5 px-3 border border-border bg-surface-2 text-foreground font-mono text-xs font-bold uppercase tracking-wide hover:bg-surface-3 transition-colors flex items-center justify-between"
               >
-                <span>Configure Habit Schedules</span>
+                <span>{t("settings.configureHabits")}</span>
                 <span className="text-accent text-[11px] font-sans">Open &rarr;</span>
               </button>
             </section>
@@ -216,10 +222,10 @@ export const SettingsScreen: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xs font-semibold uppercase text-muted tracking-wider">
-                    Data & Export
+                    {t("settings.dataExport")}
                   </h2>
                   <p className="font-serif text-xs text-foreground mt-0.5">
-                    Generate offline Excel ledgers or print PDF reports.
+                    {t("settings.dataExportDesc")}
                   </p>
                 </div>
               </div>
@@ -228,7 +234,7 @@ export const SettingsScreen: React.FC = () => {
                 onClick={() => navigate("/export")}
                 className="w-full py-2.5 px-3 border border-border bg-surface-2 text-foreground font-mono text-xs font-bold uppercase tracking-wide hover:bg-surface-3 transition-colors flex items-center justify-between"
               >
-                <span>Export Reading Dossier (.xlsx / .pdf)</span>
+                <span>{t("settings.exportBtn")}</span>
                 <span className="text-accent text-[11px] font-sans">Open &rarr;</span>
               </button>
             </section>
@@ -236,11 +242,10 @@ export const SettingsScreen: React.FC = () => {
             {/* Storage & Privacy Section */}
             <section className="bg-surface rounded-card p-4 border border-border">
               <h2 className="text-xs font-semibold uppercase text-muted tracking-wider mb-3">
-                Storage & Privacy
+                {t("settings.storagePrivacy")}
               </h2>
               <p className="text-xs text-muted leading-relaxed">
-                ReadTrack is 100% offline and local-first. Your documents and reading
-                activity never leave this device.
+                {t("settings.storagePrivacyBody")}
               </p>
             </section>
 
@@ -250,7 +255,7 @@ export const SettingsScreen: React.FC = () => {
                 ReadTrack v0.1.0
               </h2>
               <p className="font-mono text-[11px] text-muted mt-1">
-                Phase 1: Foundation Shell
+                Phase 8: Polish and Release Readiness
               </p>
             </section>
           </>
