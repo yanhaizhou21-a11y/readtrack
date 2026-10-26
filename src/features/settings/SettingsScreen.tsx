@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { Bell, RefreshCw } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { settingsGetAll, settingsSet } from "./api";
 import { reminderList } from "./reminderApi";
@@ -9,6 +9,9 @@ import { useTranslation } from "@/i18n";
 import { LoadingSkeleton } from "@/components/feedback/LoadingSkeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import type { AppSettings, Reminder } from "@/types";
+import { checkForUpdates, CURRENT_APP_VERSION } from "../updater/api";
+import { UpdateModal } from "../updater/UpdateModal";
+import type { ReleaseInfo } from "../updater/types";
 
 function applyThemeClass(newTheme: AppTheme) {
   const root = document.documentElement;
@@ -35,6 +38,31 @@ export const SettingsScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   const { theme, setTheme } = useUiStore();
+
+  const [updateChecking, setUpdateChecking] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [foundRelease, setFoundRelease] = useState<ReleaseInfo | null>(null);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+
+  const handleCheckUpdate = async () => {
+    setUpdateChecking(true);
+    setUpdateMessage(null);
+    try {
+      const result = await checkForUpdates();
+      if (result.hasUpdate && result.latestRelease) {
+        setFoundRelease(result.latestRelease);
+        setIsUpdateModalOpen(true);
+      } else if (result.latestRelease) {
+        setUpdateMessage(`Versi ${CURRENT_APP_VERSION} adalah versi terbaru.`);
+      } else {
+        setUpdateMessage("Tidak dapat terhubung ke server pembaruan.");
+      }
+    } catch {
+      setUpdateMessage("Gagal memeriksa pembaruan.");
+    } finally {
+      setUpdateChecking(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -249,16 +277,44 @@ export const SettingsScreen: React.FC = () => {
               </p>
             </section>
 
-            {/* About Section */}
-            <section className="bg-surface rounded-card p-4 border border-border text-center">
-              <h2 className="font-serif font-semibold text-foreground text-sm">
-                ReadTrack v0.1.0
-              </h2>
-              <p className="font-mono text-[11px] text-muted mt-1">
-                Phase 8: Polish and Release Readiness
-              </p>
+            {/* About & Updater Section */}
+            <section className="bg-surface rounded-card p-4 border border-border text-center space-y-3">
+              <div>
+                <h2 className="font-serif font-semibold text-foreground text-sm">
+                  ReadTrack v{CURRENT_APP_VERSION}
+                </h2>
+                <p className="font-mono text-[11px] text-muted mt-1">
+                  Local-first Document Reader & Interactive Reading Tracker
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={handleCheckUpdate}
+                  disabled={updateChecking}
+                  className="w-full min-h-[44px] py-2.5 px-3 border border-border bg-surface-2 text-foreground font-mono text-xs font-bold uppercase tracking-wide hover:bg-surface-3 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${updateChecking ? "animate-spin text-accent" : ""}`} />
+                  <span>{updateChecking ? "Memeriksa Pembaruan..." : "Periksa Pembaruan"}</span>
+                </button>
+                {updateMessage && (
+                  <p className="font-serif text-xs text-muted mt-2">
+                    {updateMessage}
+                  </p>
+                )}
+              </div>
             </section>
           </>
+        )}
+
+        {foundRelease && (
+          <UpdateModal
+            release={foundRelease}
+            currentVersion={CURRENT_APP_VERSION}
+            isOpen={isUpdateModalOpen}
+            onClose={() => setIsUpdateModalOpen(false)}
+          />
         )}
       </div>
     </div>
