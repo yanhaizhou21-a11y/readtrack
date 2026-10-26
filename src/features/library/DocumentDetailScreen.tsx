@@ -127,7 +127,10 @@ export const DocumentDetailScreen: React.FC = () => {
     daysOfWeek?: number | null;
   }) => {
     try {
-      const saved = await reminderUpsert(input);
+      const saved = await reminderUpsert({
+        ...input,
+        daysOfWeek: input.daysOfWeek ?? undefined,
+      });
       setReminder(saved);
     } catch (err) {
       console.error("Failed to save reminder:", err);

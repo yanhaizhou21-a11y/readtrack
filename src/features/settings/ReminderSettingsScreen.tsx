@@ -33,7 +33,7 @@ const DAYS_CONFIG: { bit: number; labelKey: TranslationKey; fullKey: Translation
   { bit: 64, labelKey: "days.sun", fullKey: "days.sunday" },
 ];
 
-function minToTimeString(min: number | null): string {
+function minToTimeString(min: number | null | undefined): string {
   if (min === null || min === undefined) return "20:00";
   const h = Math.floor(min / 60);
   const m = min % 60;
@@ -80,7 +80,7 @@ export const ReminderSettingsScreen: React.FC = () => {
       }
       setDocuments(docMap);
 
-      const habit = list.find((r) => r.documentId === null);
+      const habit = list.find((r) => !r.documentId);
       if (habit) {
         setHabitId(habit.id);
         setHabitEnabled(habit.enabled);
@@ -126,11 +126,11 @@ export const ReminderSettingsScreen: React.FC = () => {
 
       const saved = await reminderUpsert({
         id: habitId,
-        documentId: null,
+        documentId: undefined,
         enabled,
         scheduleType,
         timeOfDayMin: timeStringToMin(timeStr),
-        daysOfWeek: scheduleType === "custom" ? daysMask : null,
+        daysOfWeek: scheduleType === "custom" ? daysMask : undefined,
       });
 
       triggerHaptic("tick");
@@ -219,7 +219,7 @@ export const ReminderSettingsScreen: React.FC = () => {
     }
   };
 
-  const bookReminders = reminders.filter((r) => r.documentId !== null);
+  const bookReminders = reminders.filter((r) => Boolean(r.documentId));
 
   return (
     <div className="flex-1 flex flex-col">

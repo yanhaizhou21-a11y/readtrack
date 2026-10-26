@@ -49,7 +49,7 @@ const mockNotes: Note[] = [
   {
     id: "note-1",
     documentId: "doc-1",
-    highlightId: null,
+    highlightId: undefined,
     position: { documentId: "doc-1", percentage: 0.5, parserVersion: 1 },
     pos: 200,
     page: 8,

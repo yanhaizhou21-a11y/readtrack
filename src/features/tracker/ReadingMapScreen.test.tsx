@@ -61,7 +61,7 @@ const mockMap: ReadingMap = {
       title: "Concurrency",
       progress: 0.0,
       status: "unread",
-      lastReadAt: null,
+      lastReadAt: undefined,
       readMs: 0,
       sessions: 0,
       segments: [

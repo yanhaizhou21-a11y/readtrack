@@ -11,13 +11,13 @@ vi.mock("@/features/library/api/documents");
 
 const mockHabitReminder: Reminder = {
   id: "habit-1",
-  documentId: null,
+  documentId: undefined,
   enabled: true,
   scheduleType: "daily",
   timeOfDayMin: 1200, // 20:00
-  daysOfWeek: null,
-  scheduledAt: null,
-  repeatInterval: null,
+  daysOfWeek: undefined,
+  scheduledAt: undefined,
+  repeatInterval: undefined,
   createdAt: 1700000000000,
   updatedAt: 1700000000000,
 };
@@ -28,9 +28,9 @@ const mockBookReminder: Reminder = {
   enabled: true,
   scheduleType: "weekdays",
   timeOfDayMin: 540, // 09:00
-  daysOfWeek: null,
-  scheduledAt: null,
-  repeatInterval: null,
+  daysOfWeek: undefined,
+  scheduledAt: undefined,
+  repeatInterval: undefined,
   createdAt: 1700000000000,
   updatedAt: 1700000000000,
 };
@@ -126,7 +126,7 @@ describe("ReminderSettingsScreen component", () => {
       expect(reminderApi.reminderUpsert).toHaveBeenCalledWith(
         expect.objectContaining({
           id: "habit-1",
-          documentId: null,
+          documentId: undefined,
           enabled: false,
         })
       );
@@ -178,7 +178,7 @@ describe("ReminderSettingsScreen component", () => {
       title: "Continue reading: The Odyssey",
       body: "Book 1 · 15% completed. Tap to resume.",
       documentId: "doc-1",
-      position: null,
+      position: undefined,
     });
 
     render(

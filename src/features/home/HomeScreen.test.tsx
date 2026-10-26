@@ -62,7 +62,7 @@ describe("HomeScreen component", () => {
 
   it("renders empty state when there is no reading activity or documents", async () => {
     vi.spyOn(trackerApi, "getHomeDashboard").mockResolvedValue({
-      continueReading: null,
+      continueReading: undefined,
       recent: [],
       currentlyReading: 0,
       completed: 0,

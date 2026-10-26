@@ -75,7 +75,7 @@ export function parseIpcError(error: unknown): AppErrorDto {
 export async function ipc<T>(
   command: string,
   args: Record<string, unknown> = {},
-  schema?: ZodType<T>
+  schema?: ZodType<T, any, any>
 ): Promise<T> {
   let raw: unknown;
   try {
@@ -87,7 +87,19 @@ export async function ipc<T>(
   if (schema) {
     const parseResult = schema.safeParse(raw);
     if (!parseResult.success) {
-      console.error(`[IPC] Validation failed for command ${command}:`, parseResult.error);
+      const isDev =
+        (typeof process !== "undefined" && process.env?.NODE_ENV !== "production") ||
+        (typeof import.meta !== "undefined" && Boolean((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV));
+
+      if (isDev) {
+        console.error(`[IPC] Validation failed for command "${command}":`, {
+          issues: parseResult.error.issues,
+          rawPayload: raw,
+        });
+      } else {
+        console.error(`[IPC] Validation failed for command "${command}":`, parseResult.error.issues);
+      }
+
       throw new IpcException({
         code: "InvalidInput",
         message: "Invalid response format from application backend.",

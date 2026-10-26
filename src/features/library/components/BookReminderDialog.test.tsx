@@ -28,9 +28,9 @@ const mockReminder: Reminder = {
   enabled: true,
   scheduleType: "daily",
   timeOfDayMin: 1200,
-  daysOfWeek: null,
-  scheduledAt: null,
-  repeatInterval: null,
+  daysOfWeek: undefined,
+  scheduledAt: undefined,
+  repeatInterval: undefined,
   createdAt: 1700000000000,
   updatedAt: 1700000000000,
 };

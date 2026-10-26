@@ -18,13 +18,13 @@ vi.mock("@/lib/notification");
 
 const mockReminder: Reminder = {
   id: "rem-1",
-  documentId: null,
+  documentId: undefined,
   enabled: true,
   scheduleType: "daily",
   timeOfDayMin: 1200,
-  daysOfWeek: null,
-  scheduledAt: null,
-  repeatInterval: null,
+  daysOfWeek: undefined,
+  scheduledAt: undefined,
+  repeatInterval: undefined,
   createdAt: 1700000000000,
   updatedAt: 1700000000000,
 };
@@ -57,7 +57,7 @@ describe("reminderApi", () => {
   it("reminderUpsert passes input correctly", async () => {
     const input: ReminderUpsertInput = {
       id: "rem-1",
-      documentId: null,
+      documentId: undefined,
       enabled: true,
       scheduleType: "daily",
       timeOfDayMin: 1200,
@@ -88,7 +88,7 @@ describe("reminderApi", () => {
       title: "Continue reading",
       body: "Chapter 1 · 10% completed. Tap to resume.",
       documentId: "doc-1",
-      position: null,
+      position: undefined,
     };
     vi.mocked(ipc).mockResolvedValueOnce(payload);
 
