@@ -33,17 +33,22 @@ pub struct Document {
 pub struct DocumentSummary {
     pub id: String,
     pub title: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub author: Option<String>,
     pub file_type: String,
     pub file_size: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub page_count: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub word_count: Option<i64>,
     pub section_count: i64,
     pub progress: f64,
     pub completed: bool,
     pub is_archived: bool,
     pub created_at: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_opened_at: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub thumbnail_url: Option<String>,
     pub parse_status: String,
 }
@@ -58,7 +63,9 @@ pub struct DocumentDetail {
     pub content_hash: String,
     pub total_read_ms: i64,
     pub session_count: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_read_at: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub position: Option<LogicalPosition>,
 }
 
@@ -69,8 +76,10 @@ pub struct DocumentSection {
     pub document_id: String,
     pub section_index: i64,
     pub section_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     pub level: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>,
     pub word_count: i64,
     pub start_position: i64,
@@ -95,6 +104,7 @@ pub struct BlockPayload {
 pub struct SectionPayload {
     pub id: String,
     pub index: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
     pub level: i64,
     pub word_count: i64,
@@ -109,14 +119,18 @@ pub struct ReadingSegment {
     pub section_id: String,
     pub segment_type: String,
     pub segment_index: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub first_block_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_block_id: Option<String>,
     pub start_position: i64,
     pub end_position: i64,
     pub word_count: i64,
     pub status: String,
     pub dwell_ms: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub first_read_at: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub last_read_at: Option<i64>,
     pub read_count: i64,
 }
@@ -126,14 +140,17 @@ pub struct ReadingSegment {
 pub struct ReadingProgress {
     pub id: String,
     pub document_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub current_page: Option<i64>,
     pub current_position: LogicalPosition,
     pub current_pos: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub current_section_id: Option<String>,
     pub progress_percent: f64,
     pub furthest_pos: i64,
     pub total_read_ms: i64,
     pub completed: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<i64>,
     pub updated_at: i64,
 }

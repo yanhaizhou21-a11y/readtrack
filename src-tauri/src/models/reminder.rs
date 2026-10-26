@@ -36,12 +36,17 @@ impl ReminderScheduleType {
 #[serde(rename_all = "camelCase")]
 pub struct Reminder {
     pub id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub document_id: Option<String>,
     pub enabled: bool,
     pub schedule_type: ReminderScheduleType,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub time_of_day_min: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub days_of_week: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scheduled_at: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub repeat_interval: Option<i64>,
     pub created_at: i64,
     pub updated_at: i64,
@@ -50,13 +55,20 @@ pub struct Reminder {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReminderUpsertInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub document_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<bool>,
     pub schedule_type: ReminderScheduleType,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub time_of_day_min: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub days_of_week: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scheduled_at: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub repeat_interval: Option<i64>,
 }
 
