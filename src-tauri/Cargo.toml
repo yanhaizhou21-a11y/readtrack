@@ -30,6 +30,9 @@ blake3 = "1.5"
 pulldown-cmark = { version = "0.12", default-features = false, features = ["html"] }
 rust_xlsxwriter = { version = "0.80", features = ["chrono"] }
 printpdf = "0.7"
+lopdf = "0.31"
+quick-xml = "0.31"
+zip = { version = "2.4", default-features = false, features = ["deflate"] }
 open = "5.3"
 
 [dev-dependencies]
