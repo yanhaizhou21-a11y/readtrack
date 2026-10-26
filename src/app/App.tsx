@@ -7,9 +7,12 @@ import { onAction, type ActionNotification } from "@/lib/notification";
 import { settingsGetAll } from "@/features/settings/api";
 import { parseImportSource } from "@/lib/deepLink";
 import type { NotificationPayload } from "@/types";
+import { useAutoUpdateCheck } from "@/features/updater/useAutoUpdateCheck";
+import { UpdateModal } from "@/features/updater/UpdateModal";
 
 export const App: React.FC = () => {
   const { theme, setLanguage } = useUiStore();
+  const { release, currentVersion, isOpen, closeModal } = useAutoUpdateCheck();
 
   useEffect(() => {
     // Synchronize saved user language from database on launch
@@ -114,5 +117,17 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  return <RouterProvider router={router} future={{ v7_startTransition: true }} />;
+  return (
+    <>
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      {release && (
+        <UpdateModal
+          release={release}
+          currentVersion={currentVersion}
+          isOpen={isOpen}
+          onClose={closeModal}
+        />
+      )}
+    </>
+  );
 };
