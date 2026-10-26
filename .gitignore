@@ -6,6 +6,8 @@ node_modules/
 dist/
 dist-ssr/
 build/
+dist-apk/
+*.apk
 
 # Rust & Cargo build artifacts
 src-tauri/target/
