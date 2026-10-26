@@ -5,22 +5,22 @@
 @tailwind utilities;
 
 :root {
-  /* Newsprint Light Palette */
-  --background: #F9F9F7;
-  --foreground: #111111;
-  --muted: #737373;
-  --muted-foreground: #525252;
-  --divider: #E5E5E0;
-  --surface: #FFFFFF;
-  --surface-2: #F5F5F5;
-  --surface-3: #E5E5E5;
-  --border: #111111;
-  --border-muted: #E5E5E0;
-  --accent: #CC0000;
-  --accent-foreground: #F9F9F7;
-  --success: #1E6B38;
-  --warning: #B7791F;
-  --danger: #CC0000;
+  /* Vintage Editorial Warm Parchment Palette (Calm & Soothing) */
+  --background: #F5F0E6;
+  --foreground: #2A2521;
+  --muted: #7D756C;
+  --muted-foreground: #5C554D;
+  --divider: #DDD6C8;
+  --surface: #FAF7F0;
+  --surface-2: #EFE9DC;
+  --surface-3: #E5DDD0;
+  --border: #3B342E;
+  --border-muted: #DDD6C8;
+  --accent: #9E4B37;
+  --accent-foreground: #FAF7F0;
+  --success: #2C6E49;
+  --warning: #A86F2D;
+  --danger: #A23B2A;
   --radius: 0px;
 
   /* Safe area helpers */
@@ -31,22 +31,22 @@
 }
 
 .dark {
-  /* Newsprint Inverted Dark Palette */
-  --background: #111111;
-  --foreground: #F9F9F7;
-  --muted: #888888;
-  --muted-foreground: #A3A3A3;
-  --divider: #262626;
-  --surface: #1A1A1A;
-  --surface-2: #242424;
-  --surface-3: #2F2F2F;
-  --border: #444444;
-  --border-muted: #262626;
-  --accent: #E53935;
-  --accent-foreground: #FFFFFF;
-  --success: #388E3C;
-  --warning: #FFA000;
-  --danger: #E53935;
+  /* Vintage Nocturnal Warm Espresso Palette (Soft on the Eyes) */
+  --background: #171513;
+  --foreground: #EDE8DD;
+  --muted: #948C81;
+  --muted-foreground: #ADA69C;
+  --divider: #2C2723;
+  --surface: #201D1A;
+  --surface-2: #282420;
+  --surface-3: #322D27;
+  --border: #484139;
+  --border-muted: #2C2723;
+  --accent: #C2634E;
+  --accent-foreground: #FAF7F0;
+  --success: #448A60;
+  --warning: #C98B3C;
+  --danger: #C04D3C;
   --radius: 0px;
 }
 
@@ -65,13 +65,13 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--background);
   color: var(--foreground);
-  /* Newsprint subtle tactile dot grid */
-  background-image: radial-gradient(rgba(17, 17, 17, 0.05) 1px, transparent 1px);
+  /* Vintage book tactile paper fiber pattern */
+  background-image: radial-gradient(rgba(42, 37, 33, 0.05) 1px, transparent 1px);
   background-size: 8px 8px;
 }
 
 .dark body {
-  background-image: radial-gradient(rgba(249, 249, 247, 0.05) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(237, 232, 221, 0.04) 1px, transparent 1px);
 }
 
 /* Safe area padding utilities */
@@ -88,7 +88,7 @@ body {
   padding-right: var(--sar);
 }
 
-/* Newsprint Design Utilities */
+/* Newsprint & Vintage Book Design Utilities */
 .sharp-corners {
   border-radius: 0px !important;
 }
@@ -98,40 +98,45 @@ body {
 }
 .hard-shadow-hover:hover {
   box-shadow: 4px 4px 0px 0px var(--border);
-  transform: translate(-2px, -2px);
 }
 
-.newsprint-texture {
-  position: relative;
-}
-.newsprint-texture::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(0deg, transparent 98%, rgba(0, 0, 0, 0.03) 100%),
-    linear-gradient(90deg, transparent 98%, rgba(0, 0, 0, 0.03) 100%);
-  background-size: 4px 4px;
-  pointer-events: none;
-  opacity: 0.6;
+.hard-shadow-active {
+  box-shadow: 4px 4px 0px 0px var(--border);
 }
 
-/* Typography classes */
-.font-display {
-  font-family: 'Playfair Display', 'Times New Roman', serif;
-}
-.font-body {
-  font-family: 'Lora', Georgia, serif;
+.hard-shadow-card {
+  box-shadow: 3px 3px 0px 0px var(--border);
 }
 
-/* Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+.hard-shadow-sm {
+  box-shadow: 2px 2px 0px 0px var(--border);
+}
+
+.dashed-divider-horizontal {
+  border-bottom: 1px dashed var(--divider);
+}
+
+.dashed-divider-vertical {
+  border-right: 1px dashed var(--divider);
+}
+
+/* Screen and container sizing constraints */
+.content-max-w {
+  max-width: 680px;
+}
+
+/* Custom Scrollbar for tactile vintage feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
 }
