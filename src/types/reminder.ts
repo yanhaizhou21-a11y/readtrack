@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { opt } from "./zod-helpers";
 import { LogicalPositionSchema } from "./document";
 
 export type ReminderScheduleType = "daily" | "weekdays" | "custom" | "once";
@@ -7,58 +8,56 @@ export const ReminderScheduleTypeSchema = z.enum(["daily", "weekdays", "custom",
 
 export interface Reminder {
   id: string;
-  documentId: string | null;
+  documentId?: string;
   enabled: boolean;
   scheduleType: ReminderScheduleType;
-  timeOfDayMin: number | null;
-  daysOfWeek: number | null;
-  scheduledAt: number | null;
-  repeatInterval: number | null;
+  timeOfDayMin?: number;
+  daysOfWeek?: number;
+  scheduledAt?: number;
+  repeatInterval?: number;
   createdAt: number;
   updatedAt: number;
 }
 
 export const ReminderSchema = z.object({
-  id: z.string(),
-  documentId: z.string().nullable(),
+  id: z.string().min(1),
+  documentId: opt(z.string()),
   enabled: z.boolean(),
   scheduleType: ReminderScheduleTypeSchema,
-  timeOfDayMin: z.number().nullable(),
-  daysOfWeek: z.number().nullable(),
-  scheduledAt: z.number().nullable(),
-  repeatInterval: z.number().nullable(),
+  timeOfDayMin: opt(z.number().min(0).max(1439)),
+  daysOfWeek: opt(z.number().min(1).max(127)),
+  scheduledAt: opt(z.number()),
+  repeatInterval: opt(z.number()),
   createdAt: z.number(),
   updatedAt: z.number(),
 });
 
 export interface ReminderUpsertInput {
   id?: string;
-  documentId?: string | null;
+  documentId?: string;
   enabled?: boolean;
   scheduleType: ReminderScheduleType;
-  timeOfDayMin?: number | null;
-  daysOfWeek?: number | null;
-  scheduledAt?: number | null;
-  repeatInterval?: number | null;
+  timeOfDayMin?: number;
+  daysOfWeek?: number;
+  scheduledAt?: number;
+  repeatInterval?: number;
 }
 
 export const ReminderUpsertInputSchema = z.object({
-  id: z.string().optional(),
-  documentId: z.string().nullable().optional(),
-  enabled: z.boolean().optional(),
+  id: opt(z.string()),
+  documentId: opt(z.string()),
+  enabled: opt(z.boolean()),
   scheduleType: ReminderScheduleTypeSchema,
-  timeOfDayMin: z.number().min(0).max(1439).nullable().optional(),
-  daysOfWeek: z.number().min(1).max(127).nullable().optional(),
-  scheduledAt: z.number().positive().nullable().optional(),
-  repeatInterval: z.number().positive().nullable().optional(),
+  timeOfDayMin: opt(z.number().min(0).max(1439)),
+  daysOfWeek: opt(z.number().min(1).max(127)),
+  scheduledAt: opt(z.number().positive()),
+  repeatInterval: opt(z.number().positive()),
 });
 
 export const NotificationPayloadSchema = z.object({
   title: z.string(),
   body: z.string(),
-  documentId: z.string().nullable().optional(),
-  position: LogicalPositionSchema.nullable().optional(),
+  documentId: opt(z.string()),
+  position: opt(LogicalPositionSchema),
 });
-
 export type NotificationPayload = z.infer<typeof NotificationPayloadSchema>;
-

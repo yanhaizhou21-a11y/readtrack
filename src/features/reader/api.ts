@@ -1,45 +1,46 @@
 import { ipc } from "@/lib/ipc";
 import { z } from "zod";
+import { opt } from "@/types/zod-helpers";
 
 export const LogicalPositionSchema = z.object({
-  documentId: z.string(),
-  sectionId: z.string().nullable().optional(),
-  blockId: z.string().nullable().optional(),
-  offset: z.number().nullable().optional(),
-  page: z.number().nullable().optional(),
-  pageOffset: z.number().nullable().optional(),
+  documentId: z.string().min(1),
+  sectionId: opt(z.union([z.string(), z.number()])),
+  blockId: opt(z.string()),
+  offset: opt(z.number()),
+  page: opt(z.number()),
+  pageOffset: opt(z.number()),
   percentage: z.number(),
-  parserVersion: z.number().optional()
+  parserVersion: opt(z.number()),
 });
 
 export type LogicalPosition = z.infer<typeof LogicalPositionSchema>;
 
 export const ResolvedPositionSchema = z.object({
   sectionIndex: z.number(),
-  blockId: z.string().nullable().optional(),
-  offset: z.number().nullable().optional(),
-  page: z.number().nullable().optional(),
-  pageOffset: z.number().nullable().optional(),
+  blockId: opt(z.string()),
+  offset: opt(z.number()),
+  page: opt(z.number()),
+  pageOffset: opt(z.number()),
   percentage: z.number(),
   linearPos: z.number(),
-  fallbackTier: z.string()
+  fallbackTier: z.string(),
 });
 
 export type ResolvedPosition = z.infer<typeof ResolvedPositionSchema>;
 
 export const ReadingProgressSchema = z.object({
-  id: z.string(),
-  documentId: z.string(),
-  currentPage: z.number().nullable().optional(),
+  id: z.string().min(1),
+  documentId: z.string().min(1),
+  currentPage: opt(z.number()),
   currentPosition: LogicalPositionSchema,
   currentPos: z.number(),
-  currentSectionId: z.string().nullable().optional(),
+  currentSectionId: opt(z.string()),
   progressPercent: z.number(),
   furthestPos: z.number(),
   totalReadMs: z.number(),
   completed: z.boolean(),
-  completedAt: z.number().nullable().optional(),
-  updatedAt: z.number()
+  completedAt: opt(z.number()),
+  updatedAt: z.number(),
 });
 
 export type ReadingProgress = z.infer<typeof ReadingProgressSchema>;
@@ -48,14 +49,14 @@ export const document_resolve_position = async (position: LogicalPosition): Prom
   return ipc("document_resolve_position", { position }, ResolvedPositionSchema);
 };
 
-export const reading_update_progress = async (documentId: string, position: LogicalPosition): Promise<void> => {
-  return ipc("reading_update_progress", { documentId, position });
+export const reading_update_progress = async (documentId: string, position: LogicalPosition): Promise<ReadingProgress> => {
+  return ipc("reading_update_progress", { documentId, position }, ReadingProgressSchema);
 };
 
 export const reading_get_progress = async (documentId: string): Promise<ReadingProgress> => {
   return ipc("reading_get_progress", { documentId }, ReadingProgressSchema);
 };
 
-export const document_get_sections = async (id: string, fromIndex?: number, count?: number): Promise<unknown[]> => {
+export const document_get_sections = async (id: string, fromIndex?: number, count?: number) => {
   return ipc("document_get_sections", { id, fromIndex, count });
 };

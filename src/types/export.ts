@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { opt } from "./zod-helpers";
 
 export const ExportKindSchema = z.enum(["xlsx", "pdf"]);
 export type ExportKind = z.infer<typeof ExportKindSchema>;
 
 export const ExportInputSchema = z.object({
-  documentIds: z.array(z.string()).optional(),
+  documentIds: opt(z.array(z.string())),
 });
 export type ExportInput = z.infer<typeof ExportInputSchema>;
 

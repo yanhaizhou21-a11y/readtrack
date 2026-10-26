@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { opt } from "./zod-helpers";
 
 export const FileTypeSchema = z.enum(["pdf", "docx", "rtf", "txt", "md", "epub"]);
 export type FileType = z.infer<typeof FileTypeSchema>;
@@ -11,31 +12,31 @@ export type ParseStatus = z.infer<typeof ParseStatusSchema>;
 
 export const LogicalPositionSchema = z.object({
   documentId: z.string().min(1),
-  sectionId: z.number().int().nonnegative().optional(),
-  blockId: z.string().optional(),
-  offset: z.number().int().nonnegative().optional(),
-  page: z.number().int().positive().optional(),
-  pageOffset: z.number().min(0).max(1).optional(),
+  sectionId: opt(z.number().int().nonnegative()),
+  blockId: opt(z.string()),
+  offset: opt(z.number().int().nonnegative()),
+  page: opt(z.number().int().nonnegative()),
+  pageOffset: opt(z.number().min(0).max(1)),
   percentage: z.number().min(0).max(1),
-  parserVersion: z.number().int().positive(),
+  parserVersion: z.number().int().nonnegative(),
 });
 export type LogicalPosition = z.infer<typeof LogicalPositionSchema>;
 
 export const DocumentSummarySchema = z.object({
-  id: z.string().uuid(),
-  title: z.string().min(1).max(200),
-  author: z.string().optional(),
+  id: z.string().min(1),
+  title: z.string().min(1).max(500),
+  author: opt(z.string()),
   fileType: FileTypeSchema,
   fileSize: z.number().int().nonnegative(),
-  pageCount: z.number().int().positive().optional(),
-  wordCount: z.number().int().nonnegative().optional(),
+  pageCount: opt(z.number().int().nonnegative()),
+  wordCount: opt(z.number().int().nonnegative()),
   sectionCount: z.number().int().nonnegative(),
   progress: z.number().min(0).max(1),
   completed: z.boolean(),
   isArchived: z.boolean(),
-  createdAt: z.number().int().positive(),
-  lastOpenedAt: z.number().int().positive().optional(),
-  thumbnailUrl: z.string().optional(),
+  createdAt: z.number().int().nonnegative(),
+  lastOpenedAt: opt(z.number().int().nonnegative()),
+  thumbnailUrl: opt(z.string()),
   parseStatus: ParseStatusSchema,
 });
 export type DocumentSummary = z.infer<typeof DocumentSummarySchema>;
@@ -46,13 +47,24 @@ export const DocumentDetailSchema = DocumentSummarySchema.extend({
   contentHash: z.string().length(64),
   totalReadMs: z.number().int().nonnegative(),
   sessionCount: z.number().int().nonnegative(),
-  lastReadAt: z.number().int().positive().optional(),
-  position: LogicalPositionSchema.optional(),
+  lastReadAt: opt(z.number().int().nonnegative()),
+  position: opt(LogicalPositionSchema),
 });
 export type DocumentDetail = z.infer<typeof DocumentDetailSchema>;
 
 export const DocumentListResponseSchema = z.object({
-  items: z.array(DocumentSummarySchema),
+  items: z.array(z.unknown()).transform((rawItems) => {
+    const validItems: DocumentSummary[] = [];
+    for (const rawItem of rawItems) {
+      const parsed = DocumentSummarySchema.safeParse(rawItem);
+      if (parsed.success) {
+        validItems.push(parsed.data);
+      } else {
+        console.error("[DocumentListResponse] Malformed document item skipped:", parsed.error, rawItem);
+      }
+    }
+    return validItems;
+  }),
   total: z.number().int().nonnegative(),
 });
 export type DocumentListResponse = z.infer<typeof DocumentListResponseSchema>;
@@ -74,14 +86,14 @@ export const BlockSchema = z.object({
   type: BlockTypeSchema,
   text: z.string(),
   wordCount: z.number().int().nonnegative(),
-  level: z.number().int().min(1).max(6).optional(),
+  level: opt(z.number().int().min(1).max(6)),
 });
 export type Block = z.infer<typeof BlockSchema>;
 
 export const SectionPayloadSchema = z.object({
   id: z.string().min(1),
   index: z.number().int().nonnegative(),
-  title: z.string().optional(),
+  title: opt(z.string()),
   level: z.number().int().min(0).max(6),
   wordCount: z.number().int().nonnegative(),
   blocks: z.array(BlockSchema),

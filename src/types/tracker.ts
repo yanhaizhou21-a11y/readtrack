@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { opt } from "./zod-helpers";
 import {
   LogicalPositionSchema,
   DocumentSummarySchema,
@@ -15,8 +16,8 @@ export const JumpTypeSchema = z.enum(["none", "toc", "search", "bookmark", "resu
 export type JumpType = z.infer<typeof JumpTypeSchema>;
 
 export const ViewportReportSchema = z.object({
-  sessionId: z.string().uuid(),
-  ts: z.number().int().positive(),
+  sessionId: z.string().min(1),
+  ts: z.number().int().nonnegative(),
   visible: z.array(VisibleSegmentRatioSchema),
   position: LogicalPositionSchema,
   interacting: z.boolean(),
@@ -26,15 +27,15 @@ export const ViewportReportSchema = z.object({
 export type ViewportReport = z.infer<typeof ViewportReportSchema>;
 
 export const ReadingSessionSchema = z.object({
-  id: z.string().uuid(),
-  documentId: z.string().uuid(),
-  startedAt: z.number().int().positive(),
-  endedAt: z.number().int().positive().nullable().optional(),
-  lastHeartbeatAt: z.number().int().positive(),
+  id: z.string().min(1),
+  documentId: z.string().min(1),
+  startedAt: z.number().int().nonnegative(),
+  endedAt: opt(z.number().int().nonnegative()),
+  lastHeartbeatAt: z.number().int().nonnegative(),
   durationSeconds: z.number().int().nonnegative(),
   activeSeconds: z.number().int().nonnegative(),
-  startPosition: LogicalPositionSchema.nullable().optional(),
-  endPosition: LogicalPositionSchema.nullable().optional(),
+  startPosition: opt(LogicalPositionSchema),
+  endPosition: opt(LogicalPositionSchema),
   startPos: z.number().int().nonnegative(),
   endPos: z.number().int().nonnegative(),
   pagesRead: z.number().int().nonnegative(),
@@ -43,10 +44,10 @@ export const ReadingSessionSchema = z.object({
 export type ReadingSession = z.infer<typeof ReadingSessionSchema>;
 
 export const SessionSummarySchema = z.object({
-  sessionId: z.string().uuid(),
-  documentId: z.string().uuid(),
-  startedAt: z.number().int().positive(),
-  endedAt: z.number().int().positive(),
+  sessionId: z.string().min(1),
+  documentId: z.string().min(1),
+  startedAt: z.number().int().nonnegative(),
+  endedAt: z.number().int().nonnegative(),
   durationSeconds: z.number().int().nonnegative(),
   activeSeconds: z.number().int().nonnegative(),
   pagesRead: z.number().int().nonnegative(),
@@ -62,12 +63,12 @@ export const MapSegmentSchema = z.object({
 export type MapSegment = z.infer<typeof MapSegmentSchema>;
 
 export const MapSectionSchema = z.object({
-  sectionId: z.string(),
+  sectionId: z.string().min(1),
   index: z.number().int().nonnegative(),
   title: z.string(),
   progress: z.number().min(0).max(1),
   status: z.enum(["unread", "reading", "read"]),
-  lastReadAt: z.number().int().positive().nullable().optional(),
+  lastReadAt: opt(z.number().int().nonnegative()),
   readMs: z.number().int().nonnegative(),
   sessions: z.number().int().nonnegative(),
   segments: z.array(MapSegmentSchema),
@@ -76,12 +77,12 @@ export const MapSectionSchema = z.object({
 export type MapSection = z.infer<typeof MapSectionSchema>;
 
 export const ReadingMapSchema = z.object({
-  documentId: z.string().uuid(),
+  documentId: z.string().min(1),
   progress: z.number().min(0).max(1),
   completed: z.boolean(),
   totalReadMs: z.number().int().nonnegative(),
   sessions: z.number().int().nonnegative(),
-  lastReadAt: z.number().int().positive().nullable().optional(),
+  lastReadAt: opt(z.number().int().nonnegative()),
   sections: z.array(MapSectionSchema),
   current: LogicalPositionSchema,
 });
@@ -105,14 +106,14 @@ export type TrackerOverview = z.infer<typeof TrackerOverviewSchema>;
 
 export const ContinueCardSchema = z.object({
   document: DocumentSummarySchema,
-  sectionTitle: z.string().nullable().optional(),
+  sectionTitle: opt(z.string()),
   progress: z.number().min(0).max(1),
   position: LogicalPositionSchema,
 });
 export type ContinueCard = z.infer<typeof ContinueCardSchema>;
 
 export const HomeDashboardSchema = z.object({
-  continueReading: ContinueCardSchema.nullable().optional(),
+  continueReading: opt(ContinueCardSchema),
   recent: z.array(DocumentSummarySchema),
   currentlyReading: z.number().int().nonnegative(),
   completed: z.number().int().nonnegative(),
@@ -121,9 +122,9 @@ export const HomeDashboardSchema = z.object({
 export type HomeDashboard = z.infer<typeof HomeDashboardSchema>;
 
 export const ReadingProgressUpdatedPayloadSchema = z.object({
-  documentId: z.string().uuid(),
+  documentId: z.string().min(1),
   progress: z.number().min(0).max(1),
-  currentSectionId: z.string().nullable().optional(),
+  currentSectionId: opt(z.string()),
   completed: z.boolean(),
 });
 export type ReadingProgressUpdatedPayload = z.infer<typeof ReadingProgressUpdatedPayloadSchema>;

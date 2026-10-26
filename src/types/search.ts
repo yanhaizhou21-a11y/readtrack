@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { opt } from "./zod-helpers";
 import { LogicalPositionSchema } from "./document";
 
 export const SnippetPartSchema = z.object({
@@ -19,21 +20,21 @@ export type SearchHitKind = z.infer<typeof SearchHitKindSchema>;
 
 export const SearchHitSchema = z.object({
   kind: SearchHitKindSchema,
-  documentId: z.string(),
+  documentId: z.string().min(1),
   documentTitle: z.string(),
-  sectionTitle: z.string().optional().nullable(),
-  page: z.number().int().optional().nullable(),
+  sectionTitle: opt(z.string()),
+  page: opt(z.number().int().nonnegative()),
   snippet: z.array(SnippetPartSchema),
   position: LogicalPositionSchema,
-  refId: z.string().optional().nullable(),
+  refId: opt(z.string()),
 });
 export type SearchHit = z.infer<typeof SearchHitSchema>;
 
 export const DocumentSearchInputSchema = z.object({
   query: z.string().min(1),
-  scope: z.array(z.string()).optional(),
-  documentId: z.string().optional(),
-  limit: z.number().int().positive().optional(),
-  offset: z.number().int().nonnegative().optional(),
+  scope: opt(z.array(z.string())),
+  documentId: opt(z.string()),
+  limit: opt(z.number().int().positive()),
+  offset: opt(z.number().int().nonnegative()),
 });
 export type DocumentSearchInput = z.infer<typeof DocumentSearchInputSchema>;
