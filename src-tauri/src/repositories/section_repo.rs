@@ -214,9 +214,13 @@ impl SectionRepo {
             Block::Table { rows, .. } => {
                 let mut text = String::new();
                 for row in rows {
+                    let mut first = true;
                     for cell in row {
+                        if !first {
+                            text.push('\t');
+                        }
+                        first = false;
                         text.push_str(&SegmentGenerator::extract_inlines_text(cell));
-                        text.push(' ');
                     }
                     text.push('\n');
                 }

@@ -60,29 +60,61 @@ impl DocumentParser for DocxParser {
             .unwrap_or("Untitled DOCX")
             .to_string();
 
-        let paragraphs = extract_docx_paragraphs(&doc_xml);
+        let items = extract_docx_items(&doc_xml);
         let mut blocks = Vec::new();
         let mut total_words: u32 = 0;
         let mut total_chars: u32 = 0;
 
-        for (idx, p_text) in paragraphs.iter().enumerate() {
-            let trimmed = p_text.trim();
-            if trimmed.is_empty() {
-                continue;
+        for (idx, item) in items.into_iter().enumerate() {
+            match item {
+                DocxItem::Paragraph(text) => {
+                    let trimmed = text.trim();
+                    if trimmed.is_empty() {
+                        continue;
+                    }
+                    let words = trimmed.split_whitespace().count() as u32;
+                    let chars = trimmed.chars().count() as u32;
+                    total_words += words;
+                    total_chars += chars;
+
+                    blocks.push(Block::Paragraph {
+                        id: format!("s0-b{}", idx),
+                        inlines: vec![Inline {
+                            text: trimmed.to_string(),
+                            marks: vec![],
+                        }],
+                    });
+                }
+                DocxItem::Table(rows) => {
+                    if rows.is_empty() {
+                        continue;
+                    }
+
+                    let mut table_rows = Vec::new();
+                    for row in rows {
+                        let mut row_cells = Vec::new();
+                        for cell_text in row {
+                            let trimmed = cell_text.trim();
+                            let words = trimmed.split_whitespace().count() as u32;
+                            let chars = trimmed.chars().count() as u32;
+                            total_words += words;
+                            total_chars += chars;
+
+                            row_cells.push(vec![Inline {
+                                text: trimmed.to_string(),
+                                marks: vec![],
+                            }]);
+                        }
+                        table_rows.push(row_cells);
+                    }
+
+                    blocks.push(Block::Table {
+                        id: format!("s0-b{}", idx),
+                        rows: table_rows,
+                        header_rows: 1,
+                    });
+                }
             }
-
-            let words = trimmed.split_whitespace().count() as u32;
-            let chars = trimmed.chars().count() as u32;
-            total_words += words;
-            total_chars += chars;
-
-            blocks.push(Block::Paragraph {
-                id: format!("s0-b{}", idx),
-                inlines: vec![Inline {
-                    text: trimmed.to_string(),
-                    marks: vec![],
-                }],
-            });
         }
 
         if blocks.is_empty() {
@@ -123,19 +155,43 @@ impl DocumentParser for DocxParser {
     }
 }
 
-fn extract_docx_paragraphs(xml: &str) -> Vec<String> {
-    let mut paragraphs = Vec::new();
+enum DocxItem {
+    Paragraph(String),
+    Table(Vec<Vec<String>>),
+}
+
+fn extract_docx_items(xml: &str) -> Vec<DocxItem> {
+    let mut items = Vec::new();
     let mut reader = quick_xml::Reader::from_str(xml);
     reader.trim_text(false);
 
     let mut in_p = false;
     let mut in_t = false;
+    let mut in_tbl = false;
+    let mut in_tr = false;
+    let mut in_tc = false;
+
     let mut current_p = String::new();
+    let mut current_cell = String::new();
+    let mut current_row: Vec<String> = Vec::new();
+    let mut current_table: Vec<Vec<String>> = Vec::new();
 
     let mut buf = Vec::new();
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(quick_xml::events::Event::Start(ref e)) => match e.name().as_ref() {
+                b"w:tbl" => {
+                    in_tbl = true;
+                    current_table.clear();
+                }
+                b"w:tr" => {
+                    in_tr = true;
+                    current_row.clear();
+                }
+                b"w:tc" => {
+                    in_tc = true;
+                    current_cell.clear();
+                }
                 b"w:p" => {
                     in_p = true;
                     current_p.clear();
@@ -146,11 +202,36 @@ fn extract_docx_paragraphs(xml: &str) -> Vec<String> {
                 _ => {}
             },
             Ok(quick_xml::events::Event::End(ref e)) => match e.name().as_ref() {
+                b"w:tbl" => {
+                    in_tbl = false;
+                    if !current_table.is_empty() {
+                        items.push(DocxItem::Table(std::mem::take(&mut current_table)));
+                    }
+                }
+                b"w:tr" => {
+                    in_tr = false;
+                    if in_tbl && !current_row.is_empty() {
+                        current_table.push(std::mem::take(&mut current_row));
+                    }
+                }
+                b"w:tc" => {
+                    in_tc = false;
+                    if in_tr {
+                        current_row.push(std::mem::take(&mut current_cell));
+                    }
+                }
                 b"w:p" => {
                     in_p = false;
                     let trimmed = current_p.trim();
-                    if !trimmed.is_empty() {
-                        paragraphs.push(trimmed.to_string());
+                    if in_tc {
+                        if !trimmed.is_empty() {
+                            if !current_cell.is_empty() {
+                                current_cell.push(' ');
+                            }
+                            current_cell.push_str(trimmed);
+                        }
+                    } else if !in_tbl && !trimmed.is_empty() {
+                        items.push(DocxItem::Paragraph(trimmed.to_string()));
                     }
                     current_p.clear();
                 }
@@ -173,5 +254,5 @@ fn extract_docx_paragraphs(xml: &str) -> Vec<String> {
         buf.clear();
     }
 
-    paragraphs
+    items
 }
