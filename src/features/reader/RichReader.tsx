@@ -178,6 +178,54 @@ export const RichReader: React.FC<RichReaderProps> = ({
         );
       case "separator":
         return <hr key={block.id} className="my-6 border-border" />;
+      case "table": {
+        const rows = block.text
+          .split("\n")
+          .filter((r) => r.length > 0)
+          .map((r) => r.split("\t"));
+        if (rows.length === 0) return null;
+        const [headerRow, ...bodyRows] = rows;
+        return (
+          <div
+            key={block.id}
+            className="overflow-x-auto my-4 rounded-md border border-border shadow-xs bg-surface-1"
+          >
+            <table className="w-full text-left text-sm font-sans border-collapse">
+              {headerRow && (
+                <thead className="bg-surface-2 text-foreground font-semibold border-b border-border">
+                  <tr>
+                    {headerRow.map((cell, idx) => (
+                      <th
+                        key={idx}
+                        className="px-3 py-2.5 border-r border-border last:border-r-0 text-xs uppercase tracking-wider font-mono"
+                      >
+                        {cell}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+              )}
+              <tbody>
+                {bodyRows.map((row, rIdx) => (
+                  <tr
+                    key={rIdx}
+                    className="border-b border-border/50 last:border-b-0 hover:bg-surface-2/40 odd:bg-transparent even:bg-surface-2/20 transition-colors"
+                  >
+                    {row.map((cell, cIdx) => (
+                      <td
+                        key={cIdx}
+                        className="px-3 py-2 border-r border-border/40 last:border-r-0 text-foreground/85 text-xs sm:text-sm"
+                      >
+                        {cell}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
       case "list":
         return (
           <div key={block.id} className="flex items-start gap-2 my-1.5 pl-2">

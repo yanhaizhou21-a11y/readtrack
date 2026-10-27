@@ -74,11 +74,30 @@ export const DocCard: React.FC<DocCardProps> = ({
     >
       {/* Icon / Thumbnail Box */}
       <div
-        className={`flex items-center justify-center rounded-control bg-secondary text-muted flex-shrink-0 ${
+        className={`flex items-center justify-center rounded-control bg-secondary text-muted flex-shrink-0 overflow-hidden relative ${
           viewMode === "grid" ? "w-full h-32 mb-3" : "w-12 h-14"
         }`}
       >
-        <BookOpen className={viewMode === "grid" ? "w-10 h-10 stroke-[1.5]" : "w-6 h-6 stroke-[1.5]"} />
+        {doc.thumbnailUrl ? (
+          <img
+            src={doc.thumbnailUrl}
+            alt={doc.title}
+            className="w-full h-full object-cover object-top"
+            loading="lazy"
+            onError={(e) => {
+              (e.currentTarget as HTMLElement).style.display = "none";
+              const fallback = e.currentTarget.parentElement?.querySelector(".fallback-icon");
+              if (fallback) (fallback as HTMLElement).style.display = "flex";
+            }}
+          />
+        ) : null}
+        <div
+          className={`fallback-icon items-center justify-center w-full h-full ${
+            doc.thumbnailUrl ? "hidden" : "flex"
+          }`}
+        >
+          <BookOpen className={viewMode === "grid" ? "w-10 h-10 stroke-[1.5]" : "w-6 h-6 stroke-[1.5]"} />
+        </div>
       </div>
 
       {/* Content */}
