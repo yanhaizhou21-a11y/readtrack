@@ -173,6 +173,60 @@ impl LibraryService {
         SectionRepo::get_sections_slice(&self.db, id, from, count_val).await
     }
 
+    pub async fn get_file_bytes(&self, id: &str) -> Result<Vec<u8>, AppError> {
+        self.validate_uuid(id)?;
+        let doc = DocumentRepo::get_by_id(&self.db, id)
+            .await?
+            .ok_or(AppError::DocumentNotFound)?;
+        let file_path = self.file_store.get_document_path(&doc.id, &doc.file_type)?;
+        std::fs::read(&file_path).map_err(|_| AppError::StorageUnavailable)
+    }
+
+    pub async fn save_thumbnail(
+        &self,
+        app_handle: Option<&AppHandle>,
+        id: &str,
+        base64_data: &str,
+    ) -> Result<String, AppError> {
+        self.validate_uuid(id)?;
+        let _ = DocumentRepo::get_by_id(&self.db, id)
+            .await?
+            .ok_or(AppError::DocumentNotFound)?;
+
+        let clean_base64 = if let Some(idx) = base64_data.find(',') {
+            &base64_data[idx + 1..]
+        } else {
+            base64_data
+        };
+
+        use base64::Engine;
+        let bytes = base64::engine::general_purpose::STANDARD
+            .decode(clean_base64.trim())
+            .map_err(|_| AppError::InvalidInput {
+                field: "image_data".into(),
+            })?;
+
+        let thumb_path = self.paths.thumbnails_dir().join(format!("{}.webp", id));
+        if let Some(parent) = thumb_path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        std::fs::write(&thumb_path, bytes).map_err(|_| AppError::StorageUnavailable)?;
+
+        let rel_path = format!("{}.webp", id);
+        DocumentRepo::update_thumbnail(&self.db, id, &rel_path).await?;
+
+        if let Some(app) = app_handle {
+            let _ = app.emit(
+                "library_changed",
+                LibraryChangedPayload {
+                    reason: "thumbnail_updated".to_string(),
+                },
+            );
+        }
+
+        Ok(format!("rt://thumb/{}", id))
+    }
+
     fn validate_uuid(&self, id: &str) -> Result<(), AppError> {
         uuid::Uuid::parse_str(id).map_err(|_| AppError::DocumentNotFound)?;
         Ok(())

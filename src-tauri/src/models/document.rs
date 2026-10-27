@@ -229,6 +229,13 @@ pub struct DocumentGetSectionsInput {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct DocumentSaveThumbnailInput {
+    pub id: String,
+    pub image_data: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ImportProgressPayload {
     pub job_id: String,
     pub file_name: String,

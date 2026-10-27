@@ -12,9 +12,9 @@ pub use annotations::*;
 pub use document::{
     BlockPayload, Document, DocumentArchiveInput, DocumentDeleteInput, DocumentDetail,
     DocumentGetInput, DocumentGetSectionsInput, DocumentImportBytesInput, DocumentImportInput,
-    DocumentListInput, DocumentListResponse, DocumentRenameInput, DocumentSection, DocumentSummary,
-    DocumentTouchInput, ImportProgressPayload, LibraryChangedPayload, ReadingProgress,
-    ReadingSegment, SectionPayload,
+    DocumentListInput, DocumentListResponse, DocumentRenameInput, DocumentSaveThumbnailInput,
+    DocumentSection, DocumentSummary, DocumentTouchInput, ImportProgressPayload,
+    LibraryChangedPayload, ReadingProgress, ReadingSegment, SectionPayload,
 };
 pub use document_model::{
     AssetRef, Block, BlockId, DocMetadata, FileType, Inline, Mark, NormalizedDocument, Section,

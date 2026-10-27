@@ -295,6 +295,22 @@ impl DocumentRepo {
         Ok(rows_affected > 0)
     }
 
+    pub async fn update_thumbnail(
+        pool: &SqlitePool,
+        id: &str,
+        thumbnail_path: &str,
+    ) -> Result<bool, AppError> {
+        let rows_affected = sqlx::query("UPDATE documents SET thumbnail_path = ? WHERE id = ?")
+            .bind(thumbnail_path)
+            .bind(id)
+            .execute(pool)
+            .await
+            .map_err(AppError::from)?
+            .rows_affected();
+
+        Ok(rows_affected > 0)
+    }
+
     pub async fn delete(
         conn: &mut SqliteConnection,
         id: &str,

@@ -244,6 +244,8 @@ pub fn run() {
             commands::document_delete,
             commands::document_touch,
             commands::document_get_sections,
+            commands::document_get_bytes,
+            commands::document_save_thumbnail,
             commands::document_resolve_position,
             commands::reading_get_progress,
             commands::reading_update_progress,

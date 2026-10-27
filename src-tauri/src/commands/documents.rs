@@ -4,7 +4,8 @@ use crate::errors::IpcError;
 use crate::models::{
     DocumentArchiveInput, DocumentDeleteInput, DocumentDetail, DocumentGetInput,
     DocumentGetSectionsInput, DocumentImportBytesInput, DocumentImportInput, DocumentListInput,
-    DocumentListResponse, DocumentRenameInput, DocumentSummary, DocumentTouchInput, SectionPayload,
+    DocumentListResponse, DocumentRenameInput, DocumentSaveThumbnailInput, DocumentSummary,
+    DocumentTouchInput, SectionPayload,
 };
 use crate::AppState;
 
@@ -117,6 +118,31 @@ pub async fn document_get_sections(
     state
         .library_service
         .get_sections(&input.id, input.from_index, input.count)
+        .await
+        .map_err(IpcError::from)
+}
+
+#[tauri::command]
+pub async fn document_get_bytes(
+    state: State<'_, AppState>,
+    input: DocumentGetInput,
+) -> Result<Vec<u8>, IpcError> {
+    state
+        .library_service
+        .get_file_bytes(&input.id)
+        .await
+        .map_err(IpcError::from)
+}
+
+#[tauri::command]
+pub async fn document_save_thumbnail(
+    state: State<'_, AppState>,
+    app: AppHandle,
+    input: DocumentSaveThumbnailInput,
+) -> Result<String, IpcError> {
+    state
+        .library_service
+        .save_thumbnail(Some(&app), &input.id, &input.image_data)
         .await
         .map_err(IpcError::from)
 }

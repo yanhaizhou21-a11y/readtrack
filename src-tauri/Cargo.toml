@@ -33,6 +33,7 @@ printpdf = "0.7"
 lopdf = "0.31"
 quick-xml = "0.31"
 zip = { version = "2.4", default-features = false, features = ["deflate"] }
+base64 = "0.22"
 open = "5.3"
 
 [dev-dependencies]
