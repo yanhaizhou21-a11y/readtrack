@@ -82,3 +82,16 @@ export async function getDocumentSections(
     z.array(SectionPayloadSchema)
   );
 }
+
+export async function getDocumentBytes(id: string): Promise<Uint8Array> {
+  const bytes = await ipc("document_get_bytes", { input: { id } }, z.array(z.number()));
+  return new Uint8Array(bytes);
+}
+
+export async function saveDocumentThumbnail(id: string, imageData: string): Promise<string> {
+  return ipc(
+    "document_save_thumbnail",
+    { input: { id, imageData } },
+    z.string()
+  );
+}

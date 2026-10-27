@@ -27,6 +27,7 @@ import {
 } from "@/features/annotations/api";
 import { useViewportReporter } from "@/features/reader/hooks/useViewportReporter";
 import { RichReader } from "@/features/reader/RichReader";
+import { PdfViewer } from "@/features/reader/PdfViewer";
 import { LoadingSkeleton } from "@/components/feedback/LoadingSkeleton";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import {
@@ -324,7 +325,14 @@ export const ReaderScreen: React.FC = () => {
         className="flex-1 flex flex-col min-h-0"
         onClick={(e) => e.stopPropagation()}
       >
-        {sections.length > 0 ? (
+        {doc.fileType === "pdf" ? (
+          <PdfViewer
+            documentId={id ?? ""}
+            documentTitle={doc.title}
+            initialProgress={progress}
+            onProgressUpdate={(newProg) => setProgress(newProg)}
+          />
+        ) : sections.length > 0 ? (
           <RichReader
             documentId={id ?? ""}
             sections={sections}
